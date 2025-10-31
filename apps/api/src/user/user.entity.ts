@@ -1,6 +1,14 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  OneToMany,
+} from 'typeorm';
 import { ObjectType, Field, ID, HideField } from '@nestjs/graphql';
 import { Todo } from '../todo/todo.entity';
+import { Category } from '../category/category.entity';
 
 @Entity('users')
 @ObjectType()
@@ -24,6 +32,10 @@ export class User {
   @OneToMany(() => Todo, (todo) => todo.user)
   @Field(() => [Todo], { nullable: true })
   todos?: Todo[];
+
+  @OneToMany(() => Category, (category) => category.user)
+  @Field(() => [Category], { nullable: true })
+  categories?: Category[];
 
   @CreateDateColumn()
   @Field()

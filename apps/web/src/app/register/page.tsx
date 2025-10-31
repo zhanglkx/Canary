@@ -13,10 +13,10 @@ import { NoSSR } from '@/components/ui/no-ssr';
 export default function RegisterPage() {
   const router = useRouter();
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState('admin@admin.com');
+  const [username, setUsername] = useState('admin');
+  const [password, setPassword] = useState('password');
+  const [confirmPassword, setConfirmPassword] = useState('password');
   const [error, setError] = useState('');
 
   const [registerMutation, { loading }] = useMutation(REGISTER, {

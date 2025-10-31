@@ -1,6 +1,26 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, UpdateDateColumn, ManyToOne } from 'typeorm';
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+} from 'typeorm';
+import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { User } from '../user/user.entity';
+import { Category } from '../category/category.entity';
+
+export enum Priority {
+  LOW = 'LOW',
+  MEDIUM = 'MEDIUM',
+  HIGH = 'HIGH',
+  URGENT = 'URGENT',
+}
+
+registerEnumType(Priority, {
+  name: 'Priority',
+  description: 'Todo 优先级',
+});
 
 @Entity('todos')
 @ObjectType()
@@ -27,6 +47,25 @@ export class Todo {
 
   @Column()
   userId: string;
+
+  @ManyToOne(() => Category, (category) => category.todos, { nullable: true })
+  @Field(() => Category, { nullable: true })
+  category?: Category;
+
+  @Column({ nullable: true })
+  categoryId?: string;
+
+  @Column({
+    type: 'enum',
+    enum: Priority,
+    default: Priority.MEDIUM,
+  })
+  @Field(() => Priority)
+  priority: Priority;
+
+  @Column({ nullable: true })
+  @Field({ nullable: true })
+  dueDate?: Date;
 
   @CreateDateColumn()
   @Field()

@@ -8,6 +8,7 @@ import { join } from 'path';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { TodoModule } from './todo/todo.module';
+import { CategoryModule } from './category/category.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { TodoModule } from './todo/todo.module';
     UserModule,
     AuthModule,
     TodoModule,
+    CategoryModule,
   ],
 })
 export class AppModule {}

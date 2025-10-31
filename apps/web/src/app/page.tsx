@@ -42,6 +42,26 @@ export default function Home() {
             </p>
           </Link>
 
+          <Link
+            href="/categories"
+            className="block p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-colors"
+          >
+            <h2 className="text-2xl font-semibold mb-2">Categories</h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              Organize with categories
+            </p>
+          </Link>
+
+          <Link
+            href="/dashboard"
+            className="block p-6 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:border-blue-500 transition-colors"
+          >
+            <h2 className="text-2xl font-semibold mb-2">Dashboard</h2>
+            <p className="text-gray-600 dark:text-gray-400">
+              View statistics and insights
+            </p>
+          </Link>
+
           <a
             href="http://localhost:4000/graphql"
             target="_blank"

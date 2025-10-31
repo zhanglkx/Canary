@@ -7,8 +7,30 @@ type AuthResponse {
   user: User!
 }
 
-input CreateTodoInput {
+type Category {
+  color: String!
+  createdAt: DateTime!
   description: String
+  icon: String!
+  id: ID!
+  name: String!
+  todos: [Todo!]
+  updatedAt: DateTime!
+  user: User!
+}
+
+input CreateCategoryInput {
+  color: String
+  description: String
+  icon: String
+  name: String!
+}
+
+input CreateTodoInput {
+  categoryId: ID
+  description: String
+  dueDate: DateTime
+  priority: Priority
   title: String!
 }
 
@@ -23,14 +45,38 @@ input LoginInput {
 }
 
 type Mutation {
+  """创建新分类"""
+  createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createTodo(createTodoInput: CreateTodoInput!): Todo!
   login(loginInput: LoginInput!): AuthResponse!
   register(registerInput: RegisterInput!): AuthResponse!
+
+  """删除分类"""
+  removeCategory(id: ID!): Boolean!
   removeTodo(id: ID!): Boolean!
+
+  """更新分类信息"""
+  updateCategory(id: ID!, updateCategoryInput: UpdateCategoryInput!): Category!
   updateTodo(id: ID!, updateTodoInput: UpdateTodoInput!): Todo!
 }
 
+"""Todo 优先级"""
+enum Priority {
+  HIGH
+  LOW
+  MEDIUM
+  URGENT
+}
+
 type Query {
+  """获取用户所有分类"""
+  categories: [Category!]!
+
+  """根据ID获取分类详情"""
+  category(id: ID!): Category!
+
+  """获取分类统计信息"""
+  categoryStats: [Category!]!
   me: User!
   todo(id: ID!): Todo!
   todos: [Todo!]!
@@ -45,13 +91,23 @@ input RegisterInput {
 }
 
 type Todo {
+  category: Category
   completed: Boolean!
   createdAt: DateTime!
   description: String
+  dueDate: DateTime
   id: ID!
+  priority: Priority!
   title: String!
   updatedAt: DateTime!
   user: User!
+}
+
+input UpdateCategoryInput {
+  color: String
+  description: String
+  icon: String
+  name: String
 }
 
 input UpdateTodoInput {
@@ -61,6 +117,7 @@ input UpdateTodoInput {
 }
 
 type User {
+  categories: [Category!]
   createdAt: DateTime!
   email: String!
   id: ID!

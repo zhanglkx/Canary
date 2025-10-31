@@ -13,8 +13,8 @@ import { NoSSR } from '@/components/ui/no-ssr';
 export default function LoginPage() {
   const router = useRouter();
   const { login } = useAuth();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('admin@admin.com');
+  const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
 
   const [loginMutation, { loading }] = useMutation(LOGIN, {

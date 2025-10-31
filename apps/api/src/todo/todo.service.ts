@@ -23,7 +23,7 @@ export class TodoService {
   async findAll(userId: string): Promise<Todo[]> {
     return this.todoRepository.find({
       where: { userId },
-      relations: ['user'],
+      relations: ['user', 'category'],
       order: { createdAt: 'DESC' },
     });
   }
@@ -31,7 +31,7 @@ export class TodoService {
   async findOne(id: string, userId: string): Promise<Todo> {
     const todo = await this.todoRepository.findOne({
       where: { id, userId },
-      relations: ['user'],
+      relations: ['user', 'category'],
     });
     if (!todo) {
       throw new NotFoundException(`Todo with ID ${id} not found`);

@@ -18,8 +18,16 @@ export const GET_TODOS = gql`
       title
       description
       completed
+      priority
+      dueDate
       createdAt
       updatedAt
+      category {
+        id
+        name
+        color
+        icon
+      }
     }
   }
 `;
@@ -31,8 +39,43 @@ export const GET_TODO = gql`
       title
       description
       completed
+      priority
+      dueDate
       createdAt
       updatedAt
+      category {
+        id
+        name
+        color
+        icon
+      }
+    }
+  }
+`;
+
+export const GET_CATEGORIES = gql`
+  query GetCategories {
+    categories {
+      id
+      name
+      description
+      color
+      icon
+      createdAt
+      updatedAt
+    }
+  }
+`;
+
+export const GET_CATEGORY_STATS = gql`
+  query GetCategoryStats {
+    categoryStats {
+      id
+      name
+      color
+      icon
+      todoCount
+      completedCount
     }
   }
 `;

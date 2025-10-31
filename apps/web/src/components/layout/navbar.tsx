@@ -24,10 +24,22 @@ export function Navbar() {
             {isAuthenticated && (
               <div className="ml-10 flex space-x-4">
                 <Link
+                  href="/dashboard"
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  仪表板
+                </Link>
+                <Link
                   href="/todos"
                   className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Todos
+                  待办事项
+                </Link>
+                <Link
+                  href="/categories"
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
+                >
+                  分类管理
                 </Link>
               </div>
             )}
