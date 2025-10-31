@@ -29,7 +29,7 @@ input CreateCategoryInput {
 input CreateTodoInput {
   categoryId: ID
   description: String
-  dueDate: DateTime
+  dueDate: String
   priority: Priority
   title: String!
 }
@@ -95,7 +95,7 @@ type Todo {
   completed: Boolean!
   createdAt: DateTime!
   description: String
-  dueDate: DateTime
+  dueDate: String
   id: ID!
   priority: Priority!
   title: String!
@@ -111,8 +111,11 @@ input UpdateCategoryInput {
 }
 
 input UpdateTodoInput {
+  categoryId: ID
   completed: Boolean
   description: String
+  dueDate: String
+  priority: Priority
   title: String
 }
 

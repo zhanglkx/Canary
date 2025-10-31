@@ -63,9 +63,9 @@ export class Todo {
   @Field(() => Priority)
   priority: Priority;
 
-  @Column({ nullable: true })
-  @Field({ nullable: true })
-  dueDate?: Date;
+  @Column({ type: 'timestamp', nullable: true })
+  @Field(() => String, { nullable: true })
+  dueDate?: string;
 
   @CreateDateColumn()
   @Field()

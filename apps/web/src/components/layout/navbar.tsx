@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -46,16 +47,20 @@ export function Navbar() {
           </div>
 
           <div className="flex items-center space-x-4">
+            <ThemeToggle />
             {isAuthenticated ? (
               <>
-                <span className="text-sm text-gray-700 dark:text-gray-300">
-                  {user?.username}
-                </span>
+                <Link
+                  href="/profile"
+                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
+                >
+                  👤 {user?.username}
+                </Link>
                 <button
                   onClick={handleLogout}
                   className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Logout
+                  退出
                 </button>
               </>
             ) : (
@@ -64,13 +69,13 @@ export function Navbar() {
                   href="/login"
                   className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
                 >
-                  Login
+                  登录
                 </Link>
                 <Link
                   href="/register"
                   className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
                 >
-                  Register
+                  注册
                 </Link>
               </>
             )}

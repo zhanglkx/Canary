@@ -22,8 +22,8 @@ export class CreateTodoInput {
   @IsEnum(Priority)
   priority?: Priority;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   @IsOptional()
   @IsDateString()
-  dueDate?: Date;
+  dueDate?: string;
 }
