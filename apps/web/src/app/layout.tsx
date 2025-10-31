@@ -3,6 +3,7 @@ import './globals.css';
 import { ApolloWrapper } from '@/lib/apollo-wrapper';
 import { AuthProvider } from '@/lib/auth-context';
 import { Navbar } from '@/components/layout/navbar';
+import { ErrorBoundary } from '@/components/error-boundary';
 
 export const metadata: Metadata = {
   title: 'Learning NestJS + Next.js + GraphQL',
@@ -16,13 +17,15 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>
-        <ApolloWrapper>
-          <AuthProvider>
-            <Navbar />
-            {children}
-          </AuthProvider>
-        </ApolloWrapper>
+      <body suppressHydrationWarning={true}>
+        <ErrorBoundary>
+          <ApolloWrapper>
+            <AuthProvider>
+              <Navbar />
+              {children}
+            </AuthProvider>
+          </ApolloWrapper>
+        </ErrorBoundary>
       </body>
     </html>
   );

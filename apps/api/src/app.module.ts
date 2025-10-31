@@ -20,6 +20,7 @@ import { TodoModule } from './todo/todo.module';
       sortSchema: true,
       playground: true,
       context: ({ req, res }) => ({ req, res }),
+      csrfPrevention: false, // 禁用 CSRF 保护以解决前端连接问题
     }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],

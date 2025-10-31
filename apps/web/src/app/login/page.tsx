@@ -8,6 +8,7 @@ import { LOGIN } from '@/lib/graphql/mutations';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NoSSR } from '@/components/ui/no-ssr';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -61,45 +62,53 @@ export default function LoginPage() {
             </Link>
           </p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <NoSSR fallback={<div className="mt-8 space-y-6 animate-pulse">
           <div className="space-y-4">
-            <Input
-              label="Email address"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="email@example.com"
-              required
-            />
-            <Input
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-            />
+            <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
           </div>
-
-          {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-              <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        </div>}>
+          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            <div className="space-y-4">
+              <Input
+                label="Email address"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="email@example.com"
+                required
+              />
+              <Input
+                label="Password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="••••••••"
+                required
+              />
             </div>
-          )}
 
-          <Button type="submit" loading={loading} className="w-full">
-            Sign in
-          </Button>
+            {error && (
+              <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
+                <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
+              </div>
+            )}
 
-          <div className="text-center">
-            <Link
-              href="/"
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-            >
-              Back to home
-            </Link>
-          </div>
-        </form>
+            <Button type="submit" loading={loading} className="w-full">
+              Sign in
+            </Button>
+
+            <div className="text-center">
+              <Link
+                href="/"
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
+              >
+                Back to home
+              </Link>
+            </div>
+          </form>
+        </NoSSR>
       </div>
     </div>
   );

@@ -8,6 +8,7 @@ import { REGISTER } from '@/lib/graphql/mutations';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { NoSSR } from '@/components/ui/no-ssr';
 
 export default function RegisterPage() {
   const router = useRouter();
