@@ -8,7 +8,8 @@ export function ThemeToggle() {
     useEffect(() => {
         // 检查本地存储和系统偏好
         const stored = localStorage.getItem('theme');
-        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const prefersDark = mediaQuery.matches;
 
         if (stored === 'dark' || (!stored && prefersDark)) {
             setIsDark(true);
@@ -17,6 +18,26 @@ export function ThemeToggle() {
             setIsDark(false);
             document.documentElement.classList.remove('dark');
         }
+
+        // 监听系统主题变化
+        const handleChange = (e: MediaQueryListEvent) => {
+            if (!localStorage.getItem('theme')) {
+                // 只有在用户没有手动设置主题时才跟随系统
+                setIsDark(e.matches);
+                if (e.matches) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            }
+        };
+
+        mediaQuery.addEventListener('change', handleChange);
+
+        // 清理函数
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+        };
     }, []);
 
     const toggleTheme = () => {

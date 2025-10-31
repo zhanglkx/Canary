@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Category } from './category.entity';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
+import { CategoryStats } from './dto/category-stats.type';
 
 @Injectable()
 export class CategoryService {
@@ -72,20 +73,32 @@ export class CategoryService {
     return true;
   }
 
-  async getCategoryStats(userId: string): Promise<any[]> {
-    return this.categoryRepository
+  async getCategoryStats(userId: string): Promise<CategoryStats[]> {
+    const rawStats = await this.categoryRepository
       .createQueryBuilder('category')
       .leftJoin('category.todos', 'todo')
       .where('category.userId = :userId', { userId })
       .select([
-        'category.id',
-        'category.name',
-        'category.color',
-        'category.icon',
+        'category.id as id',
+        'category.name as name',
+        'category.color as color',
+        'category.icon as icon',
         'COUNT(todo.id) as todoCount',
         'COUNT(CASE WHEN todo.completed = true THEN 1 END) as completedCount',
       ])
       .groupBy('category.id')
+      .addGroupBy('category.name')
+      .addGroupBy('category.color')
+      .addGroupBy('category.icon')
       .getRawMany();
+
+    return rawStats.map((stat) => ({
+      id: stat.id,
+      name: stat.name,
+      color: stat.color,
+      icon: stat.icon,
+      todoCount: parseInt(stat.todoCount) || 0,
+      completedCount: parseInt(stat.completedCount) || 0,
+    }));
   }
 }

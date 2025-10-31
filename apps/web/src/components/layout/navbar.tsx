@@ -42,6 +42,15 @@ export function Navbar() {
                 >
                   分类管理
                 </Link>
+                <a
+                  href="http://localhost:4000/graphql"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
+                  title="GraphQL Playground"
+                >
+                  🔧 API
+                </a>
               </div>
             )}
           </div>

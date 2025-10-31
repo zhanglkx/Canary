@@ -68,6 +68,7 @@ export default function TodosPage() {
   const [filterCategory, setFilterCategory] = useState<string>('all');
   const [sortBy, setSortBy] = useState<'createdAt' | 'dueDate' | 'priority'>('createdAt');
 
+  // 使用 useEffect 处理重定向，避免在渲染期间调用 router.push
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/login');
@@ -242,8 +243,16 @@ export default function TodosPage() {
     return new Date(dueDate).toDateString() === new Date().toDateString();
   };
 
+  // 如果未认证，显示加载状态而不是 null
   if (!isAuthenticated) {
-    return null;
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600 dark:text-gray-400">正在跳转到登录页面...</p>
+        </div>
+      </div>
+    );
   }
 
   const categories: Category[] = categoriesData?.categories || [];
@@ -426,8 +435,8 @@ export default function TodosPage() {
                     <button
                       onClick={() => setFilterCategory('all')}
                       className={`px-3 py-1 rounded-full text-sm font-medium ${filterCategory === 'all'
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                         }`}
                     >
                       全部
@@ -435,8 +444,8 @@ export default function TodosPage() {
                     <button
                       onClick={() => setFilterCategory('uncategorized')}
                       className={`px-3 py-1 rounded-full text-sm font-medium ${filterCategory === 'uncategorized'
-                          ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
-                          : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                        : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
                         }`}
                     >
                       无分类
@@ -446,8 +455,8 @@ export default function TodosPage() {
                         key={category.id}
                         onClick={() => setFilterCategory(category.id)}
                         className={`px-3 py-1 rounded-full text-sm font-medium ${filterCategory === category.id
-                            ? 'text-white'
-                            : 'text-gray-800 dark:text-gray-300'
+                          ? 'text-white'
+                          : 'text-gray-800 dark:text-gray-300'
                           }`}
                         style={{
                           backgroundColor: filterCategory === category.id ? category.color : undefined,
@@ -494,8 +503,8 @@ export default function TodosPage() {
                               <div className="flex items-center gap-2 mb-1">
                                 <h3
                                   className={`text-sm font-medium ${todo.completed
-                                      ? 'line-through text-gray-500 dark:text-gray-500'
-                                      : 'text-gray-900 dark:text-white'
+                                    ? 'line-through text-gray-500 dark:text-gray-500'
+                                    : 'text-gray-900 dark:text-white'
                                     }`}
                                 >
                                   {todo.title}
@@ -515,8 +524,8 @@ export default function TodosPage() {
                               {todo.description && (
                                 <p
                                   className={`mt-1 text-sm ${todo.completed
-                                      ? 'line-through text-gray-400 dark:text-gray-600'
-                                      : 'text-gray-600 dark:text-gray-400'
+                                    ? 'line-through text-gray-400 dark:text-gray-600'
+                                    : 'text-gray-600 dark:text-gray-400'
                                     }`}
                                 >
                                   {todo.description}
@@ -526,8 +535,8 @@ export default function TodosPage() {
                                 <span>创建: {new Date(todo.createdAt).toLocaleDateString()}</span>
                                 {todo.dueDate && (
                                   <span className={`${isOverdue(todo.dueDate) ? 'text-red-600 dark:text-red-400 font-medium' :
-                                      isDueToday(todo.dueDate) ? 'text-yellow-600 dark:text-yellow-400 font-medium' :
-                                        'text-gray-500 dark:text-gray-500'
+                                    isDueToday(todo.dueDate) ? 'text-yellow-600 dark:text-yellow-400 font-medium' :
+                                      'text-gray-500 dark:text-gray-500'
                                     }`}>
                                     截止: {new Date(todo.dueDate).toLocaleDateString()}
                                     {isOverdue(todo.dueDate) && ' (已过期)'}

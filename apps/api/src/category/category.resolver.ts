@@ -4,6 +4,7 @@ import { Category } from './category.entity';
 import { CategoryService } from './category.service';
 import { CreateCategoryInput } from './dto/create-category.input';
 import { UpdateCategoryInput } from './dto/update-category.input';
+import { CategoryStats } from './dto/category-stats.type';
 import { GqlAuthGuard } from '../common/guards/gql-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '../user/user.entity';
@@ -51,8 +52,8 @@ export class CategoryResolver {
     return this.categoryService.remove(id, user.id);
   }
 
-  @Query(() => [Category], { name: 'categoryStats', description: '获取分类统计信息' })
-  async getCategoryStats(@CurrentUser() user: User) {
+  @Query(() => [CategoryStats], { name: 'categoryStats', description: '获取分类统计信息' })
+  async getCategoryStats(@CurrentUser() user: User): Promise<CategoryStats[]> {
     return this.categoryService.getCategoryStats(user.id);
   }
 }

@@ -230,7 +230,7 @@ export default function HomePage() {
         </div>
       )}
 
-      {/* Technology Stack */}
+      {/* Technology Stack & Developer Tools */}
       <div className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -242,7 +242,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-8 mb-12">
             {[
               { name: 'Next.js 15', icon: '⚛️' },
               { name: 'NestJS 10', icon: '🐱' },
@@ -260,6 +260,33 @@ export default function HomePage() {
                 </div>
               </div>
             ))}
+          </div>
+
+          {/* Developer Tools */}
+          <div className="text-center">
+            <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-6">
+              开发者工具
+            </h3>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <a
+                href="http://localhost:4000/graphql"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transform hover:scale-105 transition-all duration-200 shadow-lg"
+              >
+                <span className="mr-2">🔧</span>
+                GraphQL Playground
+              </a>
+              <a
+                href="http://localhost:4000"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-lg transform hover:scale-105 transition-all duration-200 shadow-lg"
+              >
+                <span className="mr-2">📋</span>
+                API 信息
+              </a>
+            </div>
           </div>
         </div>
       </div>

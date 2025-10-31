@@ -2,6 +2,7 @@
 
 import { useQuery } from '@apollo/client';
 import { useRouter } from 'next/navigation';
+import { useEffect } from 'react';
 import { GET_TODOS, GET_CATEGORIES, GET_CATEGORY_STATS } from '@/lib/graphql/queries';
 import { useAuth } from '@/lib/auth-context';
 import { NoSSR } from '@/components/ui/no-ssr';
@@ -56,6 +57,13 @@ export default function DashboardPage() {
     const router = useRouter();
     const { isAuthenticated } = useAuth();
 
+    // 使用 useEffect 处理重定向，避免在渲染期间调用 router.push
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.push('/login');
+        }
+    }, [isAuthenticated, router]);
+
     const { data: todosData, loading: todosLoading } = useQuery(GET_TODOS, {
         skip: !isAuthenticated,
     });
@@ -68,9 +76,16 @@ export default function DashboardPage() {
         skip: !isAuthenticated,
     });
 
+    // 如果未认证，显示加载状态而不是 null
     if (!isAuthenticated) {
-        router.push('/login');
-        return null;
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">正在跳转到登录页面...</p>
+                </div>
+            </div>
+        );
     }
 
     const todos: Todo[] = todosData?.todos || [];

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, FormEvent } from 'react';
+import { useState, FormEvent, useEffect } from 'react';
 import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import { GET_ME } from '@/lib/graphql/queries';
@@ -30,9 +30,23 @@ export default function ProfilePage() {
         skip: !isAuthenticated,
     });
 
+    // 使用 useEffect 处理重定向，避免在渲染期间调用 router.push
+    useEffect(() => {
+        if (!isAuthenticated) {
+            router.push('/login');
+        }
+    }, [isAuthenticated, router]);
+
+    // 如果未认证，显示加载状态而不是 null
     if (!isAuthenticated) {
-        router.push('/login');
-        return null;
+        return (
+            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="mt-4 text-gray-600 dark:text-gray-400">正在跳转到登录页面...</p>
+                </div>
+            </div>
+        );
     }
 
     // 模拟用户统计数据（实际应该从后端获取）
