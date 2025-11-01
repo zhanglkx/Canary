@@ -1,69 +1,68 @@
-# Quick Start Guide
+# 🚀 快速开始指南
 
-This guide will help you get the project up and running in under 5 minutes.
+## 项目简介
 
-## Prerequisites Check
+这是一个为 **GraphQL + NestJS + Next.js** 初学者设计的完整学习项目。
+
+项目包含：
+- ✅ GraphQL API 后端 (NestJS)
+- ✅ React 前端 (Next.js)
+- ✅ 完整的用户认证
+- ✅ 待办事项管理
+- ✅ 评论系统
+- ✅ 标签系统（多对多关系）
+- ✅ 搜索和过滤
+- ✅ 统计和分析
+
+所有代码都有**详细的中文注释**，非常适合初学者学习！
+
+## 📋 前置要求
 
 ```bash
-node --version   # Should be 20+
-pnpm --version   # Should be 9+
-docker --version # Should be installed
+node --version  # >= 20
+pnpm --version  # >= 9
 ```
 
-## Step 1: Install Dependencies
+## 🔧 快速开始
 
+### 1. 安装依赖
 ```bash
 pnpm install
 ```
 
-## Step 2: Start the Database
-
+### 2. 启动数据库
 ```bash
-docker-compose -f docker-compose.dev.yml up -d
+# 使用 Docker
+docker compose -f docker-compose.dev.yml up -d
 ```
 
-Wait about 10 seconds for PostgreSQL to initialize.
-
-## Step 3: Start the Backend
-
-Open a terminal and run:
-
+### 3. 启动项目
 ```bash
+# 同时启动前端和后端
+pnpm dev
+
+# 或分别启动：
+# 终端 1
 pnpm dev:api
-```
 
-You should see:
-```
-🚀 Server is running on http://localhost:4000/graphql
-```
-
-## Step 4: Start the Frontend
-
-Open another terminal and run:
-
-```bash
+# 终端 2  
 pnpm dev:web
 ```
 
-You should see:
-```
-  ▲ Next.js 15.x
-  - Local:        http://localhost:3000
-```
+## 🌐 访问应用
 
-## Step 5: Test the Application
+- **前端**: http://localhost:3000
+- **Apollo Studio** (GraphQL IDE): http://localhost:4000/apollo-studio
+- **GraphQL API**: http://localhost:4000/graphql
 
-1. Open http://localhost:3000 in your browser
-2. Click on "Register" to create an account
-3. After registration, you'll be logged in automatically
-4. Try creating some todos!
+## 📚 首先阅读
 
-## GraphQL Playground
+1. `CLAUDE.md` - 项目架构指南
+2. `FEATURES.md` - 功能详解和学习路线
 
-Visit http://localhost:4000/graphql to explore the API directly.
+## 📝 核心 GraphQL 操作
 
-Try this mutation to register:
-
+### 注册
 ```graphql
 mutation {
   register(registerInput: {
@@ -72,74 +71,87 @@ mutation {
     password: "password123"
   }) {
     accessToken
-    user {
-      id
-      email
-      username
+    user { id email }
+  }
+}
+```
+
+### 创建待办事项
+```graphql
+mutation {
+  createTodo(createTodoInput: {
+    title: "学习 GraphQL"
+    priority: HIGH
+  }) {
+    id title priority
+  }
+}
+```
+
+### 查询所有待办事项
+```graphql
+query {
+  todos {
+    id title completed priority
+    tags { name }
+    comments { content }
+  }
+}
+```
+
+### 搜索待办事项
+```graphql
+query {
+  searchTodos(filter: {
+    keyword: "项目"
+    priority: HIGH
+  }) {
+    id title
+  }
+}
+```
+
+### 查看统计数据
+```graphql
+query {
+  dashboard {
+    todoStats {
+      total completed completionPercentage
+    }
+    categoryStats {
+      categoryName totalTodos
     }
   }
 }
 ```
 
-## Next Steps
+## 🧠 学习路线
 
-Now that everything is running, you can:
+**第 1 天**: GraphQL 基础和认证
+**第 2 天**: CRUD 操作
+**第 3 天**: 关系映射 (一对多、多对多)
+**第 4 天**: 搜索、过滤、统计
+**第 5 天**: 前端集成
 
-1. Explore the code in `apps/api/src` (Backend)
-2. Explore the code in `apps/web/src` (Frontend)
-3. Check out the README.md for detailed documentation
-4. Modify the code and see hot-reload in action!
+详见 `FEATURES.md` 中的完整学习路线。
 
-## Stopping Everything
+## ✨ 新增功能 (⭐ 标记)
 
-```bash
-# Stop backend: Ctrl+C in the terminal running it
-# Stop frontend: Ctrl+C in the terminal running it
-# Stop database:
-docker-compose -f docker-compose.dev.yml down
-```
+- **Comment Module** - 评论/讨论功能
+- **Tag Module** - 标签系统 (多对多关系)
+- **Stats Module** - 统计和分析
+- **Search Module** - 搜索和过滤
 
-## Common Commands
+所有这些都展示了重要的学习概念！
 
-```bash
-# Install dependencies
-pnpm install
+## 📖 所有文件都有详细注释！
 
-# Run both API and web concurrently
-pnpm dev
+每个源文件都包含：
+- 📌 文件功能说明
+- 📌 类和方法的详细注释
+- 📌 GraphQL 操作示例
+- 📌 关键概念解释
 
-# Run only API
-pnpm dev:api
+## 🎉 开始学习吧！
 
-# Run only web
-pnpm dev:web
-
-# Build everything
-pnpm build
-
-# Start database only
-docker-compose -f docker-compose.dev.yml up -d
-
-# Start full stack with Docker
-docker-compose up --build
-```
-
-## Troubleshooting
-
-### Port 4000 or 3000 already in use
-Kill the process using that port or change the port in the config.
-
-### Database connection error
-Make sure Docker is running and the database container is healthy:
-```bash
-docker ps
-```
-
-### Module not found
-Delete node_modules and reinstall:
-```bash
-rm -rf node_modules apps/*/node_modules libs/*/node_modules
-pnpm install
-```
-
-Happy coding!
+打开 Apollo Studio，开始你的 GraphQL 学习之旅！

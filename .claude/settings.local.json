@@ -3,7 +3,14 @@
     "allow": [
       "Bash(tree:*)",
       "Bash(pnpm dev)",
-      "Bash(pnpm build)"
+      "Bash(pnpm build)",
+      "Read(//Users/temptrip/Documents/Demo/ztest/graphql-task-manager/**)",
+      "Bash(pnpm build:api:*)",
+      "Bash(docker-compose -f docker-compose.dev.yml down)",
+      "Bash(docker-compose -f docker-compose.dev.yml up -d)",
+      "Bash(docker-compose -f docker-compose.dev.yml logs)",
+      "Bash(docker compose:*)",
+      "Bash(docker version:*)"
     ],
     "deny": [],
     "ask": []
