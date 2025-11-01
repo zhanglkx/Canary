@@ -87,7 +87,7 @@ export class Tag {
    * 多对多关系会自动创建一个联接表（junction table）
    * 表名通常是：tag_todos_todo
    */
-  @ManyToMany(() => Todo, (todo) => todo.tags, { eager: true })
+  @ManyToMany(() => Todo, (todo) => todo.tags)
   @Field(() => [Todo], { nullable: true })
   todos?: Todo[];
 

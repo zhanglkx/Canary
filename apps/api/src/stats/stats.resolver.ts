@@ -18,6 +18,7 @@ import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { Todo } from '../todo/todo.entity';
 import { Category } from '../category/category.entity';
 import { User } from '../user/user.entity';
+import { CategoryStats } from '../category/dto/category-stats.type';
 import { GqlAuthGuard } from '../common/guards/gql-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 
@@ -76,29 +77,6 @@ export class TodoStats {
   overdueCount: number;
 }
 
-/**
- * 分类统计 DTO
- */
-@ObjectType()
-export class CategoryStats {
-  /**
-   * 分类名称
-   */
-  @Field()
-  categoryName: string;
-
-  /**
-   * 该分类下的待办事项总数
-   */
-  @Field(() => Int)
-  totalTodos: number;
-
-  /**
-   * 该分类下已完成的待办事项数
-   */
-  @Field(() => Int)
-  completedTodos: number;
-}
 
 /**
  * 仪表板数据 DTO
@@ -224,13 +202,16 @@ export class StatsResolver {
 
     // 为每个分类计算统计数据
     const stats = categories.map((category) => {
-      const totalTodos = category.todos?.length || 0;
-      const completedTodos = category.todos?.filter((t) => t.completed).length || 0;
+      const todoCount = category.todos?.length || 0;
+      const completedCount = category.todos?.filter((t) => t.completed).length || 0;
 
       return {
-        categoryName: category.name,
-        totalTodos,
-        completedTodos,
+        id: category.id,
+        name: category.name,
+        color: category.color,
+        icon: category.icon,
+        todoCount,
+        completedCount,
       };
     });
 

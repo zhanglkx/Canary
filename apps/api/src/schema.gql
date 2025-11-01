@@ -28,10 +28,29 @@ type CategoryStats {
   todoCount: Int!
 }
 
+type Comment {
+  author: User!
+  content: String!
+  createdAt: DateTime!
+  id: ID!
+  todo: Todo!
+  updatedAt: DateTime!
+}
+
 input CreateCategoryInput {
   color: String
   description: String
   icon: String
+  name: String!
+}
+
+input CreateCommentInput {
+  content: String!
+  todoId: String!
+}
+
+input CreateTagInput {
+  color: String
   name: String!
 }
 
@@ -41,6 +60,12 @@ input CreateTodoInput {
   dueDate: String
   priority: Priority
   title: String!
+}
+
+type DashboardData {
+  categoryStats: [CategoryStats!]!
+  recentTodosCount: Int!
+  todoStats: TodoStats!
 }
 
 """
@@ -54,18 +79,26 @@ input LoginInput {
 }
 
 type Mutation {
+  addTagToTodo(tagId: ID!, todoId: ID!): Todo!
+
   """创建新分类"""
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
+  createComment(createCommentInput: CreateCommentInput!): Comment!
+  createTag(createTagInput: CreateTagInput!): Tag!
   createTodo(createTodoInput: CreateTodoInput!): Todo!
+  deleteComment(id: ID!): Boolean!
+  deleteTag(id: ID!): Boolean!
   login(loginInput: LoginInput!): AuthResponse!
   register(registerInput: RegisterInput!): AuthResponse!
 
   """删除分类"""
   removeCategory(id: ID!): Boolean!
+  removeTagFromTodo(tagId: ID!, todoId: ID!): Todo!
   removeTodo(id: ID!): Boolean!
 
   """更新分类信息"""
   updateCategory(id: ID!, updateCategoryInput: UpdateCategoryInput!): Category!
+  updateComment(content: String!, id: ID!): Comment!
   updateTodo(id: ID!, updateTodoInput: UpdateTodoInput!): Todo!
 }
 
@@ -78,16 +111,22 @@ enum Priority {
 }
 
 type Query {
+  advancedSearch(keyword: String, priorities: [String!], sortBy: String): [Todo!]!
+
   """获取用户所有分类"""
   categories: [Category!]!
 
   """根据ID获取分类详情"""
   category(id: ID!): Category!
-
-  """获取分类统计信息"""
   categoryStats: [CategoryStats!]!
+  comments(todoId: ID!): [Comment!]!
+  dashboard: DashboardData!
   me: User!
+  searchTodos(filter: TodoFilterInput): [Todo!]!
+  tag(id: ID!): Tag!
+  tags: [Tag!]!
   todo(id: ID!): Todo!
+  todoStats: TodoStats!
   todos: [Todo!]!
   user(id: ID!): User!
   users: [User!]!
@@ -99,17 +138,48 @@ input RegisterInput {
   username: String!
 }
 
+type Tag {
+  color: String!
+  createdAt: DateTime!
+  id: ID!
+  name: String!
+  todos: [Todo!]
+  user: User!
+}
+
 type Todo {
   category: Category
+  comments: [Comment!]
   completed: Boolean!
   createdAt: DateTime!
   description: String
   dueDate: String
   id: ID!
   priority: Priority!
+  tags: [Tag!]
   title: String!
   updatedAt: DateTime!
   user: User!
+}
+
+input TodoFilterInput {
+  categoryId: String
+  completed: Boolean
+  keyword: String
+  priority: String
+  tagId: String
+}
+
+type TodoStats {
+  completed: Int!
+  completionPercentage: Int!
+  highCount: Int!
+  lowCount: Int!
+  mediumCount: Int!
+  overdueCount: Int!
+  pending: Int!
+  total: Int!
+  urgentCount: Int!
 }
 
 input UpdateCategoryInput {
