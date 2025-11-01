@@ -1,3 +1,9 @@
+/**
+ * Auth Module
+ *
+ * 作用：配置认证相关功能（JWT、Passport 及认证策略），并将认证服务与解析器注册到 NestJS 容器中。
+ * 注意：此模块导出 AuthService 以供其他模块（例如 GraphQL 的解析器或守卫）使用。
+ */
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';

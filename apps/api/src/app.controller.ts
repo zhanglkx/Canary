@@ -1,3 +1,10 @@
+/**
+ * 应用控制器 - AppController
+ *
+ * 作用：为根路径提供简单的 HTML 首页，方便开发者快速查看服务状态和打开调试工具（Apollo Studio / GraphQL Playground）。
+ * 说明：该控制器仅用于开发体验，不承担业务逻辑。页面以静态 HTML 返回，不依赖前端框架。
+ * 主要导出：AppController
+ */
 import { Controller, Get, Res } from '@nestjs/common';
 import { Response } from 'express';
 
@@ -156,7 +163,7 @@ export class AppController {
     </div>
   </body>
 </html>`;
-    
+
     res.setHeader('Content-Type', 'text/html');
     res.send(homePageHTML);
   }

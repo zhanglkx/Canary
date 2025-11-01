@@ -459,8 +459,7 @@ export default function TodosPage() {
                           : 'text-gray-800 dark:text-gray-300'
                           }`}
                         style={{
-                          backgroundColor: filterCategory === category.id ? category.color : undefined,
-                          backgroundColor: filterCategory !== category.id ? '#f3f4f6' : undefined,
+                          backgroundColor: filterCategory === category.id ? category.color : '#f3f4f6',
                         }}
                       >
                         {category.icon} {category.name}

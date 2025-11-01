@@ -5,16 +5,18 @@ WORKDIR /app
 FROM base AS dependencies
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/api/package.json ./apps/api/
-COPY libs/shared/package.json ./libs/shared/ 2>/dev/null || mkdir -p ./libs/shared
+RUN mkdir -p ./libs/shared
+COPY libs/shared/package.json ./libs/shared/
 RUN pnpm install --frozen-lockfile
 
 FROM base AS build
-COPY --from=dependencies /app/node_modules ./node_modules
-COPY --from=dependencies /app/apps/api/node_modules ./apps/api/node_modules
 COPY tsconfig.base.json ./
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/api ./apps/api
 COPY libs/shared ./libs/shared
 WORKDIR /app/apps/api
+# Install dependencies inside the build stage to ensure pnpm workspace layout is correct
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile
 RUN pnpm build
 
 FROM base AS production

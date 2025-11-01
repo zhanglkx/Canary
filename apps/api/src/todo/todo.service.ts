@@ -1,3 +1,14 @@
+/**
+ * TodoService - 待办事项业务服务
+ *
+ * 作用：封装与待办事项相关的数据访问与业务逻辑。
+ * 主要职责：
+ *  - 创建、查询、更新和删除 Todo 实体
+ *  - 执行与权限相关的数据过滤（按 userId）
+ *  - 抛出适当的异常以供 Resolver 层映射到 GraphQL 错误
+ *
+ * 注意：Service 层只关注业务逻辑，不处理 HTTP/GraphQL 请求细节。
+ */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

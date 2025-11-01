@@ -1,3 +1,12 @@
+/**
+ * UserService - 用户管理服务
+ *
+ * 作用：封装用户相关的数据库操作和业务逻辑。
+ * 主要职责：
+ *  - 创建用户（包含密码哈希处理）
+ *  - 查找用户（按 id / email / username）
+ *  - 提供给 AuthService 与其他模块使用的用户查询接口
+ */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';

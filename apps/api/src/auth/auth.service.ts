@@ -1,3 +1,13 @@
+/**
+ * AuthService - 认证业务服务
+ *
+ * 作用：
+ *  - 验证用户凭证（validateUser）
+ *  - 注册与登录逻辑（register / login）
+ *  - JWT Token 的生成与解析
+ *
+ * 说明：该类不直接处理 HTTP 请求或 GraphQL 层面的细节，而是为解析器和守卫提供业务方法。
+ */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';

@@ -1,3 +1,9 @@
+/**
+ * ApolloStudioController
+ *
+ * 作用：为开发者提供一个内嵌的 Apollo Studio 界面，方便在浏览器中调试和探索 GraphQL API。
+ * 说明：该控制器返回静态 HTML（包含 Apollo Studio 嵌入脚本），仅用于开发和调试环境。
+ */
 import { Controller, Get, Res } from '@nestjs/common';
 import { Response } from 'express';
 

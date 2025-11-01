@@ -1,3 +1,11 @@
+/**
+ * CategoryResolver - 分类模块的 GraphQL 解析器
+ *
+ * 作用：处理分类相关的 Query 与 Mutation，供前端 GraphQL 接口调用。
+ * 关键点：
+ *  - 使用 @UseGuards(GqlAuthGuard) 保护接口，确保只有认证用户可以访问
+ *  - 通过 CategoryService 执行业务操作
+ */
 import { Resolver, Query, Mutation, Args, ID } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { Category } from './category.entity';
