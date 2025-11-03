@@ -20,6 +20,7 @@ import { ProductModule } from './product/product.module';
 import { InventoryModule } from './inventory/inventory.module';
 import { ShoppingCartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
+import { PaymentModule } from './payment/payment.module';
 
 /**
  * 电商主模块
@@ -32,9 +33,9 @@ import { OrderModule } from './order/order.module';
     InventoryModule,
     ShoppingCartModule,
     OrderModule,
-    // PaymentModule, // 后续添加
+    PaymentModule,
     // ReviewModule, // 后续添加
   ],
-  exports: [ProductModule, InventoryModule, ShoppingCartModule, OrderModule],
+  exports: [ProductModule, InventoryModule, ShoppingCartModule, OrderModule, PaymentModule],
 })
 export class EcommerceModule {}
