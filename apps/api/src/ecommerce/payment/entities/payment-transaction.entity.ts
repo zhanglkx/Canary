@@ -150,7 +150,13 @@ export class PaymentTransaction {
    */
   @Column({ type: 'jsonb', nullable: true })
   @Field({ nullable: true })
-  responseData?: {
+  get responseData(): string | undefined {
+    return this.responseDataRaw ? JSON.stringify(this.responseDataRaw) : undefined;
+  }
+
+  @Column({ type: 'jsonb', nullable: true, select: false })
+  @HideField()
+  responseDataRaw?: {
     transactionId?: string;
     status?: string;
     receiptUrl?: string;
@@ -220,7 +226,13 @@ export class PaymentTransaction {
    */
   @Column({ type: 'jsonb', nullable: true })
   @Field({ nullable: true })
-  metadata?: Record<string, any>;
+  get metadata(): string | undefined {
+    return this.metadataRaw ? JSON.stringify(this.metadataRaw) : undefined;
+  }
+
+  @Column({ type: 'jsonb', nullable: true, select: false })
+  @HideField()
+  metadataRaw?: Record<string, any>;
 
   /**
    * 备注
@@ -276,7 +288,7 @@ export class PaymentTransaction {
     }
     this.status = TransactionStatus.COMPLETED;
     this.gatewayTransactionId = gatewayTransactionId;
-    this.responseData = responseData;
+    this.responseDataRaw = responseData;
     this.completedAt = new Date();
     this.errorCode = undefined;
     this.errorMessage = undefined;

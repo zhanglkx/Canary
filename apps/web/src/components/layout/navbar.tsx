@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { ShoppingCart } from 'lucide-react';
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -42,6 +43,30 @@ export function Navbar() {
                 >
                   分类管理
                 </Link>
+
+                {/* E-Commerce Menu */}
+                <div className="flex space-x-4 border-l border-gray-300 dark:border-gray-600 pl-4">
+                  <Link
+                    href="/shop"
+                    className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    🛍️ Shop
+                  </Link>
+                  <Link
+                    href="/cart"
+                    className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1"
+                  >
+                    <ShoppingCart size={18} />
+                    Cart
+                  </Link>
+                  <Link
+                    href="/orders"
+                    className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    📦 Orders
+                  </Link>
+                </div>
+
                 <a
                   href="http://localhost:4000/graphql"
                   target="_blank"

@@ -86,10 +86,7 @@ export class ShoppingCartRepository extends Repository<ShoppingCart> {
     private cartRepository: Repository<ShoppingCart>,
     private dataSource: DataSource,
   ) {
-    super(
-      ShoppingCart.prototype.constructor,
-      dataSource.createEntityManager(),
-    );
+    super(ShoppingCart.prototype.constructor, dataSource.createEntityManager());
   }
 
   /**
@@ -99,10 +96,7 @@ export class ShoppingCartRepository extends Repository<ShoppingCart> {
    * @param status 可选的购物车状态筛选
    * @returns 购物车列表
    */
-  async findByUserId(
-    userId: string,
-    status?: CartStatus,
-  ): Promise<ShoppingCart[]> {
+  async findByUserId(userId: string, status?: CartStatus): Promise<ShoppingCart[]> {
     const query = this.cartRepository
       .createQueryBuilder('cart')
       .where('cart.userId = :userId', { userId })
@@ -211,10 +205,7 @@ export class ShoppingCartRepository extends Repository<ShoppingCart> {
    * @param limit 限制数量
    * @returns 高价值购物车列表
    */
-  async findHighValueCarts(
-    minValue: number,
-    limit: number = 20,
-  ): Promise<HighValueCart[]> {
+  async findHighValueCarts(minValue: number, limit: number = 20): Promise<HighValueCart[]> {
     const carts = await this.cartRepository
       .createQueryBuilder('cart')
       .leftJoinAndSelect('cart.items', 'items')
@@ -247,10 +238,7 @@ export class ShoppingCartRepository extends Repository<ShoppingCart> {
    * @param limit 限制数量
    * @returns 低价值购物车列表
    */
-  async findLowValueCarts(
-    maxValue: number,
-    limit: number = 20,
-  ): Promise<HighValueCart[]> {
+  async findLowValueCarts(maxValue: number, limit: number = 20): Promise<HighValueCart[]> {
     const carts = await this.cartRepository
       .createQueryBuilder('cart')
       .leftJoinAndSelect('cart.items', 'items')
@@ -335,8 +323,7 @@ export class ShoppingCartRepository extends Repository<ShoppingCart> {
     const totalValue = await this.getCartsTotalValue();
     const averageValue = totalCarts > 0 ? totalValue / totalCarts : 0;
 
-    const abandonmentRate =
-      totalCarts > 0 ? (abandonedCarts / totalCarts) * 100 : 0;
+    const abandonmentRate = totalCarts > 0 ? (abandonedCarts / totalCarts) * 100 : 0;
 
     return {
       totalCarts,
@@ -376,8 +363,7 @@ export class ShoppingCartRepository extends Repository<ShoppingCart> {
       }
     });
 
-    const averageTimeToConversion =
-      convertedCarts > 0 ? totalTimeToConversion / convertedCarts : 0;
+    const averageTimeToConversion = convertedCarts > 0 ? totalTimeToConversion / convertedCarts : 0;
 
     const totalCarts = totalActiveCarts + abandonedCarts + convertedCarts;
     const conversionRate = totalCarts > 0 ? (convertedCarts / totalCarts) * 100 : 0;
@@ -455,9 +441,7 @@ export class ShoppingCartRepository extends Repository<ShoppingCart> {
    * @param userIds 用户ID列表
    * @returns 购物车列表（按用户ID分组）
    */
-  async findByUserIdsBatch(
-    userIds: string[],
-  ): Promise<Map<string, ShoppingCart[]>> {
+  async findByUserIdsBatch(userIds: string[]): Promise<Map<string, ShoppingCart[]>> {
     if (userIds.length === 0) {
       return new Map();
     }
@@ -488,9 +472,7 @@ export class ShoppingCartRepository extends Repository<ShoppingCart> {
    *
    * @returns 分布信息
    */
-  async getCartItemDistribution(): Promise<
-    { itemCount: number; cartCount: number }[]
-  > {
+  async getCartItemDistribution(): Promise<{ itemCount: number; cartCount: number }[]> {
     const carts = await this.cartRepository
       .createQueryBuilder('cart')
       .leftJoinAndSelect('cart.items', 'items')

@@ -4,7 +4,8 @@
       "Read(//tmp/**)",
       "Bash(timeout 60 pnpm:*)",
       "Bash(pnpm --filter api test -- inventory.service.concurrent.spec.ts)",
-      "Bash(pnpm install)"
+      "Bash(pnpm install)",
+      "Bash(pnpm --filter api build:api:*)"
     ],
     "deny": [],
     "ask": []
