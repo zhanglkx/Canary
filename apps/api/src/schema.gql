@@ -80,6 +80,8 @@ input LoginInput {
 
 type Mutation {
   addTagToTodo(tagId: ID!, todoId: ID!): Todo!
+  addTagsToTodos(tagIds: [String!]!, todoIds: [String!]!): Int!
+  cleanupCompletedTodos: Int!
 
   """创建新分类"""
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
@@ -88,7 +90,9 @@ type Mutation {
   createTodo(createTodoInput: CreateTodoInput!): Todo!
   deleteComment(id: ID!): Boolean!
   deleteTag(id: ID!): Boolean!
+  deleteTodos(todoIds: [String!]!): Int!
   login(loginInput: LoginInput!): AuthResponse!
+  markTodosAsCompleted(todoIds: [String!]!): Int!
   register(registerInput: RegisterInput!): AuthResponse!
 
   """删除分类"""
@@ -99,6 +103,8 @@ type Mutation {
   """更新分类信息"""
   updateCategory(id: ID!, updateCategoryInput: UpdateCategoryInput!): Category!
   updateComment(content: String!, id: ID!): Comment!
+  updatePriority(priority: String!, todoIds: [String!]!): Int!
+  updateProfile(updateUserInput: UpdateUserInput!): User!
   updateTodo(id: ID!, updateTodoInput: UpdateTodoInput!): Todo!
 }
 
@@ -120,8 +126,10 @@ type Query {
   category(id: ID!): Category!
   categoryStats: [CategoryStats!]!
   comments(todoId: ID!): [Comment!]!
+  currentUser: User!
   dashboard: DashboardData!
   me: User!
+  pendingTodos: [Todo!]!
   searchTodos(filter: TodoFilterInput): [Todo!]!
   tag(id: ID!): Tag!
   tags: [Tag!]!
@@ -129,7 +137,7 @@ type Query {
   todoStats: TodoStats!
   todos: [Todo!]!
   user(id: ID!): User!
-  users: [User!]!
+  userStats: String
 }
 
 input RegisterInput {
@@ -196,6 +204,13 @@ input UpdateTodoInput {
   dueDate: String
   priority: Priority
   title: String
+}
+
+input UpdateUserInput {
+  email: String
+  newPassword: String
+  oldPassword: String
+  username: String
 }
 
 type User {
