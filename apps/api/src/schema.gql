@@ -4,6 +4,9 @@
 
 type AuthResponse {
   accessToken: String!
+  expiresIn: Float!
+  refreshToken: String!
+  tokenType: String!
   user: User!
 }
 
@@ -92,7 +95,10 @@ type Mutation {
   deleteTag(id: ID!): Boolean!
   deleteTodos(todoIds: [String!]!): Int!
   login(loginInput: LoginInput!): AuthResponse!
+  logout(refreshToken: String!): Boolean!
+  logoutAll: Boolean!
   markTodosAsCompleted(todoIds: [String!]!): Int!
+  refreshToken(refreshTokenInput: RefreshTokenInput!): TokenResponse!
   register(registerInput: RegisterInput!): AuthResponse!
 
   """删除分类"""
@@ -138,6 +144,10 @@ type Query {
   todos: [Todo!]!
   user(id: ID!): User!
   userStats: String
+}
+
+input RefreshTokenInput {
+  refreshToken: String!
 }
 
 input RegisterInput {
@@ -188,6 +198,13 @@ type TodoStats {
   pending: Int!
   total: Int!
   urgentCount: Int!
+}
+
+type TokenResponse {
+  accessToken: String!
+  expiresIn: Float!
+  refreshToken: String!
+  tokenType: String!
 }
 
 input UpdateCategoryInput {

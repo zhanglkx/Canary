@@ -20,6 +20,7 @@ import {
 import { ObjectType, Field, ID, HideField } from '@nestjs/graphql';
 import { Todo } from '../todo/todo.entity';
 import { Category } from '../category/category.entity';
+import { RefreshToken } from '../auth/entities/refresh-token.entity';
 
 /**
  * @Entity('users') - TypeORM 装饰器
@@ -108,4 +109,15 @@ export class User {
   @UpdateDateColumn()
   @Field()
   updatedAt: Date;
+
+  /**
+   * 用户的刷新令牌列表
+   * 支持多设备登录和令牌管理
+   * @HideField() - 不在 GraphQL 中暴露（敏感信息）
+   */
+  @OneToMany(() => RefreshToken, (refreshToken) => refreshToken.user, {
+    eager: false,
+  })
+  @HideField()
+  refreshTokens?: RefreshToken[];
 }

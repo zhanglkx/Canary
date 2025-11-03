@@ -2,20 +2,25 @@
  * Auth Module
  *
  * 作用：配置认证相关功能（JWT、Passport 及认证策略），并将认证服务与解析器注册到 NestJS 容器中。
- * 注意：此模块导出 AuthService 以供其他模块（例如 GraphQL 的解析器或守卫）使用。
+ * 新增：TokenService 用于处理刷新令牌和令牌管理
+ * 注意：此模块导出 AuthService 和 TokenService 以供其他模块使用。
  */
 import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from '../user/user.module';
 import { AuthService } from './auth.service';
+import { TokenService } from './services/token.service';
 import { AuthResolver } from './auth.resolver';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { RefreshToken } from './entities/refresh-token.entity';
 
 @Module({
   imports: [
+    TypeOrmModule.forFeature([RefreshToken]),
     UserModule,
     PassportModule,
     JwtModule.registerAsync({
@@ -29,7 +34,7 @@ import { LocalStrategy } from './strategies/local.strategy';
       inject: [ConfigService],
     }),
   ],
-  providers: [AuthService, AuthResolver, LocalStrategy, JwtStrategy],
-  exports: [AuthService],
+  providers: [AuthService, TokenService, AuthResolver, LocalStrategy, JwtStrategy],
+  exports: [AuthService, TokenService],
 })
 export class AuthModule {}

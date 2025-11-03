@@ -1,8 +1,12 @@
+/**
+ * Token Response DTO
+ * 用于返回访问令牌和刷新令牌
+ */
+
 import { ObjectType, Field } from '@nestjs/graphql';
-import { User } from '../../user/user.entity';
 
 @ObjectType()
-export class AuthResponse {
+export class TokenResponse {
   @Field()
   accessToken: string;
 
@@ -14,7 +18,4 @@ export class AuthResponse {
 
   @Field()
   tokenType: string;
-
-  @Field(() => User)
-  user: User;
 }
