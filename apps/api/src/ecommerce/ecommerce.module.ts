@@ -18,6 +18,7 @@
 import { Module } from '@nestjs/common';
 import { ProductModule } from './product/product.module';
 import { InventoryModule } from './inventory/inventory.module';
+import { ShoppingCartModule } from './cart/cart.module';
 
 /**
  * 电商主模块
@@ -28,11 +29,11 @@ import { InventoryModule } from './inventory/inventory.module';
   imports: [
     ProductModule,
     InventoryModule,
-    // ShoppingCartModule, // 后续添加
+    ShoppingCartModule,
     // OrderModule, // 后续添加
     // PaymentModule, // 后续添加
     // ReviewModule, // 后续添加
   ],
-  exports: [ProductModule, InventoryModule],
+  exports: [ProductModule, InventoryModule, ShoppingCartModule],
 })
 export class EcommerceModule {}
