@@ -41,10 +41,10 @@ import { User } from '../../../user/user.entity';
  */
 @Entity('products')
 @ObjectType()
-@Index(['categoryId', 'status'], { name: 'IDX_product_category_status' })
-@Index(['name'], { name: 'IDX_product_name' })
-@Index(['sku'], { name: 'IDX_product_sku' })
-@Index(['status', 'createdAt'], { name: 'IDX_product_status_created' })
+@Index('IDX_product_category_status', ['categoryId', 'status'])
+@Index('IDX_product_name', ['name'])
+@Index('IDX_product_sku', ['sku'])
+@Index('IDX_product_status_created', ['status', 'createdAt'])
 export class Product {
   /**
    * 产品ID

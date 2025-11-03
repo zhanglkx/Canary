@@ -25,7 +25,7 @@ import { Product } from './product.entity';
  */
 @Entity('product_images')
 @ObjectType()
-@Index(['productId', 'displayOrder'], { name: 'IDX_image_product_order' })
+@Index('IDX_image_product_order', ['productId', 'displayOrder'])
 export class ProductImage {
   /**
    * 图片ID

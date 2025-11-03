@@ -22,9 +22,9 @@ import { HideField } from '@nestjs/graphql';
  */
 @Entity('product_categories')
 @ObjectType()
-@Index(['parentId', 'isActive'], { name: 'IDX_category_parent_active' })
-@Index(['path'], { name: 'IDX_category_path' })
-@Index(['level'], { name: 'IDX_category_level' })
+@Index('IDX_category_parent_active', ['parentId', 'isActive'])
+@Index('IDX_category_path', ['path'])
+@Index('IDX_category_level', ['level'])
 export class ProductCategory {
   /**
    * 分类ID

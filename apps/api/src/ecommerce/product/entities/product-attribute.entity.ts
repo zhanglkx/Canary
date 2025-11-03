@@ -30,8 +30,8 @@ import { ProductAttributeValue } from './product-attribute-value.entity';
  */
 @Entity('product_attributes')
 @ObjectType()
-@Index(['name'], { name: 'IDX_attribute_name' })
-@Index(['displayOrder'], { name: 'IDX_attribute_order' })
+@Index('IDX_attribute_name', ['name'])
+@Index('IDX_attribute_order', ['displayOrder'])
 export class ProductAttribute {
   /**
    * 属性ID

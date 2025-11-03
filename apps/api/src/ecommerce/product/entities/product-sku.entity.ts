@@ -39,9 +39,9 @@ import { Product } from './product.entity';
  */
 @Entity('product_skus')
 @ObjectType()
-@Index(['productId', 'skuCode'], { name: 'IDX_sku_product_code' })
-@Index(['skuCode'], { name: 'IDX_sku_code' })
-@Index(['stock'], { name: 'IDX_sku_stock' })
+@Index('IDX_sku_product_code', ['productId', 'skuCode'])
+@Index('IDX_sku_code', ['skuCode'])
+@Index('IDX_sku_stock', ['stock'])
 export class ProductSku {
   /**
    * SKU ID

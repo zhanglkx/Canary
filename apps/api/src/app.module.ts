@@ -23,6 +23,7 @@ import { TagModule } from './tag/tag.module'; // 标签功能模块（新增）
 import { StatsModule } from './stats/stats.module'; // 统计功能模块（新增）
 import { SearchModule } from './search/search.module'; // 搜索功能模块（新增）
 import { BatchModule } from './batch/batch.module'; // 批量操作模块（新增）
+import { EcommerceModule } from './ecommerce/ecommerce.module'; // 电商模块（新增）
 import { AppController } from './app.controller';
 import { ApolloStudioController } from './apollo-studio.controller';
 
@@ -91,6 +92,7 @@ import { ApolloStudioController } from './apollo-studio.controller';
     StatsModule, // 统计功能（新增）
     SearchModule, // 搜索功能（新增）
     BatchModule, // 批量操作功能（新增）
+    EcommerceModule, // 电商功能（新增）
   ],
 })
 export class AppModule {}

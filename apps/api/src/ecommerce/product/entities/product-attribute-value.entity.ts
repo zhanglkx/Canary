@@ -25,7 +25,7 @@ import { ProductAttribute } from './product-attribute.entity';
  */
 @Entity('product_attribute_values')
 @ObjectType()
-@Index(['attributeId', 'value'], { name: 'IDX_attr_value_unique', unique: true })
+@Index('IDX_attr_value_unique', ['attributeId', 'value'], { unique: true })
 export class ProductAttributeValue {
   /**
    * 属性值ID
