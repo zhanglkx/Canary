@@ -142,8 +142,14 @@ export class OrderItem {
    * }
    */
   @Column({ type: 'jsonb', nullable: true })
-  @Field({ nullable: true })
-  attributeSnapshot?: Record<string, string>;
+  @Field(() => String, { nullable: true })
+  get attributeSnapshot(): string | undefined {
+    return this.attributeSnapshotData ? JSON.stringify(this.attributeSnapshotData) : undefined;
+  }
+
+  @Column({ type: 'jsonb', nullable: true, select: false })
+  @HideField()
+  attributeSnapshotData?: Record<string, string>;
 
   /**
    * 项目级折扣（人民币分）
