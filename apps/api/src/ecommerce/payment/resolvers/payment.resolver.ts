@@ -662,4 +662,105 @@ export class PaymentResolver {
       message: 'Stripe integration requires configuration',
     });
   }
+
+  /**
+   * ==================== PayPal 集成 ====================
+   */
+
+  /**
+   * 创建 PayPal 订单
+   *
+   * @param user 当前用户
+   * @param paymentId 支付ID
+   * @returns PayPal 支付结果
+   */
+  @Mutation(() => String)  // 返回 JSON 字符串
+  @UseGuards(GqlAuthGuard)
+  async createPayPalOrder(
+    @CurrentUser() user: User,
+    @Args('paymentId') paymentId: string,
+  ): Promise<string> {
+    this.logger.debug(
+      `创建 PayPal 订单: 用户=${user.id}, 支付=${paymentId}`,
+    );
+
+    // 验证权限
+    const payment = await this.paymentRepository.findById(paymentId);
+    if (!payment || payment.userId !== user.id) {
+      throw new BadRequestException('无权访问该支付记录');
+    }
+
+    // 注意: 实际使用时需要注入 PayPalPaymentService
+    // 这里返回占位符响应
+    return JSON.stringify({
+      success: false,
+      message: 'PayPal integration requires configuration',
+    });
+  }
+
+  /**
+   * 捕获 PayPal 订单支付
+   *
+   * @param user 当前用户
+   * @param paymentId 支付ID
+   * @param orderId PayPal 订单ID
+   * @returns PayPal 支付结果
+   */
+  @Mutation(() => String)  // 返回 JSON 字符串
+  @UseGuards(GqlAuthGuard)
+  async capturePayPalOrder(
+    @CurrentUser() user: User,
+    @Args('paymentId') paymentId: string,
+    @Args('orderId') orderId: string,
+  ): Promise<string> {
+    this.logger.debug(
+      `捕获 PayPal 订单: 用户=${user.id}, 支付=${paymentId}, 订单=${orderId}`,
+    );
+
+    // 验证权限
+    const payment = await this.paymentRepository.findById(paymentId);
+    if (!payment || payment.userId !== user.id) {
+      throw new BadRequestException('无权访问该支付记录');
+    }
+
+    // 注意: 实际使用时需要注入 PayPalPaymentService
+    // 这里返回占位符响应
+    return JSON.stringify({
+      success: false,
+      message: 'PayPal integration requires configuration',
+    });
+  }
+
+  /**
+   * 创建 PayPal 退款
+   *
+   * @param user 当前用户
+   * @param paymentId 支付ID
+   * @param refundAmount 退款金额（分）
+   * @returns 退款结果
+   */
+  @Mutation(() => String)  // 返回 JSON 字符串
+  @UseGuards(GqlAuthGuard)
+  async createPayPalRefund(
+    @CurrentUser() user: User,
+    @Args('paymentId') paymentId: string,
+    @Args('refundAmount', { type: () => Int }) refundAmount: number,
+  ): Promise<string> {
+    this.logger.debug(
+      `创建 PayPal 退款: 用户=${user.id}, 支付=${paymentId}, 金额=${refundAmount}`,
+    );
+
+    // 验证权限
+    const payment = await this.paymentRepository.findById(paymentId);
+    if (!payment || payment.userId !== user.id) {
+      throw new BadRequestException('无权访问该支付记录');
+    }
+
+    // 注意: 实际使用时需要注入 PayPalPaymentService
+    // 这里返回占位符响应
+    return JSON.stringify({
+      success: false,
+      message: 'PayPal integration requires configuration',
+    });
+  }
 }

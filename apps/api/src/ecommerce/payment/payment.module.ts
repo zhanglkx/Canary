@@ -21,6 +21,8 @@ import { PaymentMethodService } from './services/payment-method.service';
 import { PaymentResolver } from './resolvers/payment.resolver';
 import { StripePaymentService } from './integrations/stripe-payment.service';
 import { StripeWebhookController } from './integrations/stripe-webhook.controller';
+import { PayPalPaymentService } from './integrations/paypal-payment.service';
+import { PayPalWebhookController } from './integrations/paypal-webhook.controller';
 import { Order } from '../order/entities/order.entity';
 
 @Module({
@@ -33,8 +35,15 @@ import { Order } from '../order/entities/order.entity';
     PaymentMethodService,
     PaymentResolver,
     StripePaymentService,
+    PayPalPaymentService,
   ],
-  controllers: [StripeWebhookController],
-  exports: [PaymentService, PaymentRepository, PaymentMethodService, StripePaymentService],
+  controllers: [StripeWebhookController, PayPalWebhookController],
+  exports: [
+    PaymentService,
+    PaymentRepository,
+    PaymentMethodService,
+    StripePaymentService,
+    PayPalPaymentService,
+  ],
 })
 export class PaymentModule {}
