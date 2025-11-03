@@ -66,9 +66,10 @@ export class UserResolver {
    *   }
    * }
    */
-  @Query(() => Object)
+  @Query(() => String, { nullable: true })
   @UseGuards(GqlAuthGuard)
-  async userStats(@CurrentUser() user: User): Promise<any> {
-    return this.userService.getUserStats(user.id);
+  async userStats(@CurrentUser() user: User): Promise<string> {
+    const stats = await this.userService.getUserStats(user.id);
+    return JSON.stringify(stats);
   }
 }

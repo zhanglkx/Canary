@@ -3,11 +3,11 @@
   "version": "1.0.0",
   "description": "NestJS GraphQL API",
   "scripts": {
-    "dev": "nest start --watch",
+    "dev": "npm run build && npm run start",
     "debug": "nest start --debug --watch",
     "debug:brk": "nest start --debug-brk --watch",
     "debug:prod": "node --inspect dist/main",
-    "build": "nest build",
+    "build": "rm -rf dist tsconfig.tsbuildinfo && nest build",
     "start": "node dist/main",
     "start:prod": "node dist/main",
     "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
