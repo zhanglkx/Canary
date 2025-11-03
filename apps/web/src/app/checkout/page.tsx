@@ -218,7 +218,7 @@ export default function CheckoutPage() {
 
               {/* Items */}
               <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
-                {cart.items.map((item) => (
+                {cart.items.map((item: any) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <div>
                       <p className="text-gray-900 font-medium">{item.productName}</p>

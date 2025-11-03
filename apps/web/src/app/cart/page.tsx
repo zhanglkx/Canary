@@ -114,7 +114,7 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
             <div className="divide-y">
-              {cart.items.map((item) => (
+              {cart.items.map((item: any) => (
                 <CartItem
                   key={item.id}
                   id={item.id}
@@ -148,7 +148,7 @@ export default function CartPage() {
         </div>
 
         {/* Additional Notes */}
-        {cart.items.some((item) => item.stockStatus === 'LOW_STOCK') && (
+        {cart.items.some((item: any) => item.stockStatus === 'LOW_STOCK') && (
           <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3 items-start">
             <AlertCircle className="text-blue-600 flex-shrink-0" size={20} />
             <div>
