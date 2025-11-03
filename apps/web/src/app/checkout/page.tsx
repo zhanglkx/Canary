@@ -7,6 +7,7 @@ import { GET_MY_CART } from '@/lib/graphql/cart';
 import { CREATE_ORDER } from '@/lib/graphql/order';
 import { useAuth } from '@/lib/auth-context';
 import { AlertCircle, Loader, CheckCircle } from 'lucide-react';
+import type { CartItem as CartItemType } from '@/types/ecommerce';
 
 /**
  * Checkout Page
@@ -218,7 +219,7 @@ export default function CheckoutPage() {
 
               {/* Items */}
               <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
-                {cart.items.map((item: any) => (
+                {cart.items.map((item: CartItemType) => (
                   <div key={item.id} className="flex justify-between text-sm">
                     <div>
                       <p className="text-gray-900 font-medium">{item.productName}</p>

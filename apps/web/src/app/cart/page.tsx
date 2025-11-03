@@ -8,6 +8,7 @@ import { useAuth } from '@/lib/auth-context';
 import { CartItem } from '@/components/features/cart-item';
 import { CartSummary } from '@/components/features/cart-summary';
 import { ShoppingCart as CartIcon, AlertCircle } from 'lucide-react';
+import type { CartItem as CartItemType } from '@/types/ecommerce';
 
 /**
  * Shopping Cart Page
@@ -114,7 +115,7 @@ export default function CartPage() {
           {/* Cart Items */}
           <div className="lg:col-span-2 bg-white rounded-lg shadow-sm p-6">
             <div className="divide-y">
-              {cart.items.map((item: any) => (
+              {cart.items.map((item: CartItemType) => (
                 <CartItem
                   key={item.id}
                   id={item.id}
@@ -148,7 +149,7 @@ export default function CartPage() {
         </div>
 
         {/* Additional Notes */}
-        {cart.items.some((item: any) => item.stockStatus === 'LOW_STOCK') && (
+        {cart.items.some((item: CartItemType) => item.stockStatus === 'LOW_STOCK') && (
           <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4 flex gap-3 items-start">
             <AlertCircle className="text-blue-600 flex-shrink-0" size={20} />
             <div>

@@ -7,6 +7,7 @@ import { GET_MY_ORDERS, GET_MY_ORDER_STATS } from '@/lib/graphql/order';
 import { useAuth } from '@/lib/auth-context';
 import { Package, AlertCircle, Loader } from 'lucide-react';
 import Link from 'next/link';
+import type { Order } from '@/types/ecommerce';
 
 /**
  * Orders Page
@@ -124,7 +125,7 @@ export default function OrdersPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y">
-                  {orders.map((order: any) => (
+                  {orders.map((order: Order) => (
                     <tr key={order.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 text-sm text-gray-900 font-medium">{order.orderNumber}</td>
                       <td className="px-6 py-4 text-sm text-gray-600">

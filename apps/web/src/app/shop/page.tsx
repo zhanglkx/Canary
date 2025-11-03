@@ -5,6 +5,7 @@ import { useQuery } from '@apollo/client';
 import { GET_PRODUCTS } from '@/lib/graphql/product';
 import { ProductCard } from '@/components/features/product-card';
 import { AlertCircle, Search, Loader } from 'lucide-react';
+import type { Product } from '@/types/ecommerce';
 
 /**
  * Shop/Products Page
@@ -159,7 +160,7 @@ export default function ShopPage() {
         {!loading && products.length > 0 && (
           <>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-              {products.map((product: any) => (
+              {products.map((product: Product) => (
                 <ProductCard
                   key={product.id}
                   id={product.id}
