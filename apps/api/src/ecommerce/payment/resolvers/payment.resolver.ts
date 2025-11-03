@@ -559,4 +559,107 @@ export class PaymentResolver {
       message: result.message,
     };
   }
+
+  /**
+   * ==================== Stripe 集成 ====================
+   */
+
+  /**
+   * 创建 Stripe 支付意图
+   *
+   * @param user 当前用户
+   * @param paymentId 支付ID
+   * @param cardToken Stripe 卡片 token
+   * @returns Stripe 支付结果
+   */
+  @Mutation(() => String)  // 返回 JSON 字符串
+  @UseGuards(GqlAuthGuard)
+  async createStripePaymentIntent(
+    @CurrentUser() user: User,
+    @Args('paymentId') paymentId: string,
+    @Args('cardToken', { nullable: true }) cardToken?: string,
+  ): Promise<string> {
+    this.logger.debug(
+      `创建 Stripe 支付意图: 用户=${user.id}, 支付=${paymentId}`,
+    );
+
+    // 验证权限
+    const payment = await this.paymentRepository.findById(paymentId);
+    if (!payment || payment.userId !== user.id) {
+      throw new BadRequestException('无权访问该支付记录');
+    }
+
+    // 注意: 实际使用时需要注入 StripePaymentService
+    // 这里返回占位符响应
+    return JSON.stringify({
+      success: false,
+      message: 'Stripe integration requires configuration',
+    });
+  }
+
+  /**
+   * 确认 Stripe 支付意图
+   *
+   * @param user 当前用户
+   * @param paymentId 支付ID
+   * @param cardToken Stripe 卡片 token
+   * @returns Stripe 支付结果
+   */
+  @Mutation(() => String)  // 返回 JSON 字符串
+  @UseGuards(GqlAuthGuard)
+  async confirmStripePaymentIntent(
+    @CurrentUser() user: User,
+    @Args('paymentId') paymentId: string,
+    @Args('cardToken', { nullable: true }) cardToken?: string,
+  ): Promise<string> {
+    this.logger.debug(
+      `确认 Stripe 支付意图: 用户=${user.id}, 支付=${paymentId}`,
+    );
+
+    // 验证权限
+    const payment = await this.paymentRepository.findById(paymentId);
+    if (!payment || payment.userId !== user.id) {
+      throw new BadRequestException('无权访问该支付记录');
+    }
+
+    // 注意: 实际使用时需要注入 StripePaymentService
+    // 这里返回占位符响应
+    return JSON.stringify({
+      success: false,
+      message: 'Stripe integration requires configuration',
+    });
+  }
+
+  /**
+   * 创建 Stripe 退款
+   *
+   * @param user 当前用户
+   * @param paymentId 支付ID
+   * @param refundAmount 退款金额（分）
+   * @returns 退款结果
+   */
+  @Mutation(() => String)  // 返回 JSON 字符串
+  @UseGuards(GqlAuthGuard)
+  async createStripeRefund(
+    @CurrentUser() user: User,
+    @Args('paymentId') paymentId: string,
+    @Args('refundAmount', { type: () => Int }) refundAmount: number,
+  ): Promise<string> {
+    this.logger.debug(
+      `创建 Stripe 退款: 用户=${user.id}, 支付=${paymentId}, 金额=${refundAmount}`,
+    );
+
+    // 验证权限
+    const payment = await this.paymentRepository.findById(paymentId);
+    if (!payment || payment.userId !== user.id) {
+      throw new BadRequestException('无权访问该支付记录');
+    }
+
+    // 注意: 实际使用时需要注入 StripePaymentService
+    // 这里返回占位符响应
+    return JSON.stringify({
+      success: false,
+      message: 'Stripe integration requires configuration',
+    });
+  }
 }

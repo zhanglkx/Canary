@@ -17,14 +17,24 @@ import { Payment } from './entities/payment.entity';
 import { PaymentTransaction } from './entities/payment-transaction.entity';
 import { PaymentService } from './services/payment.service';
 import { PaymentRepository } from './repositories/payment.repository';
+import { PaymentMethodService } from './services/payment-method.service';
 import { PaymentResolver } from './resolvers/payment.resolver';
+import { StripePaymentService } from './integrations/stripe-payment.service';
+import { StripeWebhookController } from './integrations/stripe-webhook.controller';
 import { Order } from '../order/entities/order.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Payment, PaymentTransaction, Order]),
   ],
-  providers: [PaymentService, PaymentRepository, PaymentResolver],
-  exports: [PaymentService, PaymentRepository],
+  providers: [
+    PaymentService,
+    PaymentRepository,
+    PaymentMethodService,
+    PaymentResolver,
+    StripePaymentService,
+  ],
+  controllers: [StripeWebhookController],
+  exports: [PaymentService, PaymentRepository, PaymentMethodService, StripePaymentService],
 })
 export class PaymentModule {}

@@ -83,6 +83,16 @@ export class PaymentRepository {
   ) {}
 
   /**
+   * 保存支付记录
+   *
+   * @param payment 支付对象
+   * @returns 保存后的支付记录
+   */
+  async save(payment: Payment): Promise<Payment> {
+    return this.repository.save(payment);
+  }
+
+  /**
    * 按ID获取支付
    *
    * @param id 支付ID
