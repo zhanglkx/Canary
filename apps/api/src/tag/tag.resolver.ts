@@ -55,8 +55,12 @@ export class TagResolver {
    * }
    */
   @Query(() => Tag)
-  async tag(@Args('id', { type: () => ID }) id: string): Promise<Tag> {
-    return this.tagService.findOne(id);
+  @UseGuards(GqlAuthGuard)
+  async tag(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() user: User,
+  ): Promise<Tag> {
+    return this.tagService.findOne(id, user.id);
   }
 
   /**
@@ -104,8 +108,9 @@ export class TagResolver {
   async addTagToTodo(
     @Args('tagId', { type: () => ID }) tagId: string,
     @Args('todoId', { type: () => ID }) todoId: string,
+    @CurrentUser() user: User,
   ): Promise<Todo> {
-    return this.tagService.addTagToTodo(tagId, todoId);
+    return this.tagService.addTagToTodo(tagId, todoId, user.id);
   }
 
   /**
@@ -125,8 +130,9 @@ export class TagResolver {
   async removeTagFromTodo(
     @Args('tagId', { type: () => ID }) tagId: string,
     @Args('todoId', { type: () => ID }) todoId: string,
+    @CurrentUser() user: User,
   ): Promise<Todo> {
-    return this.tagService.removeTagFromTodo(tagId, todoId);
+    return this.tagService.removeTagFromTodo(tagId, todoId, user.id);
   }
 
   /**
@@ -139,7 +145,10 @@ export class TagResolver {
    */
   @Mutation(() => Boolean)
   @UseGuards(GqlAuthGuard)
-  async deleteTag(@Args('id', { type: () => ID }) id: string): Promise<boolean> {
-    return this.tagService.remove(id);
+  async deleteTag(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() user: User,
+  ): Promise<boolean> {
+    return this.tagService.remove(id, user.id);
   }
 }

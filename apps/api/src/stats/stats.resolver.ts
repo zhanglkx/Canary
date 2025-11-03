@@ -139,28 +139,52 @@ export class StatsResolver {
   @Query(() => TodoStats)
   @UseGuards(GqlAuthGuard)
   async todoStats(@CurrentUser() user: User): Promise<TodoStats> {
-    // 获取用户的所有待办事项
-    const todos = await this.todoRepository.find({
-      where: { userId: user.id },
-    });
+    // 使用 QueryBuilder 在数据库层面计算统计数据（高效）
+    const baseQuery = this.todoRepository
+      .createQueryBuilder('todo')
+      .where('todo.userId = :userId', { userId: user.id });
 
-    // 计算各种统计数据
-    const total = todos.length;
-    const completed = todos.filter((t) => t.completed).length;
+    // 计算总数
+    const total = await baseQuery.getCount();
+
+    // 计算完成数
+    const completed = await baseQuery
+      .clone()
+      .andWhere('todo.completed = true')
+      .getCount();
+
     const pending = total - completed;
     const completionPercentage = total > 0 ? Math.round((completed / total) * 100) : 0;
 
-    // 按优先级计数
-    const urgentCount = todos.filter((t) => t.priority === 'URGENT').length;
-    const highCount = todos.filter((t) => t.priority === 'HIGH').length;
-    const mediumCount = todos.filter((t) => t.priority === 'MEDIUM').length;
-    const lowCount = todos.filter((t) => t.priority === 'LOW').length;
+    // 按优先级计数（在数据库中计数）
+    const urgentCount = await baseQuery
+      .clone()
+      .andWhere('todo.priority = :priority', { priority: 'URGENT' })
+      .getCount();
+
+    const highCount = await baseQuery
+      .clone()
+      .andWhere('todo.priority = :priority', { priority: 'HIGH' })
+      .getCount();
+
+    const mediumCount = await baseQuery
+      .clone()
+      .andWhere('todo.priority = :priority', { priority: 'MEDIUM' })
+      .getCount();
+
+    const lowCount = await baseQuery
+      .clone()
+      .andWhere('todo.priority = :priority', { priority: 'LOW' })
+      .getCount();
 
     // 计算逾期的待办事项数
     const now = new Date();
-    const overdueCount = todos.filter(
-      (t) => !t.completed && t.dueDate && new Date(t.dueDate) < now,
-    ).length;
+    const overdueCount = await baseQuery
+      .clone()
+      .andWhere('todo.completed = false')
+      .andWhere('todo.dueDate IS NOT NULL')
+      .andWhere('todo.dueDate < :now', { now })
+      .getCount();
 
     return {
       total,

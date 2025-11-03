@@ -209,10 +209,10 @@ export class SearchResolver {
   @Query(() => [Todo])
   @UseGuards(GqlAuthGuard)
   async advancedSearch(
+    @CurrentUser() user: User,
     @Args('keyword', { nullable: true }) keyword?: string,
     @Args('priorities', { type: () => [String], nullable: true }) priorities?: string[],
     @Args('sortBy', { nullable: true }) sortBy?: string,
-    @CurrentUser() user?: User,
   ): Promise<Todo[]> {
     let query = this.todoRepository
       .createQueryBuilder('todo')

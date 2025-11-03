@@ -4,6 +4,9 @@
   "description": "NestJS GraphQL API",
   "scripts": {
     "dev": "nest start --watch",
+    "debug": "nest start --debug --watch",
+    "debug:brk": "nest start --debug-brk --watch",
+    "debug:prod": "node --inspect dist/main",
     "build": "nest build",
     "start": "node dist/main",
     "start:prod": "node dist/main",

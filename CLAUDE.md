@@ -25,14 +25,39 @@ pnpm dev:api       # NestJS backend on http://localhost:4000/graphql
 pnpm dev:web       # Next.js frontend on http://localhost:3000
 ```
 
-### Building & Linting
+### Building, Linting & Testing
 
 ```bash
 pnpm build              # Build all packages
 pnpm lint               # Lint all packages
 pnpm build:api          # Build backend only
 pnpm build:web          # Build frontend only
+pnpm test               # Run all tests
+pnpm --filter api test          # Run backend tests only
+pnpm --filter api test:watch    # Run backend tests in watch mode
+pnpm --filter api test:cov      # Run backend tests with coverage
+pnpm --filter web test          # Run frontend tests only
 ```
+
+### GraphQL Code Generation
+
+When you modify backend GraphQL resolvers/entities, regenerate frontend types:
+
+```bash
+pnpm --filter web codegen      # Generate types from backend schema
+```
+
+Run this after any backend schema changes to keep frontend types in sync.
+
+### Debugging
+
+```bash
+pnpm debug:api          # Debug backend with hot reload
+pnpm debug:api:brk      # Debug backend and break on first line
+pnpm debug:api:prod     # Debug production build (no hot reload)
+```
+
+Connect debugger to `127.0.0.1:9229` in your IDE (VS Code, Chrome DevTools)
 
 ### Docker
 
@@ -135,6 +160,27 @@ Feature Module (e.g., TodoModule)
 **CategoryModule** (`apps/api/src/category/`):
 - Category management for organizing todos
 - Color and icon properties for UI
+- One-to-many relationship (Category → Todos)
+
+**CommentModule** (`apps/api/src/comment/`) ⭐ **NEW**:
+- Comments/discussions on todos
+- Author-only delete permissions
+- One-to-many relationships (User ↔ Comment, Todo ↔ Comment)
+
+**TagModule** (`apps/api/src/tag/`) ⭐ **NEW**:
+- Tag system for organizing todos
+- Many-to-many relationship (Tag ↔ Todo) with auto-managed join table
+- Add/remove tags from todos
+
+**SearchModule** (`apps/api/src/search/`) ⭐ **NEW**:
+- Full-text search across todos (keyword matching)
+- Advanced filtering by priority, completion status, category, tags
+- QueryBuilder for complex database queries
+
+**StatsModule** (`apps/api/src/stats/`) ⭐ **NEW**:
+- Todo statistics (total, completed, completion percentage)
+- Priority distribution and overdue task counts
+- Dashboard aggregating all metrics
 
 **CommonModule** (`apps/api/src/common/`):
 - GqlAuthGuard: Intercepts GraphQL requests, validates JWT
@@ -243,6 +289,18 @@ apps/web/src/
 
 ## Environment Configuration
 
+### Setup
+
+1. **Backend**: Copy `.env.example` to `.env` in `apps/api/`:
+```bash
+cp apps/api/.env.example apps/api/.env
+```
+
+2. **Frontend**: Copy `.env.local.example` to `.env.local` in `apps/web/`:
+```bash
+cp apps/web/.env.local.example apps/web/.env.local
+```
+
 ### Backend (.env)
 ```env
 NODE_ENV=development
@@ -254,6 +312,8 @@ DATABASE_PASSWORD=postgres
 DATABASE_NAME=learning_nest_next
 JWT_SECRET=your-super-secret-jwt-key
 JWT_EXPIRATION=1d
+DEBUG_PORT=9229
+FRONTEND_URL=http://localhost:3000
 ```
 
 ### Frontend (.env.local)
@@ -263,33 +323,83 @@ NEXT_PUBLIC_API_URL=http://localhost:4000/graphql
 
 ## Common Development Tasks
 
-### Add a New GraphQL Query
+### Add a New GraphQL Query/Mutation
 
 1. Update backend entity/resolver in `apps/api/src/[module]/[module].resolver.ts`
-2. Restart backend (auto-reload with `dev:api`)
-3. Run code generation in frontend: `pnpm --filter web codegen`
-4. Use generated types in frontend components
+2. Define query/mutation method with @Query() or @Mutation() decorator
+3. Restart backend (auto-reload with `dev:api`)
+4. Run code generation in frontend: `pnpm --filter web codegen`
+5. Use generated types and hooks in frontend components
 
-### Add a New Database Entity
+Example:
+```typescript
+@Resolver(() => Todo)
+export class TodoResolver {
+  @Query(() => [Todo])
+  @UseGuards(GqlAuthGuard)
+  async todos(@CurrentUser() user: User): Promise<Todo[]> {
+    return this.todoService.findByUser(user.id);
+  }
+}
+```
 
-1. Create entity file in `apps/api/src/[module]/entities/[entity].entity.ts`
-2. Use TypeORM + GraphQL decorators (@Entity, @ObjectType, @Field, etc.)
-3. Create service and resolver for CRUD operations
-4. Register in module's imports/providers
-5. Schema auto-syncs in development
+### Add Authentication to Resolvers
 
-### Add Authentication to a Query/Mutation
-
+Protect queries/mutations requiring authentication:
 ```typescript
 @Resolver()
 export class TodoResolver {
   @Query(() => [Todo])
-  @UseGuards(GqlAuthGuard)  // Add this
-  async todos(@CurrentUser() user: User) {  // Add this
-    // Now you have access to authenticated user
+  @UseGuards(GqlAuthGuard)  // Add this guard
+  async todos(@CurrentUser() user: User) {  // Injects authenticated user
+    // Only authenticated users reach here
   }
 }
 ```
+
+### Implement Many-to-Many Relationships
+
+Example from TagModule:
+```typescript
+@Entity('todos')
+export class Todo {
+  @ManyToMany(() => Tag, tag => tag.todos, { eager: true })
+  @JoinTable()
+  tags: Tag[];
+}
+
+// In resolver:
+@Mutation(() => Todo)
+async addTagToTodo(
+  @Args('tagId') tagId: string,
+  @Args('todoId') todoId: string,
+): Promise<Todo> {
+  return this.todoService.addTagToTodo(todoId, tagId);
+}
+```
+
+### Working with Complex Queries
+
+SearchModule demonstrates QueryBuilder patterns:
+```typescript
+// In service
+const todos = this.todoRepository
+  .createQueryBuilder('todo')
+  .where('todo.title ILIKE :keyword', { keyword: `%${keyword}%` })
+  .andWhere('todo.priority = :priority', { priority })
+  .andWhere('todo.userId = :userId', { userId })
+  .leftJoinAndSelect('todo.tags', 'tags')
+  .getMany();
+```
+
+### Add a New Database Entity
+
+1. Create entity file: `apps/api/src/[module]/entities/[entity].entity.ts`
+2. Use TypeORM + GraphQL decorators (@Entity, @ObjectType, @Field)
+3. Create service (`[entity].service.ts`) with business logic
+4. Create resolver (`[entity].resolver.ts`) with GraphQL operations
+5. Create module (`[entity].module.ts`) registering providers
+6. Schema auto-syncs in development (check database logs)
 
 ### Working with Shared Library
 
@@ -350,11 +460,20 @@ pnpm --filter web test    # Frontend tests only
 - User queries filtered by authenticated user ID (user isolation)
 
 ### Development Workflow
-- Use separate terminals for `pnpm dev:api` and `pnpm dev:web`
+- Use separate terminals for `pnpm dev:api` and `pnpm dev:web` (or use `pnpm dev` for both)
 - Hot-reload enabled in both backend and frontend
-- GraphQL Playground available at http://localhost:4000/graphql
-- Database schema auto-syncs in development mode
-- Run `pnpm --filter web codegen` after backend schema changes
+- GraphQL Studio available at http://localhost:4000/apollo-studio
+- Database schema auto-syncs in development mode (watch logs for schema changes)
+- Run `pnpm --filter web codegen` after backend schema changes to regenerate types
+- Test changes quickly: `pnpm test` for unit tests or specific test file with Jest
+
+### Key Architectural Patterns
+- **Code-First GraphQL**: Entities decorated with @ObjectType generate schema automatically
+- **TypeORM Decorators**: Same entity handles both database mapping and GraphQL exposure
+- **User Isolation**: All user queries filtered by authenticated user ID (multi-tenant safety)
+- **Repository Pattern**: Services use injected repositories for data access
+- **GraphQL Guards**: @UseGuards(GqlAuthGuard) protects sensitive operations
+- **Eager Loading**: Many-to-many relationships (tags) use eager: true to auto-fetch
 
 ### Performance & Scalability
 - pnpm hoisted dependencies reduce disk usage
@@ -362,3 +481,65 @@ pnpm --filter web test    # Frontend tests only
 - Apollo Client caching prevents redundant queries
 - TypeORM query optimization with proper indexing
 - User data isolation ensures multi-tenant safety
+
+## Troubleshooting
+
+### Port Conflicts
+If ports 3000, 4000, or 5432 are already in use:
+```bash
+# Find process using port
+lsof -i :4000
+lsof -i :3000
+
+# Kill process
+kill -9 <PID>
+```
+
+### Database Connection Issues
+1. Verify PostgreSQL is running: `docker-compose -f docker-compose.dev.yml ps`
+2. Check credentials in `apps/api/.env` match database setup
+3. View database logs: `docker-compose -f docker-compose.dev.yml logs postgres`
+
+### Module Resolution Errors
+```bash
+# Clear and reinstall dependencies
+rm -rf node_modules pnpm-lock.yaml
+pnpm install
+```
+
+### GraphQL Schema Not Updating
+- Restart backend server: `pnpm dev:api`
+- Check schema generation: `schema.gql` should exist at `apps/api/src/schema.gql`
+- Run codegen for frontend: `pnpm --filter web codegen`
+
+### Hot Reload Not Working
+1. Ensure you're using `pnpm dev:api` (not `pnpm build`)
+2. Check file system permissions for watched directories
+3. Try restarting the development server
+
+## Git Workflow
+
+### Creating a Feature Branch
+```bash
+git checkout -b feature/your-feature-name
+```
+
+### Making Changes
+1. Make code changes in feature branch
+2. Run tests: `pnpm test`
+3. Run linter: `pnpm lint`
+4. Build to verify: `pnpm build`
+
+### Committing
+```bash
+git add .
+git commit -m "Descriptive message about changes"
+git push origin feature/your-feature-name
+```
+
+### Schema Changes Workflow
+When modifying backend entities or resolvers:
+1. Make changes to backend in `apps/api/src/`
+2. Restart backend to verify it compiles
+3. Regenerate frontend types: `pnpm --filter web codegen`
+4. Test in frontend with new types available

@@ -61,16 +61,17 @@ export class TagService {
    * 获取单个标签详情
    *
    * @param id - 标签 ID
+   * @param userId - 用户 ID（用于权限检查）
    * @returns 标签对象
    */
-  async findOne(id: string): Promise<Tag> {
+  async findOne(id: string, userId: string): Promise<Tag> {
     const tag = await this.tagRepository.findOne({
-      where: { id },
+      where: { id, userId },
       relations: ['todos'],
     });
 
     if (!tag) {
-      throw new NotFoundException(`标签 ${id} 不存在`);
+      throw new NotFoundException(`标签 ${id} 不存在或您没有权限访问`);
     }
 
     return tag;
@@ -85,20 +86,21 @@ export class TagService {
    *
    * @param tagId - 标签 ID
    * @param todoId - Todo ID
+   * @param userId - 用户 ID（用于权限检查）
    * @returns 更新后的 Todo
    */
-  async addTagToTodo(tagId: string, todoId: string): Promise<Todo> {
-    // 查找标签
-    const tag = await this.findOne(tagId);
+  async addTagToTodo(tagId: string, todoId: string, userId: string): Promise<Todo> {
+    // 查找标签（必须属于当前用户）
+    const tag = await this.findOne(tagId, userId);
 
-    // 查找 Todo
+    // 查找 Todo（必须属于当前用户）
     const todo = await this.todoRepository.findOne({
-      where: { id: todoId },
+      where: { id: todoId, userId },
       relations: ['tags'],
     });
 
     if (!todo) {
-      throw new NotFoundException(`Todo ${todoId} 不存在`);
+      throw new NotFoundException(`Todo ${todoId} 不存在或您没有权限修改`);
     }
 
     // 检查标签是否已经添加过（避免重复）
@@ -122,16 +124,17 @@ export class TagService {
    *
    * @param tagId - 标签 ID
    * @param todoId - Todo ID
+   * @param userId - 用户 ID（用于权限检查）
    * @returns 更新后的 Todo
    */
-  async removeTagFromTodo(tagId: string, todoId: string): Promise<Todo> {
+  async removeTagFromTodo(tagId: string, todoId: string, userId: string): Promise<Todo> {
     const todo = await this.todoRepository.findOne({
-      where: { id: todoId },
+      where: { id: todoId, userId },
       relations: ['tags'],
     });
 
     if (!todo) {
-      throw new NotFoundException(`Todo ${todoId} 不存在`);
+      throw new NotFoundException(`Todo ${todoId} 不存在或您没有权限修改`);
     }
 
     // 从 Todo 的标签列表中移除指定标签
@@ -150,10 +153,11 @@ export class TagService {
    * （由于多对多关系的配置）
    *
    * @param id - 标签 ID
+   * @param userId - 用户 ID（用于权限检查）
    * @returns 是否删除成功
    */
-  async remove(id: string): Promise<boolean> {
-    const tag = await this.findOne(id);
+  async remove(id: string, userId: string): Promise<boolean> {
+    const tag = await this.findOne(id, userId);
     await this.tagRepository.remove(tag);
     return true;
   }

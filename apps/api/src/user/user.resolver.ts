@@ -1,22 +1,74 @@
-import { Resolver, Query, Args, ID } from '@nestjs/graphql';
+import { Resolver, Query, Args, ID, Mutation } from '@nestjs/graphql';
 import { UseGuards } from '@nestjs/common';
 import { User } from './user.entity';
 import { UserService } from './user.service';
 import { GqlAuthGuard } from '../common/guards/gql-auth.guard';
+import { CurrentUser } from '../common/decorators/current-user.decorator';
+import { UpdateUserInput } from './dto/update-user.input';
 
 @Resolver(() => User)
 export class UserResolver {
   constructor(private readonly userService: UserService) {}
 
-  @Query(() => [User], { name: 'users' })
+  @Query(() => User, { name: 'currentUser' })
   @UseGuards(GqlAuthGuard)
-  async findAll() {
-    return this.userService.findAll();
+  async getCurrentUser(@CurrentUser() user: User): Promise<User> {
+    return user;
   }
 
   @Query(() => User, { name: 'user' })
   @UseGuards(GqlAuthGuard)
-  async findOne(@Args('id', { type: () => ID }) id: string) {
+  async findOne(
+    @Args('id', { type: () => ID }) id: string,
+    @CurrentUser() user: User,
+  ): Promise<User> {
+    // Only allow users to view their own profile or implement admin check
+    if (id !== user.id) {
+      throw new Error('Unauthorized: You can only view your own profile');
+    }
     return this.userService.findOne(id);
+  }
+
+  /**
+   * Mutation: 更新用户信息
+   *
+   * GraphQL 变更示例：
+   * mutation {
+   *   updateProfile(updateUserInput: {
+   *     username: "newusername"
+   *     email: "newemail@example.com"
+   *   }) {
+   *     id
+   *     username
+   *     email
+   *   }
+   * }
+   */
+  @Mutation(() => User)
+  @UseGuards(GqlAuthGuard)
+  async updateProfile(
+    @Args('updateUserInput') updateUserInput: UpdateUserInput,
+    @CurrentUser() user: User,
+  ): Promise<User> {
+    return this.userService.update(user.id, updateUserInput);
+  }
+
+  /**
+   * Query: 获取用户统计信息（Todo 统计、标签数等）
+   *
+   * GraphQL 查询示例：
+   * query {
+   *   userStats {
+   *     totalTodos
+   *     completedTodos
+   *     totalCategories
+   *     totalTags
+   *   }
+   * }
+   */
+  @Query(() => Object)
+  @UseGuards(GqlAuthGuard)
+  async userStats(@CurrentUser() user: User): Promise<any> {
+    return this.userService.getUserStats(user.id);
   }
 }
