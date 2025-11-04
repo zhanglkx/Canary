@@ -28,6 +28,7 @@ import { CreateProductInput } from '../dto/create-product.input';
 import { UpdateProductInput } from '../dto/update-product.input';
 import { ProductFilterInput } from '../dto/product-filter.input';
 import { CreateProductSkuInput } from '../dto/create-product-sku.input';
+import { ProductStatsDto } from '../dto/product-stats.dto';
 import { ProductResponse } from '../dto/product.response';
 
 /**
@@ -612,7 +613,7 @@ export class ProductService {
    *
    * @throws NotFoundException 当产品不存在时
    */
-  async getProductStats(id: string) {
+  async getProductStats(id: string): Promise<ProductStatsDto> {
     const product = await this.productRepository.findOne({ where: { id } });
     if (!product) {
       throw new NotFoundException(`产品 ${id} 不存在`);

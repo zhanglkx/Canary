@@ -143,14 +143,16 @@ Feature Module (e.g., TodoModule)
 ### Key Modules
 
 **AuthModule** (`apps/api/src/auth/`):
-- Handles user registration and login
-- JWT token generation and validation
+- User registration and login with JWT tokens
+- JWT token generation, validation, and revocation
 - Passport strategies (LocalStrategy, JwtStrategy)
+- Refresh token management with multi-device session support
 - @CurrentUser() decorator for extracting authenticated user
+- Mutations: `register`, `login`, `refreshToken`, `logout`, `logoutAll`
 
 **UserModule** (`apps/api/src/user/`):
 - User CRUD operations
-- User queries in GraphQL
+- User profile queries in GraphQL
 
 **TodoModule** (`apps/api/src/todo/`):
 - Todo CRUD with user isolation (todos filtered by userId)
@@ -162,25 +164,34 @@ Feature Module (e.g., TodoModule)
 - Color and icon properties for UI
 - One-to-many relationship (Category → Todos)
 
-**CommentModule** (`apps/api/src/comment/`) ⭐ **NEW**:
+**CommentModule** (`apps/api/src/comment/`):
 - Comments/discussions on todos
 - Author-only delete permissions
 - One-to-many relationships (User ↔ Comment, Todo ↔ Comment)
 
-**TagModule** (`apps/api/src/tag/`) ⭐ **NEW**:
+**TagModule** (`apps/api/src/tag/`):
 - Tag system for organizing todos
 - Many-to-many relationship (Tag ↔ Todo) with auto-managed join table
 - Add/remove tags from todos
 
-**SearchModule** (`apps/api/src/search/`) ⭐ **NEW**:
+**SearchModule** (`apps/api/src/search/`):
 - Full-text search across todos (keyword matching)
 - Advanced filtering by priority, completion status, category, tags
 - QueryBuilder for complex database queries
 
-**StatsModule** (`apps/api/src/stats/`) ⭐ **NEW**:
+**StatsModule** (`apps/api/src/stats/`):
 - Todo statistics (total, completed, completion percentage)
 - Priority distribution and overdue task counts
 - Dashboard aggregating all metrics
+
+**EcommerceModule** (`apps/api/src/ecommerce/`) ⭐ **NEW**:
+- Complete e-commerce system with 5 sub-modules:
+  - **ProductModule**: Product catalog, SKUs, images, categories, attributes
+  - **InventoryModule**: Stock management with concurrency control (optimistic locking)
+  - **CartModule**: Shopping cart management with persistence
+  - **OrderModule**: Order processing, order items, order history
+  - **PaymentModule**: Multi-gateway payment processing (Stripe, PayPal)
+- Key Features: Advanced filtering, search, transaction management, concurrent inventory updates
 
 **CommonModule** (`apps/api/src/common/`):
 - GqlAuthGuard: Intercepts GraphQL requests, validates JWT
@@ -208,12 +219,27 @@ Result returned through resolver → GraphQL response
 ### Authentication Flow
 
 1. User calls `register` or `login` mutation
-2. LocalStrategy validates credentials
-3. AuthService generates JWT token
-4. Frontend stores token in localStorage
-5. Subsequent requests: AuthLink adds `Authorization: Bearer {token}` header
-6. GqlAuthGuard validates token on protected resolvers
-7. @CurrentUser() injects the authenticated user from JWT payload
+2. LocalStrategy validates credentials via Passport
+3. AuthService generates JWT token pair (access + refresh tokens)
+4. TokenService stores refresh token in database with device metadata (userAgent, ipAddress)
+5. Response includes both tokens with expiration times (access: 15min, refresh: 7 days)
+6. Frontend stores both tokens in localStorage
+7. Subsequent requests: AuthLink adds `Authorization: Bearer {accessToken}` header
+8. GqlAuthGuard validates access token signature and expiration on protected resolvers
+9. @CurrentUser() injects authenticated user from JWT payload
+10. When access token expires: Frontend uses `refreshToken` mutation to obtain new token pair
+11. Multi-device support: Each device/session tracked separately for targeted logout
+
+**Token Types**:
+- **Access Token**: Short-lived (15 minutes), used for API authentication
+- **Refresh Token**: Long-lived (7 days), stored in DB for revocation tracking and session management
+- **Multi-device Logout**: `logoutAll` mutation revokes all user's refresh tokens across all devices
+
+**RefreshToken Entity** (`apps/api/src/auth/entities/refresh-token.entity.ts`):
+- Stores JWT refresh tokens with metadata
+- Tracks device info (userAgent, ipAddress) for security audit
+- Database indexes on (userId, isRevoked) and (expiresAt) for efficient queries
+- CASCADE delete when user is deleted
 
 ## Next.js Frontend Architecture
 
@@ -221,23 +247,32 @@ Result returned through resolver → GraphQL response
 
 ```
 apps/web/src/
-├── app/                    # Next.js App Router pages
-│   ├── layout.tsx         # Root layout with Providers (Apollo, Auth Context)
-│   ├── page.tsx           # Home page
-│   ├── login/page.tsx     # Login page
-│   ├── register/page.tsx  # Register page
-│   ├── dashboard/page.tsx # Protected dashboard
-│   ├── todos/page.tsx     # Todo management
-│   ├── categories/page.tsx # Category management
-│   └── profile/page.tsx   # User profile
+├── app/                       # Next.js App Router pages
+│   ├── layout.tsx            # Root layout with Providers (Apollo, Auth Context)
+│   ├── page.tsx              # Home page
+│   ├── login/page.tsx        # Login page
+│   ├── register/page.tsx     # Register page
+│   ├── dashboard/page.tsx    # Protected dashboard
+│   ├── todos/page.tsx        # Todo management
+│   ├── categories/page.tsx   # Category management
+│   ├── shop/page.tsx         # E-commerce product listing
+│   ├── cart/page.tsx         # Shopping cart interface
+│   ├── checkout/page.tsx     # Checkout/order creation
+│   ├── orders/page.tsx       # Order history and tracking
+│   └── profile/page.tsx      # User profile
 ├── lib/
-│   ├── apollo-client.ts   # Apollo Client configuration
-│   ├── apollo-wrapper.tsx # ApolloProvider wrapper component
-│   ├── auth-context.tsx   # React Context for auth state (user, token)
-│   └── graphql/           # GraphQL queries, mutations, fragments
+│   ├── apollo-client.ts      # Apollo Client configuration with auth middleware
+│   ├── apollo-wrapper.tsx    # ApolloProvider wrapper component
+│   ├── auth-context.tsx      # React Context for auth state (user, token)
+│   └── graphql/              # GraphQL queries, mutations, fragments
+│       ├── auth/             # Auth-related operations
+│       ├── todos/            # Todo operations
+│       ├── ecommerce/        # E-commerce operations
+│       └── ...
 └── components/
-    ├── layout/            # Layout components (navbar)
-    └── ui/                # Reusable UI components
+    ├── layout/               # Layout components (navbar, footer)
+    ├── features/             # Feature-specific components (e-commerce, todos)
+    └── ui/                   # Reusable UI components
 ```
 
 ### State Management
@@ -401,6 +436,62 @@ const todos = this.todoRepository
 5. Create module (`[entity].module.ts`) registering providers
 6. Schema auto-syncs in development (check database logs)
 
+### Implementing JWT Token Refresh Flow
+
+When modifying auth flows or creating new authenticated endpoints:
+
+1. **Protect Resolver**: Add `@UseGuards(GqlAuthGuard)` and `@CurrentUser()` decorator:
+```typescript
+@Resolver()
+export class MyResolver {
+  @Mutation(() => MyType)
+  @UseGuards(GqlAuthGuard)
+  async myMutation(@CurrentUser() user: User): Promise<MyType> {
+    // User is guaranteed to be authenticated
+  }
+}
+```
+
+2. **Use TokenService for token operations**: Inject and use for token management
+```typescript
+constructor(private tokenService: TokenService) {}
+
+const { accessToken, refreshToken, expiresIn } =
+  await this.tokenService.generateTokenPair(user, userAgent, ipAddress);
+```
+
+3. **Frontend Token Refresh**: Handled automatically via Apollo Client AuthLink with built-in refresh logic
+
+### Working with E-Commerce Orders
+
+Complete order flow with inventory management:
+
+1. **Create Order** (service layer):
+```typescript
+// In OrderService: Reserve inventory, create order, clear cart
+const order = await this.orderService.createOrder(userId, cartItems);
+// Internally: 1) Reserves inventory 2) Creates order items 3) Clears cart
+```
+
+2. **Handle Payment Callbacks**: Process payment confirmations:
+```typescript
+// In PaymentService: Confirm inventory, update order status
+await this.paymentService.confirmPayment(orderId, transactionId);
+// Internally: 1) Confirms reserved inventory 2) Updates order status
+```
+
+3. **Inventory Concurrency**: QueryBuilder with version check for optimistic locking
+```typescript
+// Multiple concurrent updates safe due to version-based locking
+const updated = await this.skuRepository
+  .createQueryBuilder()
+  .update(ProductSku)
+  .set({ stock: () => 'stock - :quantity', version: () => 'version + 1' })
+  .where('id = :id AND version = :version')
+  .setParameters({ id, quantity, version })
+  .execute();
+```
+
 ### Working with Shared Library
 
 Access shared types/utils from both apps:
@@ -430,12 +521,117 @@ Each app (api, web) has a Dockerfile with stages:
 - PostgreSQL only (less overhead for local development)
 - Developers run frontend/backend locally with `pnpm dev`
 
+## E-Commerce System Architecture ⭐ **NEW**
+
+### Overview
+
+The e-commerce module is a complete, production-ready system with:
+- Multi-tier product catalog with SKUs and inventory management
+- Real-time stock tracking with concurrency control (optimistic locking)
+- Shopping cart with persistence
+- Complete order lifecycle management
+- Multi-gateway payment processing (Stripe, PayPal)
+
+### Sub-Modules
+
+**ProductModule** (`apps/api/src/ecommerce/product/`):
+- Product entities: ProductCategory (hierarchical), Product, ProductSku, ProductImage, ProductAttribute
+- Advanced filtering and search capabilities
+- SKU management with pricing and inventory references
+- Infinite-level category hierarchy with materialized path optimization
+
+**InventoryModule** (`apps/api/src/ecommerce/inventory/`):
+- Stock level tracking per SKU
+- Optimistic locking (`ProductSku.version`) for concurrent updates
+- Inventory reservation during order processing
+- Inventory confirmation/release on payment success/cancellation
+- Prevents overselling with concurrent operation tests
+
+**CartModule** (`apps/api/src/ecommerce/cart/`):
+- ShoppingCart entity (persistent per user)
+- ShoppingCartItem entities with quantity management
+- Real-time price calculations
+- Cart persistence across sessions
+
+**OrderModule** (`apps/api/src/ecommerce/order/`):
+- Order entity with order status tracking
+- OrderItem entities linking to Products/SKUs
+- Order history queries per user
+- Order logs for audit trail and state transitions
+- Transactional order creation with inventory reservation
+
+**PaymentModule** (`apps/api/src/ecommerce/payment/`):
+- Strategy pattern implementation for payment gateways
+- Stripe integration for credit card processing
+- PayPal integration for PayPal account payments
+- Payment transaction tracking
+- Webhook handling for payment confirmations
+
+### Key E-Commerce Patterns
+
+**Optimistic Locking** (Inventory Concurrency):
+```typescript
+// ProductSku has version column for lock management
+// Multiple users can read inventory simultaneously
+// Write succeeds only if version matches; retried on mismatch
+```
+
+**Transaction Management**:
+- Order creation wraps inventory reserve, cart clear, and order creation
+- Rollback on payment failure releases reserved inventory
+- Database-level transaction isolation prevents race conditions
+
+**Query Optimization**:
+- QueryBuilder with eager loading to prevent N+1 queries
+- DataLoader integration planned for batch loading relationships
+- Indexed queries on userId, SKU, and order status
+
+### Frontend Pages
+
+**Shop** (`apps/web/src/app/shop/page.tsx`):
+- Product listing with advanced filtering
+- Category navigation
+- Search functionality
+
+**Product Detail** (`apps/web/src/app/shop/[id]/page.tsx`):
+- Product images gallery
+- SKU/variant selector
+- Inventory status display
+- Add-to-cart button
+
+**Cart** (`apps/web/src/app/cart/page.tsx`):
+- Cart items list with quantity adjustment
+- Price calculation and totals
+- Remove items functionality
+- Proceed-to-checkout button
+
+**Checkout** (`apps/web/src/app/checkout/page.tsx`):
+- Order review and confirmation
+- Shipping address selection
+- Payment method selection (Stripe/PayPal)
+- Order total summary
+
+**Orders** (`apps/web/src/app/orders/page.tsx`):
+- Order history list per user
+- Order status tracking
+- Order detail view with items
+
 ## Testing
 
 ```bash
-pnpm test                 # Run all tests
-pnpm --filter api test    # Backend tests only
-pnpm --filter web test    # Frontend tests only
+pnpm test                                              # Run all tests
+pnpm --filter api test                                # Backend tests only
+pnpm --filter api test:watch                          # Watch mode
+pnpm --filter api test:cov                            # Coverage report
+pnpm --filter api test -- inventory.service.spec.ts  # Single test file
+pnpm --filter web test                                # Frontend tests only
+```
+
+**Example: Inventory Concurrency Test**:
+```bash
+pnpm --filter api test -- inventory.service.concurrent.spec.ts
+# Tests optimistic locking with multiple concurrent stock updates
+# Verifies no overselling occurs under concurrent conditions
 ```
 
 ## Key Configuration Files
@@ -481,6 +677,51 @@ pnpm --filter web test    # Frontend tests only
 - Apollo Client caching prevents redundant queries
 - TypeORM query optimization with proper indexing
 - User data isolation ensures multi-tenant safety
+
+### E-Commerce-Specific Performance Patterns
+- **Optimistic Locking**: Prevents overselling in high-concurrency scenarios (no pessimistic table locks)
+- **Composite Database Indexes**: (userId, isRevoked), (productId, stock), (orderId, status) for fast queries
+- **Eager Loading**: Many-to-many relationships (Products → Categories, Orders → Items) use `eager: true`
+- **Batch Operations**: Order creation batches multiple item inserts for efficiency
+- **Transaction Isolation**: Serializable isolation level for order processing ensures data consistency
+- **Query Caching**: Apollo Client caches product listings and category hierarchies to minimize backend hits
+
+## Documentation & References
+
+### Key Documentation Files
+
+- **IMPLEMENTATION_SUMMARY.md**: Summary of JWT refresh token implementation with detailed test results
+- **ECOMMERCE_IMPLEMENTATION_ROADMAP.md**: Complete e-commerce development roadmap with 8 phases
+  - Phase 1: Product management services
+  - Phase 2: Inventory management with concurrency control
+  - Phase 3: Shopping cart system
+  - Phase 4: Order processing
+  - Phase 5: Payment integration
+  - Phase 6: Product reviews
+  - Phase 7: Frontend implementation
+  - Phase 8: Testing and optimization
+
+### GraphQL Schema & Operations
+
+**Auth Mutations**:
+- `register(registerInput)` → AuthResponse (includes user + tokens)
+- `login(loginInput)` → AuthResponse
+- `refreshToken(refreshTokenInput)` → TokenResponse (new access token)
+- `logout(refreshToken)` → Boolean (revoke single device)
+- `logoutAll` → Boolean (revoke all devices)
+
+**E-Commerce Queries** (planned/implemented):
+- `products(filter, pagination)` → [Product]
+- `productDetail(id)` → Product
+- `cart` → ShoppingCart
+- `orders` → [Order]
+- `order(id)` → Order
+
+**E-Commerce Mutations** (planned/implemented):
+- `addToCart(productId, quantity)` → ShoppingCart
+- `removeFromCart(cartItemId)` → ShoppingCart
+- `createOrder(cartItems, shippingAddress)` → Order
+- `processPayment(orderId, paymentMethod)` → PaymentResult
 
 ## Troubleshooting
 

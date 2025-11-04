@@ -24,7 +24,7 @@ export const GET_PRODUCTS = gql`
         images {
           id
           url
-          alt
+          altText
           displayOrder
         }
         skus {
@@ -115,7 +115,7 @@ export const SEARCH_PRODUCTS = gql`
         images {
           id
           url
-          alt
+          altText
           displayOrder
         }
         skus {

@@ -116,15 +116,14 @@ export class CartItem {
    * 冗余存储价格，防止后续价格调整影响已有的购物车
    * 单位：人民币分（显示时需除以100）
    */
-  @Column({ type: 'int' })
+  @Column({ type: 'int', select: false })
+  @HideField()
+  unitPriceCents: number;
+
   @Field(() => Float)
   get unitPrice(): number {
     return this.unitPriceCents / 100;
   }
-
-  @Column({ type: 'int', select: false })
-  @HideField()
-  unitPriceCents: number;
 
   /**
    * 商品数量
@@ -167,15 +166,14 @@ export class CartItem {
    *   "material": "棉"
    * }
    */
-  @Column({ type: 'jsonb', nullable: true })
+  @Column({ type: 'jsonb', nullable: true, select: false })
+  @HideField()
+  attributeSnapshotData?: Record<string, string>;
+
   @Field(() => String, { nullable: true })
   get attributeSnapshot(): string | undefined {
     return this.attributeSnapshotData ? JSON.stringify(this.attributeSnapshotData) : undefined;
   }
-
-  @Column({ type: 'jsonb', nullable: true, select: false })
-  @HideField()
-  attributeSnapshotData?: Record<string, string>;
 
   /**
    * 优惠券/促销代码（项目级）
@@ -187,15 +185,14 @@ export class CartItem {
   /**
    * 项目级折扣（元，可能为0）
    */
-  @Column({ type: 'int', default: 0 })
+  @Column({ type: 'int', default: 0, select: false })
+  @HideField()
+  itemDiscountCents: number;
+
   @Field(() => Float)
   get itemDiscount(): number {
     return this.itemDiscountCents / 100;
   }
-
-  @Column({ type: 'int', default: 0, select: false })
-  @HideField()
-  itemDiscountCents: number;
 
   /**
    * 创建时间

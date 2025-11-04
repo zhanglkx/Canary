@@ -246,7 +246,7 @@ export class Payment {
    * 元数据（JSON）
    */
   @Column({ type: 'jsonb', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   metadata?: Record<string, any>;
 
   /**

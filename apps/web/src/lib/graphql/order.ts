@@ -13,7 +13,6 @@ export const GET_ORDER = gql`
     order(id: $id) {
       id
       orderNumber
-      userId
       status
       paymentMethod
       shippingAddress
@@ -27,13 +26,12 @@ export const GET_ORDER = gql`
         quantity
         unitPrice
         itemTotal
-        itemDiscountCents
+        itemDiscount
         attributeSnapshot
       }
-      subtotalCents
-      taxCents
-      discountCents
-      totalCents
+      subtotal
+      tax
+      totalAmount
       notes
       createdAt
       updatedAt
@@ -50,7 +48,6 @@ export const GET_MY_ORDERS = gql`
       orders {
         id
         orderNumber
-        userId
         status
         paymentMethod
         shippingAddress
@@ -64,13 +61,12 @@ export const GET_MY_ORDERS = gql`
           quantity
           unitPrice
           itemTotal
-          itemDiscountCents
+          itemDiscount
           attributeSnapshot
         }
-        subtotalCents
-        taxCents
-        discountCents
-        totalCents
+        subtotal
+        tax
+        totalAmount
         notes
         createdAt
         updatedAt
@@ -88,7 +84,6 @@ export const GET_MY_ORDERS_BY_STATUS = gql`
     myOrdersByStatus(status: $status) {
       id
       orderNumber
-      userId
       status
       paymentMethod
       shippingAddress
@@ -102,13 +97,12 @@ export const GET_MY_ORDERS_BY_STATUS = gql`
         quantity
         unitPrice
         itemTotal
-        itemDiscountCents
+        itemDiscount
         attributeSnapshot
       }
-      subtotalCents
-      taxCents
-      discountCents
-      totalCents
+      subtotal
+      tax
+      totalAmount
       notes
       createdAt
       updatedAt
@@ -139,7 +133,6 @@ export const GET_ORDER_BY_NUMBER = gql`
     orderByNumber(orderNumber: $orderNumber) {
       id
       orderNumber
-      userId
       status
       paymentMethod
       shippingAddress
@@ -153,13 +146,12 @@ export const GET_ORDER_BY_NUMBER = gql`
         quantity
         unitPrice
         itemTotal
-        itemDiscountCents
+        itemDiscount
         attributeSnapshot
       }
-      subtotalCents
-      taxCents
-      discountCents
-      totalCents
+      subtotal
+      tax
+      totalAmount
       notes
       createdAt
       updatedAt
@@ -176,7 +168,6 @@ export const SEARCH_MY_ORDERS = gql`
       orders {
         id
         orderNumber
-        userId
         status
         paymentMethod
         shippingAddress
@@ -190,13 +181,12 @@ export const SEARCH_MY_ORDERS = gql`
           quantity
           unitPrice
           itemTotal
-          itemDiscountCents
+          itemDiscount
           attributeSnapshot
         }
-        subtotalCents
-        taxCents
-        discountCents
-        totalCents
+        subtotal
+        tax
+        totalAmount
         notes
         createdAt
         updatedAt
@@ -231,7 +221,6 @@ export const CREATE_ORDER = gql`
     createOrder(input: $input) {
       id
       orderNumber
-      userId
       status
       paymentMethod
       shippingAddress
@@ -245,13 +234,12 @@ export const CREATE_ORDER = gql`
         quantity
         unitPrice
         itemTotal
-        itemDiscountCents
+        itemDiscount
         attributeSnapshot
       }
-      subtotalCents
-      taxCents
-      discountCents
-      totalCents
+      subtotal
+      tax
+      totalAmount
       notes
       createdAt
       updatedAt
@@ -267,7 +255,6 @@ export const CONFIRM_ORDER_PAYMENT = gql`
     confirmOrderPayment(orderId: $orderId, paymentMethod: $paymentMethod) {
       id
       orderNumber
-      userId
       status
       paymentMethod
       shippingAddress
@@ -281,13 +268,12 @@ export const CONFIRM_ORDER_PAYMENT = gql`
         quantity
         unitPrice
         itemTotal
-        itemDiscountCents
+        itemDiscount
         attributeSnapshot
       }
-      subtotalCents
-      taxCents
-      discountCents
-      totalCents
+      subtotal
+      tax
+      totalAmount
       notes
       createdAt
       updatedAt
@@ -303,7 +289,6 @@ export const SHIP_ORDER = gql`
     shipOrder(orderId: $orderId) {
       id
       orderNumber
-      userId
       status
       paymentMethod
       shippingAddress
@@ -317,13 +302,12 @@ export const SHIP_ORDER = gql`
         quantity
         unitPrice
         itemTotal
-        itemDiscountCents
+        itemDiscount
         attributeSnapshot
       }
-      subtotalCents
-      taxCents
-      discountCents
-      totalCents
+      subtotal
+      tax
+      totalAmount
       notes
       createdAt
       updatedAt
@@ -339,7 +323,6 @@ export const DELIVER_ORDER = gql`
     deliverOrder(orderId: $orderId) {
       id
       orderNumber
-      userId
       status
       paymentMethod
       shippingAddress
@@ -353,13 +336,12 @@ export const DELIVER_ORDER = gql`
         quantity
         unitPrice
         itemTotal
-        itemDiscountCents
+        itemDiscount
         attributeSnapshot
       }
-      subtotalCents
-      taxCents
-      discountCents
-      totalCents
+      subtotal
+      tax
+      totalAmount
       notes
       createdAt
       updatedAt
@@ -375,7 +357,6 @@ export const CANCEL_ORDER = gql`
     cancelOrder(orderId: $orderId) {
       id
       orderNumber
-      userId
       status
       paymentMethod
       shippingAddress
@@ -389,13 +370,12 @@ export const CANCEL_ORDER = gql`
         quantity
         unitPrice
         itemTotal
-        itemDiscountCents
+        itemDiscount
         attributeSnapshot
       }
-      subtotalCents
-      taxCents
-      discountCents
-      totalCents
+      subtotal
+      tax
+      totalAmount
       notes
       createdAt
       updatedAt

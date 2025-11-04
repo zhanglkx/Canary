@@ -149,7 +149,7 @@ export class PaymentTransaction {
    * 响应数据（从网关返回的数据）
    */
   @Column({ type: 'jsonb', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   get responseData(): string | undefined {
     return this.responseDataRaw ? JSON.stringify(this.responseDataRaw) : undefined;
   }
@@ -225,7 +225,7 @@ export class PaymentTransaction {
    * 元数据（JSON）
    */
   @Column({ type: 'jsonb', nullable: true })
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   get metadata(): string | undefined {
     return this.metadataRaw ? JSON.stringify(this.metadataRaw) : undefined;
   }

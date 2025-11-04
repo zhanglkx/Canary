@@ -25,6 +25,7 @@ import { UseGuards, Logger, BadRequestException } from '@nestjs/common';
 import { ProductService, ProductPaginationResult } from '../services/product.service';
 import { Product } from '../entities/product.entity';
 import { ProductResponse } from '../dto/product.response';
+import { ProductStatsDto } from '../dto/product-stats.dto';
 import { CreateProductInput } from '../dto/create-product.input';
 import { UpdateProductInput } from '../dto/update-product.input';
 import { ProductFilterInput } from '../dto/product-filter.input';
@@ -522,13 +523,13 @@ export class ProductResolver {
    *   }
    * }
    */
-  @Query(() => Object, {
+  @Query(() => ProductStatsDto, {
     description: '获取产品统计信息',
   })
   async productStats(
     @Args('productId', { type: () => String })
     productId: string,
-  ): Promise<any> {
+  ): Promise<ProductStatsDto> {
     return await this.productService.getProductStats(productId);
   }
 }

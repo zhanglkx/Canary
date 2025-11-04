@@ -12,7 +12,6 @@ export const GET_MY_CART = gql`
   query GetMyCart {
     myCart {
       id
-      userId
       status
       items {
         id
@@ -22,16 +21,15 @@ export const GET_MY_CART = gql`
         quantity
         unitPrice
         itemTotal
-        itemDiscountCents
+        itemDiscount
         promoCode
         stockStatus
         attributeSnapshot
         createdAt
       }
-      subtotalCents
-      taxCents
-      discountCents
-      totalCents
+      subtotal
+      taxAmount
+      total
       isEmpty
       isAbandoned
       createdAt
@@ -64,7 +62,6 @@ export const GET_CART_DETAIL = gql`
   query GetCartDetail($cartId: String!) {
     cartDetail(cartId: $cartId) {
       id
-      userId
       status
       items {
         id
@@ -74,16 +71,15 @@ export const GET_CART_DETAIL = gql`
         quantity
         unitPrice
         itemTotal
-        itemDiscountCents
+        itemDiscount
         promoCode
         stockStatus
         attributeSnapshot
         createdAt
       }
-      subtotalCents
-      taxCents
-      discountCents
-      totalCents
+      subtotal
+      taxAmount
+      total
       isEmpty
       isAbandoned
       createdAt
@@ -164,7 +160,6 @@ export const ADD_TO_CART = gql`
       message
       cart {
         id
-        userId
         status
         items {
           id
@@ -174,16 +169,15 @@ export const ADD_TO_CART = gql`
           quantity
           unitPrice
           itemTotal
-          itemDiscountCents
+          itemDiscount
           promoCode
           stockStatus
           attributeSnapshot
           createdAt
         }
-        subtotalCents
-        taxCents
-        discountCents
-        totalCents
+        subtotal
+        taxAmount
+        total
         isEmpty
         isAbandoned
         createdAt
@@ -203,7 +197,6 @@ export const REMOVE_FROM_CART = gql`
       message
       cart {
         id
-        userId
         status
         items {
           id
@@ -213,16 +206,15 @@ export const REMOVE_FROM_CART = gql`
           quantity
           unitPrice
           itemTotal
-          itemDiscountCents
+          itemDiscount
           promoCode
           stockStatus
           attributeSnapshot
           createdAt
         }
-        subtotalCents
-        taxCents
-        discountCents
-        totalCents
+        subtotal
+        taxAmount
+        total
         isEmpty
         isAbandoned
         createdAt
@@ -242,7 +234,6 @@ export const UPDATE_CART_ITEM_QUANTITY = gql`
       message
       cart {
         id
-        userId
         status
         items {
           id
@@ -252,16 +243,15 @@ export const UPDATE_CART_ITEM_QUANTITY = gql`
           quantity
           unitPrice
           itemTotal
-          itemDiscountCents
+          itemDiscount
           promoCode
           stockStatus
           attributeSnapshot
           createdAt
         }
-        subtotalCents
-        taxCents
-        discountCents
-        totalCents
+        subtotal
+        taxAmount
+        total
         isEmpty
         isAbandoned
         createdAt
@@ -281,15 +271,13 @@ export const CLEAR_CART = gql`
       message
       cart {
         id
-        userId
         status
         items {
           id
         }
-        subtotalCents
-        taxCents
-        discountCents
-        totalCents
+        subtotal
+        taxAmount
+        total
         isEmpty
         isAbandoned
         createdAt
@@ -309,7 +297,6 @@ export const REFRESH_MY_CART_INVENTORY_STATUS = gql`
       message
       cart {
         id
-        userId
         status
         items {
           id
@@ -319,16 +306,15 @@ export const REFRESH_MY_CART_INVENTORY_STATUS = gql`
           quantity
           unitPrice
           itemTotal
-          itemDiscountCents
+          itemDiscount
           promoCode
           stockStatus
           attributeSnapshot
           createdAt
         }
-        subtotalCents
-        taxCents
-        discountCents
-        totalCents
+        subtotal
+        taxAmount
+        total
         isEmpty
         isAbandoned
         createdAt
@@ -348,7 +334,6 @@ export const REFRESH_CART_INVENTORY_STATUS = gql`
       message
       cart {
         id
-        userId
         status
         items {
           id
@@ -358,16 +343,15 @@ export const REFRESH_CART_INVENTORY_STATUS = gql`
           quantity
           unitPrice
           itemTotal
-          itemDiscountCents
+          itemDiscount
           promoCode
           stockStatus
           attributeSnapshot
           createdAt
         }
-        subtotalCents
-        taxCents
-        discountCents
-        totalCents
+        subtotal
+        taxAmount
+        total
         isEmpty
         isAbandoned
         createdAt

@@ -23,7 +23,7 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
+import { ObjectType, Field, Int, Float, registerEnumType } from '@nestjs/graphql';
 import { HideField } from '@nestjs/graphql';
 import { User } from '../../../user/user.entity';
 import { CartItem } from './cart-item.entity';
@@ -36,6 +36,9 @@ export enum CartStatus {
   ABANDONED = 'ABANDONED',
   CONVERTED = 'CONVERTED',
 }
+
+// Register enum for GraphQL
+registerEnumType(CartStatus, { name: 'CartStatus' });
 
 /**
  * 购物车实体
@@ -85,7 +88,7 @@ export class ShoppingCart {
    * - CONVERTED: 已转换为订单
    */
   @Column({ type: 'enum', enum: CartStatus, default: CartStatus.ACTIVE })
-  @Field()
+  @Field(() => CartStatus)
   status: CartStatus;
 
   /**

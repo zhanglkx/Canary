@@ -2,12 +2,66 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
+type AbandonedCartStatsDto {
+  count: Int!
+  totalValue: Float!
+}
+
+input AddToCartInput {
+  quantity: Int!
+  skuId: String!
+}
+
 type AuthResponse {
   accessToken: String!
   expiresIn: Float!
   refreshToken: String!
   tokenType: String!
   user: User!
+}
+
+type CartItem {
+  attributeSnapshot: String
+  createdAt: DateTime!
+  id: String!
+  itemDiscount: Float!
+  itemTotal: Float!
+  productId: String!
+  productName: String!
+  promoCode: String
+  quantity: Int!
+  skuCode: String!
+  skuId: String!
+  stockStatus: String!
+  unitPrice: Float!
+  updatedAt: DateTime!
+}
+
+type CartOperationResultDto {
+  cart: ShoppingCart
+  message: String!
+  success: Boolean!
+}
+
+type CartStatsDto {
+  isAbandoned: Boolean!
+  isEmpty: Boolean!
+  subtotal: Float!
+  taxAmount: Float!
+  total: Float!
+  totalItems: Int!
+  totalSKUs: Int!
+}
+
+enum CartStatus {
+  ABANDONED
+  ACTIVE
+  CONVERTED
+}
+
+type CartValidationResultDto {
+  unavailableItems: [String!]!
+  valid: Boolean!
 }
 
 type Category {
@@ -52,6 +106,25 @@ input CreateCommentInput {
   todoId: String!
 }
 
+input CreateOrderInput {
+  cartId: String!
+  notes: String
+  recipientName: String!
+  recipientPhone: String!
+  shippingAddress: String!
+}
+
+input CreateProductInput {
+  basePrice: Float!
+  categoryId: String!
+  description: String!
+  name: String!
+  seoKeywords: String
+  sku: String!
+  slug: String
+  summary: String
+}
+
 input CreateTagInput {
   color: String
   name: String!
@@ -76,6 +149,69 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 """
 scalar DateTime
 
+input InitiatePaymentInput {
+  amount: Float!
+  currency: String
+  gateway: PaymentGateway!
+  methodType: PaymentMethodType!
+  orderId: String!
+  paymentMethodId: String
+}
+
+type Inventory {
+  availableStock: Int!
+  createdAt: DateTime!
+  currentStock: Int!
+  damageCount: Int!
+  id: String!
+  inboundTotal: Int!
+  isLowStock: Boolean!
+  lastCheckTime: DateTime
+  outboundTotal: Int!
+  remarks: String
+  reservedStock: Int!
+  updatedAt: DateTime!
+  warningThreshold: Int!
+}
+
+type InventoryByCategoryDto {
+  categoryId: String!
+  categoryName: String!
+  lowStockCount: Int!
+  skuCount: Int!
+  totalReserved: Int!
+  totalStock: Int!
+}
+
+type InventoryOperationResultDto {
+  inventory: Inventory
+  message: String!
+  retriesUsed: Int
+  success: Boolean!
+}
+
+type InventoryStatsDto {
+  availableStock: Int!
+  currentStock: Int!
+  lowStockAlert: Boolean!
+  reservedStock: Int!
+  skuId: String!
+  warningThreshold: Int!
+}
+
+type InventorySummaryDto {
+  avgStockPerSku: Float!
+  lowStockCount: Int!
+  outOfStockCount: Int!
+  totalAvailable: Int!
+  totalDamage: Int!
+  totalInbound: Int!
+  totalOutbound: Int!
+  totalReserved: Int!
+  totalSkus: Int!
+  totalStock: Int!
+}
+
 input LoginInput {
   email: String!
   password: String!
@@ -84,34 +220,243 @@ input LoginInput {
 type Mutation {
   addTagToTodo(tagId: ID!, todoId: ID!): Todo!
   addTagsToTodos(tagIds: [String!]!, todoIds: [String!]!): Int!
+  addToCart(input: AddToCartInput!): CartOperationResultDto!
+  cancelOrder(orderId: String!): Order!
+  cancelPayment(paymentId: String!): Payment!
+  cancelReserve(orderId: String!, quantity: Int!, skuId: String!): InventoryOperationResultDto!
+  capturePayPalOrder(orderId: String!, paymentId: String!): String!
   cleanupCompletedTodos: Int!
+  clearCart: CartOperationResultDto!
+  completeRefund(gatewayRefundId: String!, paymentId: String!, refundAmount: Float!, refundTransactionId: String!): RefundResultOutput!
+  confirmOrderPayment(orderId: String!, paymentMethod: PaymentMethod!): Order!
+  confirmReserve(orderId: String!, quantity: Int!, skuId: String!): InventoryOperationResultDto!
+  confirmStripePaymentIntent(cardToken: String, paymentId: String!): String!
 
   """创建新分类"""
   createCategory(createCategoryInput: CreateCategoryInput!): Category!
   createComment(createCommentInput: CreateCommentInput!): Comment!
+  createOrder(input: CreateOrderInput!): Order!
+  createPayPalOrder(paymentId: String!): String!
+  createPayPalRefund(paymentId: String!, refundAmount: Int!): String!
+
+  """创建产品（需要认证）"""
+  createProduct(input: CreateProductInput!): ProductResponse!
+  createStripePaymentIntent(cardToken: String, paymentId: String!): String!
+  createStripeRefund(paymentId: String!, refundAmount: Int!): String!
   createTag(createTagInput: CreateTagInput!): Tag!
   createTodo(createTodoInput: CreateTodoInput!): Todo!
+  decreaseStock(quantity: Int!, reason: String, skuId: String!): InventoryOperationResultDto!
   deleteComment(id: ID!): Boolean!
+
+  """删除产品（需要认证）"""
+  deleteProduct(id: String!): Boolean!
   deleteTag(id: ID!): Boolean!
   deleteTodos(todoIds: [String!]!): Int!
+  deliverOrder(orderId: String!): Order!
+  increaseStock(quantity: Int!, reason: String, skuId: String!): InventoryOperationResultDto!
+  initiatePayment(input: InitiatePaymentInput!): Payment!
+  initiateRefund(input: RefundRequestInput!): RefundResultOutput!
   login(loginInput: LoginInput!): AuthResponse!
   logout(refreshToken: String!): Boolean!
   logoutAll: Boolean!
+  markAbandonedCarts: Int!
+  markPaymentAsFailed(errorCode: String!, errorMessage: String!, paymentId: String!, transactionId: String!): Payment!
+  markPaymentAsProcessing(paymentId: String!, transactionId: String!): Payment!
+  markPaymentAsSucceeded(gatewayTransactionId: String!, paymentId: String!, transactionId: String!): Payment!
   markTodosAsCompleted(todoIds: [String!]!): Int!
+  refreshCartInventoryStatus(cartId: String!): CartOperationResultDto!
+  refreshMyCartInventoryStatus: CartOperationResultDto!
   refreshToken(refreshTokenInput: RefreshTokenInput!): TokenResponse!
   register(registerInput: RegisterInput!): AuthResponse!
 
   """删除分类"""
   removeCategory(id: ID!): Boolean!
+  removeFromCart(skuId: String!): CartOperationResultDto!
   removeTagFromTodo(tagId: ID!, todoId: ID!): Todo!
   removeTodo(id: ID!): Boolean!
+  reserveStock(orderId: String!, quantity: Int!, skuId: String!): InventoryOperationResultDto!
+
+  """设置产品上下架状态（需要认证）"""
+  setProductActive(id: String!, isActive: Boolean!): ProductResponse!
+  shipOrder(orderId: String!): Order!
+  updateCartItemQuantity(input: UpdateCartItemQuantityInput!): CartOperationResultDto!
 
   """更新分类信息"""
   updateCategory(id: ID!, updateCategoryInput: UpdateCategoryInput!): Category!
   updateComment(content: String!, id: ID!): Comment!
   updatePriority(priority: String!, todoIds: [String!]!): Int!
+
+  """更新产品（需要认证）"""
+  updateProduct(id: String!, input: UpdateProductInput!): ProductResponse!
   updateProfile(updateUserInput: UpdateUserInput!): User!
   updateTodo(id: ID!, updateTodoInput: UpdateTodoInput!): Todo!
+}
+
+type Order {
+  cancelledAt: DateTime
+  createdAt: DateTime!
+  deliveredAt: DateTime
+  discount: Float!
+  id: String!
+  items: [OrderItem!]!
+  notes: String
+  orderNumber: String!
+  paidAt: DateTime
+  paymentMethod: PaymentMethod
+  recipientName: String
+  recipientPhone: String
+  shippedAt: DateTime
+  shipping: Float!
+  shippingAddress: String
+  status: OrderStatus!
+  subtotal: Float!
+  tax: Float!
+  totalAmount: Float!
+  updatedAt: DateTime!
+}
+
+type OrderAnalysisOutput {
+  ordersCancelled: Int!
+  ordersCreated: Int!
+  ordersDelivered: Int!
+  ordersPaid: Int!
+  ordersShipped: Int!
+  period: String!
+  revenue: Float!
+}
+
+type OrderItem {
+  attributeSnapshot: String
+  createdAt: DateTime!
+  finalPrice: Float!
+  id: String!
+  itemDiscount: Float!
+  itemTotal: Float!
+  productId: String!
+  productName: String!
+  quantity: Int!
+  skuCode: String!
+  skuId: String!
+  unitPrice: Float!
+  updatedAt: DateTime!
+}
+
+type OrderStatsOutput {
+  deliveredOrders: Int!
+  pendingOrders: Int!
+  shippedOrders: Int!
+  totalOrders: Int!
+  totalSpent: Float!
+}
+
+enum OrderStatus {
+  CANCELLED
+  CONFIRMED
+  DELIVERED
+  PENDING
+  SHIPPED
+}
+
+type OrdersPageOutput {
+  orders: [Order!]!
+  total: Int!
+}
+
+type Payment {
+  amount: Float!
+  createdAt: DateTime!
+  currency: String!
+  failedAt: DateTime
+  failureReason: String
+  gateway: PaymentGateway!
+  id: String!
+  isFullyRefunded: Boolean!
+  isPartiallyRefunded: Boolean!
+  metadata: String
+  methodType: PaymentMethodType!
+  notes: String
+  refundedAmount: Float!
+  retryCount: Int!
+  status: PaymentStatus!
+  succeededAt: DateTime
+  transactionId: String
+  transactions: [PaymentTransaction!]!
+  updatedAt: DateTime!
+}
+
+type PaymentAnalysisOutput {
+  averageAmount: Float!
+  cancelledPayments: Int!
+  failedPayments: Int!
+  successRate: Float!
+  successfulPayments: Int!
+  totalAmount: Float!
+  totalPayments: Int!
+}
+
+enum PaymentGateway {
+  ALIPAY
+  PAYPAL
+  STRIPE
+  WECHAT_PAY
+}
+
+enum PaymentMethod {
+  BANK_TRANSFER
+  CREDIT_CARD
+  DEBIT_CARD
+  DIGITAL_WALLET
+}
+
+enum PaymentMethodType {
+  BANK_TRANSFER
+  CREDIT_CARD
+  CRYPTOCURRENCY
+  DEBIT_CARD
+  DIGITAL_WALLET
+}
+
+type PaymentStatsOutput {
+  failedCount: Int!
+  refundedAmount: Float!
+  successRate: Float!
+  successfulAmount: Float!
+  totalAmount: Float!
+  totalPayments: Int!
+}
+
+enum PaymentStatus {
+  CANCELLED
+  FAILED
+  PENDING
+  PROCESSING
+  REFUNDED
+  REFUNDING
+  SUCCEEDED
+}
+
+type PaymentTransaction {
+  amount: Float!
+  attemptNumber: Int!
+  completedAt: DateTime
+  createdAt: DateTime!
+  errorCode: String
+  errorMessage: String
+  gatewayTransactionId: String
+  id: String!
+  metadata: String
+  notes: String
+  requiresConfirmation: Boolean!
+  responseData: String
+  status: TransactionStatus!
+  threeDSecureResult: String
+  type: TransactionType!
+  updatedAt: DateTime!
+}
+
+type PaymentsPageOutput {
+  payments: [Payment!]!
+  total: Int!
 }
 
 """Todo 优先级"""
@@ -122,8 +467,112 @@ enum Priority {
   URGENT
 }
 
+type ProductAttributeValue {
+  colorCode: String
+  createdAt: DateTime!
+  displayName: String
+  displayOrder: Float!
+  id: String!
+  imageUrl: String
+  value: String!
+}
+
+type ProductCategory {
+  children: [ProductCategory!]
+  createdAt: DateTime!
+  description: String
+  displayOrder: Int!
+  id: String!
+  imageUrl: String
+  isActive: Boolean!
+  level: Int!
+  name: String!
+  slug: String!
+  updatedAt: DateTime!
+}
+
+input ProductFilterInput {
+  categoryId: String
+  keyword: String
+  limit: Int! = 20
+  minRating: Float
+  order: String
+  page: Int! = 1
+  priceMax: Int
+  priceMin: Int
+  sort: String
+}
+
+type ProductImage {
+  altText: String
+  createdAt: DateTime!
+  displayOrder: Int!
+  id: String!
+  purpose: String!
+  thumbnailUrl: String
+  url: String!
+}
+
+type ProductPaginationResponse {
+  data: [ProductResponse!]!
+  limit: Float!
+  page: Float!
+  pages: Float!
+  total: Float!
+}
+
+type ProductResponse {
+  averageRating: Float!
+  basePrice: Float!
+  category: ProductCategory
+  createdAt: DateTime!
+  description: String!
+  id: String!
+  images: [ProductImage!]
+  isAvailable: Boolean!
+  name: String!
+  reviewCount: Int!
+  salesCount: Int!
+  sku: String!
+  skus: [ProductSku!]
+  slug: String
+  status: String!
+  summary: String
+  updatedAt: DateTime!
+  viewCount: Int!
+}
+
+type ProductSku {
+  availableStock: Int!
+  createdAt: DateTime!
+  id: String!
+  imageUrl: String
+  isActive: Boolean!
+  price: Float
+  reservedStock: Int!
+  salesCount: Int!
+  skuCode: String!
+  skuName: String!
+  stock: Int!
+  updatedAt: DateTime!
+  weight: Int
+}
+
+type ProductStats {
+  averageRating: Float
+  productId: String!
+  reviewCount: Int!
+  salesCount: Int!
+  viewCount: Int!
+}
+
 type Query {
+  abandonedCartStats: AbandonedCartStatsDto!
+  activeCartCount: Int!
   advancedSearch(keyword: String, priorities: [String!], sortBy: String): [Todo!]!
+  anomalousInventories: [Inventory!]!
+  cartDetail(cartId: String!): ShoppingCart
+  cartStats(cartId: String!): CartStatsDto!
 
   """获取用户所有分类"""
   categories: [Category!]!
@@ -131,12 +580,62 @@ type Query {
   """根据ID获取分类详情"""
   category(id: ID!): Category!
   categoryStats: [CategoryStats!]!
+
+  """检查产品库存"""
+  checkInventory(productId: String!): Boolean!
   comments(todoId: ID!): [Comment!]!
   currentUser: User!
   dashboard: DashboardData!
+  fastMovingInventories(limit: Int): [Inventory!]!
+  inventoriesNeedingCheck: [Inventory!]!
+  inventoriesWithReserve: [Inventory!]!
+  inventoryByCategory: [InventoryByCategoryDto!]!
+  inventoryDetail(skuId: String!): Inventory!
+  inventoryStats(skuId: String!): InventoryStatsDto!
+  inventorySummary: InventorySummaryDto!
+  lowStockInventories(limit: Int, offset: Int): [Inventory!]!
   me: User!
+  myCart: ShoppingCart
+  myCartStats: CartStatsDto!
+  myOrderStats: OrderStatsOutput!
+  myOrders(skip: Int, take: Int): OrdersPageOutput!
+  myOrdersByStatus(status: OrderStatus!): [Order!]!
+  myPaymentStats: PaymentStatsOutput!
+  myPayments(skip: Int, take: Int): PaymentsPageOutput!
+  myPaymentsByStatus(status: PaymentStatus!): [Payment!]!
+  order(id: String!): Order
+  orderAnalysisByDateRange(endDate: String!, startDate: String!): OrderAnalysisOutput!
+  orderByNumber(orderNumber: String!): Order
+  outOfStockInventories: [Inventory!]!
+  payment(id: String!): Payment
+  paymentAnalysisByDateRange(endDate: String!, startDate: String!): PaymentAnalysisOutput!
+  paymentTransactions(paymentId: String!): [PaymentTransaction!]!
   pendingTodos: [Todo!]!
+
+  """查询产品详情"""
+  productDetail(
+    """产品ID"""
+    id: String!
+  ): ProductResponse
+
+  """获取产品统计信息"""
+  productStats(productId: String!): ProductStats!
+
+  """查询产品列表（支持分页、筛选、排序）"""
+  products(filter: ProductFilterInput!): ProductPaginationResponse!
+  searchMyOrders(keyword: String!, skip: Int, take: Int): OrdersPageOutput!
+  searchMyPayments(keyword: String!, skip: Int, take: Int): PaymentsPageOutput!
+
+  """搜索产品"""
+  searchProducts(
+    """筛选条件"""
+    filter: ProductFilterInput
+
+    """搜索关键字"""
+    keyword: String!
+  ): ProductPaginationResponse!
   searchTodos(filter: TodoFilterInput): [Todo!]!
+  slowMovingInventories(limit: Int): [Inventory!]!
   tag(id: ID!): Tag!
   tags: [Tag!]!
   todo(id: ID!): Todo!
@@ -144,16 +643,47 @@ type Query {
   todos: [Todo!]!
   user(id: ID!): User!
   userStats: String
+  validateCartInventory(cartId: String!): CartValidationResultDto!
+  validateMyCartInventory: CartValidationResultDto!
 }
 
 input RefreshTokenInput {
   refreshToken: String!
 }
 
+input RefundRequestInput {
+  amount: Float
+  paymentId: String!
+  reason: String
+}
+
+type RefundResultOutput {
+  message: String!
+  refundAmount: Float!
+  refundTransactionId: String
+  success: Boolean!
+}
+
 input RegisterInput {
   email: String!
   password: String!
   username: String!
+}
+
+type ShoppingCart {
+  createdAt: DateTime!
+  id: String!
+  isAbandoned: Boolean!
+  isEmpty: Boolean!
+  items: [CartItem!]!
+  notes: String
+  status: CartStatus!
+  subtotal: Float!
+  taxAmount: Float!
+  total: Float!
+  totalItems: Int!
+  totalSKUs: Int!
+  updatedAt: DateTime!
 }
 
 type Tag {
@@ -207,11 +737,44 @@ type TokenResponse {
   tokenType: String!
 }
 
+enum TransactionStatus {
+  CANCELLED
+  COMPLETED
+  FAILED
+  INITIATED
+  IN_PROGRESS
+  PENDING_CONFIRMATION
+}
+
+enum TransactionType {
+  AUTHORIZE
+  CAPTURE
+  CHARGE
+  REFUND
+}
+
+input UpdateCartItemQuantityInput {
+  quantity: Int!
+  skuId: String!
+}
+
 input UpdateCategoryInput {
   color: String
   description: String
   icon: String
   name: String
+}
+
+input UpdateProductInput {
+  basePrice: Float
+  categoryId: String
+  description: String
+  name: String
+  seoKeywords: String
+  sku: String
+  slug: String
+  status: String
+  summary: String
 }
 
 input UpdateTodoInput {

@@ -13,15 +13,13 @@ export const GET_PAYMENT = gql`
     payment(id: $id) {
       id
       orderId
-      userId
       amount
       currency
       status
       methodType
       gateway
-      isSuccessful
+      transactionId
       refundedAmount
-      refundedCents
       failureReason
       createdAt
       updatedAt
@@ -38,15 +36,13 @@ export const GET_MY_PAYMENTS = gql`
       payments {
         id
         orderId
-        userId
         amount
         currency
         status
         methodType
         gateway
-        isSuccessful
+        transactionId
         refundedAmount
-        refundedCents
         failureReason
         createdAt
         updatedAt
@@ -64,15 +60,13 @@ export const GET_MY_PAYMENTS_BY_STATUS = gql`
     myPaymentsByStatus(status: $status) {
       id
       orderId
-      userId
       amount
       currency
       status
       methodType
       gateway
-      isSuccessful
+      transactionId
       refundedAmount
-      refundedCents
       failureReason
       createdAt
       updatedAt
@@ -131,15 +125,13 @@ export const SEARCH_MY_PAYMENTS = gql`
       payments {
         id
         orderId
-        userId
         amount
         currency
         status
         methodType
         gateway
-        isSuccessful
+        transactionId
         refundedAmount
-        refundedCents
         failureReason
         createdAt
         updatedAt
@@ -174,15 +166,13 @@ export const INITIATE_PAYMENT = gql`
     initiatePayment(input: $input) {
       id
       orderId
-      userId
       amount
       currency
       status
       methodType
       gateway
-      isSuccessful
+      transactionId
       refundedAmount
-      refundedCents
       failureReason
       createdAt
       updatedAt
@@ -198,15 +188,13 @@ export const MARK_PAYMENT_AS_PROCESSING = gql`
     markPaymentAsProcessing(paymentId: $paymentId, transactionId: $transactionId) {
       id
       orderId
-      userId
       amount
       currency
       status
       methodType
       gateway
-      isSuccessful
+      transactionId
       refundedAmount
-      refundedCents
       failureReason
       createdAt
       updatedAt
@@ -230,15 +218,13 @@ export const MARK_PAYMENT_AS_SUCCEEDED = gql`
     ) {
       id
       orderId
-      userId
       amount
       currency
       status
       methodType
       gateway
-      isSuccessful
+      transactionId
       refundedAmount
-      refundedCents
       failureReason
       createdAt
       updatedAt
@@ -264,15 +250,13 @@ export const MARK_PAYMENT_AS_FAILED = gql`
     ) {
       id
       orderId
-      userId
       amount
       currency
       status
       methodType
       gateway
-      isSuccessful
+      transactionId
       refundedAmount
-      refundedCents
       failureReason
       createdAt
       updatedAt
@@ -288,15 +272,13 @@ export const CANCEL_PAYMENT = gql`
     cancelPayment(paymentId: $paymentId) {
       id
       orderId
-      userId
       amount
       currency
       status
       methodType
       gateway
-      isSuccessful
+      transactionId
       refundedAmount
-      refundedCents
       failureReason
       createdAt
       updatedAt

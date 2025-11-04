@@ -15,7 +15,7 @@ export interface CartItem {
   quantity: number;
   unitPrice: number;
   itemTotal: number;
-  itemDiscountCents: number;
+  itemDiscount: number;
   promoCode?: string;
   stockStatus: string;
   attributeSnapshot?: string;
@@ -24,13 +24,11 @@ export interface CartItem {
 
 export interface Cart {
   id: string;
-  userId: string;
   status: string;
   items: CartItem[];
-  subtotalCents: number;
-  taxCents: number;
-  discountCents: number;
-  totalCents: number;
+  subtotal: number;
+  taxAmount: number;
+  total: number;
   isEmpty: boolean;
   isAbandoned: boolean;
   createdAt: string;
@@ -95,24 +93,22 @@ export interface OrderItem {
   quantity: number;
   unitPrice: number;
   itemTotal: number;
-  itemDiscountCents: number;
+  itemDiscount: number;
   attributeSnapshot?: string;
 }
 
 export interface Order {
   id: string;
   orderNumber: string;
-  userId: string;
   status: string;
   paymentMethod: string;
   shippingAddress: string;
   recipientName: string;
   recipientPhone: string;
   items: OrderItem[];
-  subtotalCents: number;
-  taxCents: number;
-  discountCents: number;
-  totalCents: number;
+  subtotal: number;
+  tax: number;
+  totalAmount: number;
   notes?: string;
   createdAt: string;
   updatedAt: string;
