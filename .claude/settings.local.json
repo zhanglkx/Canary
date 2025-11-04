@@ -17,7 +17,12 @@
       "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJjMDQzMDcwZC1mNWQzLTQ4YzMtYjE3Zi1hMTA3ODFiNDkwMWIiLCJlbWFpbCI6InRlc3RmaW5hbEBleGFtcGxlLmNvbSIsInR5cGUiOiJhY2Nlc3MiLCJpYXQiOjE3NjIyMzU1NzUsImV4cCI6MTc2MjIzNjQ3NX0.qSMQsJUnNAIfHhMkwXt59MEm893P70QjJxh1JadryV0\")",
       "Bash(pnpm --filter api build:schema:*)",
       "Bash(pnpm build:*)",
-      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZGUyMTc0My02MjMyLTRlYTYtYTc0Yy1iOTAxOTA2NDVmNTIiLCJlbWFpbCI6InQzQHRlc3QuY29tIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc2MjIzOTcyOSwiZXhwIjoxNzYyMjQwNjI5fQ.9a8TUooc5u49fQFKbK9_nKqwWUs8JhHXFyCNrh_E4uM\")"
+      "Bash(TOKEN=\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIzZGUyMTc0My02MjMyLTRlYTYtYTc0Yy1iOTAxOTA2NDVmNTIiLCJlbWFpbCI6InQzQHRlc3QuY29tIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc2MjIzOTcyOSwiZXhwIjoxNzYyMjQwNjI5fQ.9a8TUooc5u49fQFKbK9_nKqwWUs8JhHXFyCNrh_E4uM\")",
+      "Bash(if lsof -i :4000)",
+      "Bash(then echo \"✅ Both servers are running\" echo \"=== Checking debug.log for errors ===\" cat /tmp/debug.log)",
+      "Bash(cat:*)",
+      "Bash(break)",
+      "Bash(git commit -m \"$(cat <<''EOF''\n组织项目文档：将所有文档文件移动到 doc 文件夹\n\n- 创建 doc 文件夹用于统一管理项目文档\n- 移动 CLAUDE.md 到 doc 文件夹\n- 移动 ECOMMERCE_IMPLEMENTATION_ROADMAP.md 到 doc 文件夹\n- 移动 IMPLEMENTATION_SUMMARY.md 到 doc 文件夹\n- 移动 PROBLEMS_AND_SOLUTIONS.md 到 doc 文件夹\n- 创建 doc/README.md 作为文档中心入口\n\n改进文档组织结构，便于管理和查找相关资料。\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []
