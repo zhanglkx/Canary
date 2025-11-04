@@ -24,6 +24,7 @@ import { StatsModule } from './stats/stats.module'; // 统计功能模块（新�
 import { SearchModule } from './search/search.module'; // 搜索功能模块（新增）
 import { BatchModule } from './batch/batch.module'; // 批量操作模块（新增）
 import { EcommerceModule } from './ecommerce/ecommerce.module'; // 电商模块（新增）
+import { CommonModule } from './common/common.module'; // 通用模块
 import { AppController } from './app.controller';
 import { ApolloStudioController } from './apollo-studio.controller';
 
@@ -83,6 +84,7 @@ import { ApolloStudioController } from './apollo-studio.controller';
     }),
 
     // 功能模块导入
+    CommonModule, // 通用模块
     UserModule, // 用户管理功能
     AuthModule, // 身份认证功能
     TodoModule, // 待办事项功能
