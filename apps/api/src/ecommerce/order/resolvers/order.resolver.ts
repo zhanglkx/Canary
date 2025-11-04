@@ -99,11 +99,14 @@ export class OrderAnalysisOutput {
  */
 @ObjectType()
 export class OrdersPageOutput {
-  @Field(() => [Order])
+  @Field(() => [Order], { defaultValue: [] })
   orders: Order[];
 
-  @Field(() => Int)
+  @Field(() => Int, { defaultValue: 0 })
   total: number;
+
+  @Field({ defaultValue: false })
+  isEmpty: boolean;
 }
 
 /**
@@ -164,16 +167,27 @@ export class OrderResolver {
   ): Promise<OrdersPageOutput> {
     this.logger.debug(`查询我的订单: 用户=${user.id}`);
 
-    const [orders, total] = await this.orderService.getUserOrders(
-      user.id,
-      skip || 0,
-      take || 10,
-    );
+    try {
+      const [orders, total] = await this.orderService.getUserOrders(
+        user.id,
+        skip || 0,
+        take || 10,
+      );
 
-    return {
-      orders,
-      total,
-    };
+      return {
+        orders: orders || [],
+        total: total || 0,
+        isEmpty: !orders || orders.length === 0,
+      };
+    } catch (error) {
+      this.logger.warn(`查询订单失败: ${error.message}`);
+      // 返回空订单列表而不是抛出错误
+      return {
+        orders: [],
+        total: 0,
+        isEmpty: true,
+      };
+    }
   }
 
   /**
@@ -205,15 +219,27 @@ export class OrderResolver {
   async myOrderStats(@CurrentUser() user: User): Promise<OrderStatsOutput> {
     this.logger.debug(`查询我的订单统计: 用户=${user.id}`);
 
-    const stats = await this.orderService.getUserOrderStats(user.id);
+    try {
+      const stats = await this.orderService.getUserOrderStats(user.id);
 
-    return {
-      totalOrders: stats.totalOrders,
-      totalSpent: stats.totalSpent,
-      pendingOrders: stats.pendingOrders,
-      shippedOrders: stats.shippedOrders,
-      deliveredOrders: stats.deliveredOrders,
-    };
+      return {
+        totalOrders: stats?.totalOrders || 0,
+        totalSpent: stats?.totalSpent || 0,
+        pendingOrders: stats?.pendingOrders || 0,
+        shippedOrders: stats?.shippedOrders || 0,
+        deliveredOrders: stats?.deliveredOrders || 0,
+      };
+    } catch (error) {
+      this.logger.warn(`查询订单统计失败: ${error.message}`);
+      // 返回默认统计而不是抛出错误
+      return {
+        totalOrders: 0,
+        totalSpent: 0,
+        pendingOrders: 0,
+        shippedOrders: 0,
+        deliveredOrders: 0,
+      };
+    }
   }
 
   /**
@@ -271,6 +297,7 @@ export class OrderResolver {
     return {
       orders: userOrders,
       total: userOrders.length,
+      isEmpty: userOrders.length === 0,
     };
   }
 

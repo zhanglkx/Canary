@@ -47,11 +47,11 @@ export const PRODUCT_SEEDS: ProductSeedData[] = [
     basePrice: 89.99,
     images: [
       {
-        url: 'https://via.placeholder.com/500x500?text=Cotton+T-Shirt+Front',
+        url: 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?w=500&h=500&fit=crop',
         altText: '经典棉质T恤正面',
       },
       {
-        url: 'https://via.placeholder.com/500x500?text=Cotton+T-Shirt+Back',
+        url: 'https://images.unsplash.com/photo-1529720317453-c2a01ced66e9?w=500&h=500&fit=crop',
         altText: '经典棉质T恤背面',
       },
     ],
@@ -112,7 +112,7 @@ export const PRODUCT_SEEDS: ProductSeedData[] = [
     basePrice: 199.99,
     images: [
       {
-        url: 'https://via.placeholder.com/500x500?text=Denim+Jeans+Front',
+        url: 'https://images.unsplash.com/photo-1542272604-787c62d465d1?w=500&h=500&fit=crop',
         altText: '休闲牛仔裤正面',
       },
     ],
@@ -167,7 +167,7 @@ export const PRODUCT_SEEDS: ProductSeedData[] = [
     basePrice: 599.99,
     images: [
       {
-        url: 'https://via.placeholder.com/500x500?text=Running+Shoes',
+        url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=500&h=500&fit=crop',
         altText: '运动跑鞋',
       },
     ],
@@ -228,7 +228,7 @@ export const PRODUCT_SEEDS: ProductSeedData[] = [
     basePrice: 279.99,
     images: [
       {
-        url: 'https://via.placeholder.com/500x500?text=Hoodie',
+        url: 'https://images.unsplash.com/photo-1556821552-9f6db051193c?w=500&h=500&fit=crop',
         altText: '连帽卫衣',
       },
     ],
@@ -283,7 +283,7 @@ export const PRODUCT_SEEDS: ProductSeedData[] = [
     basePrice: 349.99,
     images: [
       {
-        url: 'https://via.placeholder.com/500x500?text=Backpack',
+        url: 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500&h=500&fit=crop',
         altText: '休闲背包',
       },
     ],

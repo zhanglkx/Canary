@@ -358,6 +358,7 @@ enum OrderStatus {
 }
 
 type OrdersPageOutput {
+  isEmpty: Boolean!
   orders: [Order!]!
   total: Int!
 }

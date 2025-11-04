@@ -256,12 +256,13 @@ export class ProductSeederService {
       this.logger.log('清空所有产品数据...');
 
       // 删除顺序很重要，要先删除有外键约束的表
-      await this.imageRepository.delete({});
-      await this.attributeValueRepository.delete({});
-      await this.attributeRepository.delete({});
-      await this.skuRepository.delete({});
-      await this.productRepository.delete({});
-      await this.categoryRepository.delete({});
+      // 使用 QueryBuilder 代替 delete({}) 以避免空条件错误
+      await this.imageRepository.createQueryBuilder().delete().execute();
+      await this.attributeValueRepository.createQueryBuilder().delete().execute();
+      await this.attributeRepository.createQueryBuilder().delete().execute();
+      await this.skuRepository.createQueryBuilder().delete().execute();
+      await this.productRepository.createQueryBuilder().delete().execute();
+      await this.categoryRepository.createQueryBuilder().delete().execute();
 
       this.logger.log('✓ 所有产品数据已清空');
     } catch (error) {

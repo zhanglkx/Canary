@@ -141,7 +141,7 @@ export class OrderItem {
    *   "material": "棉"
    * }
    */
-  @Column({ type: 'jsonb', nullable: true, select: false })
+  @Column({ type: 'jsonb', nullable: true, name: 'attributeSnapshotData' })
   @HideField()
   attributeSnapshotData?: Record<string, string>;
 
