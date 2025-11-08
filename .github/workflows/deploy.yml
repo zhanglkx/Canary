@@ -1,0 +1,174 @@
+name: Deploy to Aliyun
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run linting
+        run: pnpm lint
+
+      - name: Run tests
+        run: pnpm test
+        env:
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
+          DATABASE_NAME: test_db
+          JWT_SECRET: test-secret
+
+      - name: Build project
+        run: pnpm build
+
+  deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'pnpm'
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build project
+        run: pnpm build
+
+      - name: Create deployment package
+        run: |
+          mkdir -p deployment
+          cp -r apps/ deployment/
+          cp -r libs/ deployment/
+          cp package.json pnpm-workspace.yaml pnpm-lock.yaml deployment/
+          cp tsconfig.base.json deployment/
+          cp docker-compose.prod.yml deployment/docker-compose.yml
+          cp nginx.conf deployment/
+          cp env.production.example deployment/
+          tar -czf canary-deployment.tar.gz -C deployment .
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            # 创建部署目录
+            mkdir -p /opt/canary
+            mkdir -p /opt/backups/canary
+
+            # 备份现有部署
+            if [ -d "/opt/canary" ] && [ -n "$(ls -A /opt/canary)" ]; then
+              echo "备份现有部署..."
+              tar -czf /opt/backups/canary/backup-$(date +%Y%m%d-%H%M%S).tar.gz -C /opt/canary . || true
+            fi
+
+            # 停止现有服务
+            cd /opt/canary
+            docker-compose down || true
+
+      - name: Upload deployment package
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          source: 'canary-deployment.tar.gz'
+          target: '/opt/canary/'
+
+      - name: Extract and deploy
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          port: ${{ secrets.SERVER_PORT }}
+          script: |
+            cd /opt/canary
+
+            # 解压新版本
+            tar -xzf canary-deployment.tar.gz
+            rm canary-deployment.tar.gz
+
+            # 复制环境配置
+            if [ ! -f ".env.production" ]; then
+              cp env.production.example .env.production
+              echo "请配置 .env.production 文件中的环境变量"
+            fi
+
+            # 启动服务
+            docker-compose up -d --build
+
+            # 等待服务启动
+            echo "等待服务启动..."
+            sleep 30
+
+            # 检查服务状态
+            docker-compose ps
+
+            # 健康检查
+            if curl -f http://localhost:4000/health; then
+              echo "✅ API 服务正常"
+            else
+              echo "❌ API 服务异常"
+              exit 1
+            fi
+
+            if curl -f http://localhost:3000; then
+              echo "✅ 前端服务正常"
+            else
+              echo "❌ 前端服务异常"
+              exit 1
+            fi
+
+            echo "🎉 部署完成！"

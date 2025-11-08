@@ -226,7 +226,7 @@ export default function CheckoutPage() {
                       <p className="text-gray-600">Qty: {item.quantity}</p>
                     </div>
                     <p className="text-gray-900 font-semibold">
-                      ¥{((item.itemTotal - item.itemDiscountCents) / 100).toFixed(2)}
+                      ¥{((item.itemTotal - item.itemDiscount) / 100).toFixed(2)}
                     </p>
                   </div>
                 ))}
@@ -236,27 +236,22 @@ export default function CheckoutPage() {
               <div className="border-t pt-4 space-y-2 mb-4">
                 <div className="flex justify-between text-gray-600">
                   <span>Subtotal</span>
-                  <span>¥{(cart.subtotalCents / 100).toFixed(2)}</span>
+                  <span>¥{(cart.subtotal / 100).toFixed(2)}</span>
                 </div>
 
-                {cart.taxCents > 0 && (
+                {cart.taxAmount > 0 && (
                   <div className="flex justify-between text-gray-600">
                     <span>Tax</span>
-                    <span>¥{(cart.taxCents / 100).toFixed(2)}</span>
+                    <span>¥{(cart.taxAmount / 100).toFixed(2)}</span>
                   </div>
                 )}
 
-                {cart.discountCents > 0 && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Discount</span>
-                    <span>-¥{(cart.discountCents / 100).toFixed(2)}</span>
-                  </div>
-                )}
+                {/* Cart-level discount not available in GraphQL schema */}
 
                 <div className="flex justify-between items-center border-t pt-2">
                   <span className="font-semibold text-gray-900">Total</span>
                   <span className="text-2xl font-bold text-gray-900">
-                    ¥{(cart.totalCents / 100).toFixed(2)}
+                    ¥{(cart.total / 100).toFixed(2)}
                   </span>
                 </div>
               </div>
