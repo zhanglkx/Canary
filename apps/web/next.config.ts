@@ -3,6 +3,15 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@shared'],
+  
+  // 静态导出配置（可选 - 用于生成 dist 目录）
+  // output: 'export',
+  // distDir: 'dist',
+  // trailingSlash: true,
+  // images: {
+  //   unoptimized: true,
+  // },
+  
   experimental: {
     // 优化水合过程
     optimizePackageImports: ['@apollo/client'],

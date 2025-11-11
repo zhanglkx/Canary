@@ -43,8 +43,32 @@ check_requirements() {
     fi
     
     if ! command -v rsync &> /dev/null; then
-        log_error "rsync 未安装"
-        exit 1
+        log_warn "rsync 未安装，尝试自动安装..."
+        
+        # 检测操作系统并安装 rsync
+        if command -v yum &> /dev/null; then
+            log_info "使用 yum 安装 rsync..."
+            sudo yum install -y rsync
+        elif command -v dnf &> /dev/null; then
+            log_info "使用 dnf 安装 rsync..."
+            sudo dnf install -y rsync
+        elif command -v apt-get &> /dev/null; then
+            log_info "使用 apt-get 安装 rsync..."
+            sudo apt-get update && sudo apt-get install -y rsync
+        else
+            log_error "无法自动安装 rsync，请手动安装后重试"
+            log_error "Alibaba Cloud Linux 3: sudo yum install -y rsync"
+            log_error "Ubuntu/Debian: sudo apt-get install -y rsync"
+            exit 1
+        fi
+        
+        # 再次检查是否安装成功
+        if ! command -v rsync &> /dev/null; then
+            log_error "rsync 安装失败，请手动安装"
+            exit 1
+        fi
+        
+        log_info "rsync 安装成功"
     fi
     
     if [ ! -f "docker-compose.prod.yml" ]; then
@@ -91,25 +115,45 @@ set -e
 
 echo "🔧 配置服务器环境..."
 
-# 更新系统
-apt-get update && apt-get upgrade -y
+# 检测操作系统并更新系统
+if command -v yum &> /dev/null; then
+    echo "检测到 RHEL/CentOS/Alibaba Cloud Linux，使用 yum..."
+    yum update -y
+    yum install -y curl wget
+elif command -v dnf &> /dev/null; then
+    echo "检测到 Fedora/RHEL 8+，使用 dnf..."
+    dnf update -y
+    dnf install -y curl wget
+elif command -v apt-get &> /dev/null; then
+    echo "检测到 Ubuntu/Debian，使用 apt-get..."
+    apt-get update && apt-get upgrade -y
+    apt-get install -y curl wget
+else
+    echo "⚠️  无法检测操作系统，跳过系统更新"
+fi
 
 # 安装 Docker
 if ! command -v docker &> /dev/null; then
+    echo "安装 Docker..."
     curl -fsSL https://get.docker.com -o get-docker.sh
     sh get-docker.sh
     systemctl enable docker
     systemctl start docker
+    rm -f get-docker.sh
+    echo "✅ Docker 安装完成"
+else
+    echo "✅ Docker 已安装"
 fi
 
 # 安装 Docker Compose
 if ! command -v docker-compose &> /dev/null; then
+    echo "安装 Docker Compose..."
     curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
     chmod +x /usr/local/bin/docker-compose
+    echo "✅ Docker Compose 安装完成"
+else
+    echo "✅ Docker Compose 已安装"
 fi
-
-# 安装 Nginx (如果不使用容器化 Nginx)
-# apt-get install -y nginx
 
 # 创建必要目录
 mkdir -p /opt/canary/ssl
