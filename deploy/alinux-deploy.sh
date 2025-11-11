@@ -64,17 +64,79 @@ yum install -y curl wget tar gzip unzip git nano
 # 步骤2: 安装 Docker
 log_step "安装 Docker..."
 if ! command -v docker &> /dev/null; then
-    log_info "下载并安装 Docker..."
-    curl -fsSL https://get.docker.com -o get-docker.sh
-    sh get-docker.sh
+    log_info "安装 Docker..."
+    
+    # 方法1: 尝试阿里云镜像（推荐）
+    log_info "尝试使用阿里云镜像安装 Docker..."
+    if curl -fsSL https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo -o /etc/yum.repos.d/docker-ce.repo 2>/dev/null; then
+        yum install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+        log_info "✅ 使用阿里云镜像安装 Docker 成功"
+    else
+        # 方法2: 使用 yum 默认源
+        log_info "尝试使用系统默认源安装 Docker..."
+        yum install -y yum-utils
+        yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo 2>/dev/null || {
+            # 方法3: 手动安装
+            log_warn "官方源连接失败，使用备用安装方法..."
+            yum install -y docker
+        }
+        
+        if ! command -v docker &> /dev/null; then
+            yum install -y docker-ce docker-ce-cli containerd.io 2>/dev/null || yum install -y docker
+        fi
+    fi
+    
+    # 如果还是没有安装成功，尝试官方脚本
+    if ! command -v docker &> /dev/null; then
+        log_info "尝试官方安装脚本..."
+        # 设置超时和重试
+        for i in {1..3}; do
+            log_info "尝试第 $i 次下载 Docker 安装脚本..."
+            if curl -fsSL --connect-timeout 30 --max-time 300 https://get.docker.com -o get-docker.sh; then
+                sh get-docker.sh
+                rm -f get-docker.sh
+                break
+            else
+                log_warn "第 $i 次下载失败，等待 10 秒后重试..."
+                sleep 10
+            fi
+        done
+    fi
+    
+    # 验证安装
+    if ! command -v docker &> /dev/null; then
+        log_error "Docker 安装失败，请检查网络连接或手动安装"
+        log_error "手动安装命令: yum install -y docker"
+        exit 1
+    fi
+    
+    # 启动 Docker 服务
     systemctl enable docker
     systemctl start docker
-    rm -f get-docker.sh
     
-    # 将当前用户添加到 docker 组（如果不是 root）
-    if [ "$USER" != "root" ] && [ -n "$USER" ]; then
-        usermod -aG docker $USER
-    fi
+    # 配置 Docker 镜像加速器（中国大陆用户）
+    log_info "配置 Docker 镜像加速器..."
+    mkdir -p /etc/docker
+    cat > /etc/docker/daemon.json << 'EOF'
+{
+  "registry-mirrors": [
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://hub-mirror.c.163.com",
+    "https://mirror.baidubce.com"
+  ],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m",
+    "max-file": "3"
+  }
+}
+EOF
+    
+    # 重启 Docker 服务以应用配置
+    systemctl daemon-reload
+    systemctl restart docker
+    
+    log_info "✅ Docker 安装和配置完成"
 else
     log_info "Docker 已安装"
     systemctl start docker || true
@@ -84,12 +146,57 @@ fi
 # 步骤3: 安装 Docker Compose
 log_step "安装 Docker Compose..."
 if ! command -v docker-compose &> /dev/null; then
-    log_info "下载并安装 Docker Compose..."
-    curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-    chmod +x /usr/local/bin/docker-compose
+    log_info "安装 Docker Compose..."
     
-    # 创建符号链接
-    ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+    # 检查是否已经通过 Docker CE 安装了 compose 插件
+    if docker compose version &> /dev/null; then
+        log_info "Docker Compose 插件已安装，创建兼容性链接..."
+        cat > /usr/local/bin/docker-compose << 'EOF'
+#!/bin/bash
+docker compose "$@"
+EOF
+        chmod +x /usr/local/bin/docker-compose
+        ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+    else
+        # 尝试多个下载源
+        COMPOSE_VERSION="v2.23.0"
+        DOWNLOAD_SUCCESS=false
+        
+        # 下载源列表（按优先级排序）
+        DOWNLOAD_URLS=(
+            "https://github.com/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
+            "https://get.daocloud.io/docker/compose/releases/download/${COMPOSE_VERSION}/docker-compose-$(uname -s)-$(uname -m)"
+        )
+        
+        for url in "${DOWNLOAD_URLS[@]}"; do
+            log_info "尝试从 $url 下载 Docker Compose..."
+            if curl -L --connect-timeout 30 --max-time 300 "$url" -o /usr/local/bin/docker-compose 2>/dev/null; then
+                chmod +x /usr/local/bin/docker-compose
+                ln -sf /usr/local/bin/docker-compose /usr/bin/docker-compose
+                
+                # 验证安装
+                if docker-compose --version &> /dev/null; then
+                    DOWNLOAD_SUCCESS=true
+                    log_info "✅ Docker Compose 安装成功"
+                    break
+                fi
+            fi
+            log_warn "从 $url 下载失败，尝试下一个源..."
+        done
+        
+        # 如果所有下载都失败，尝试 pip 安装
+        if [ "$DOWNLOAD_SUCCESS" = false ]; then
+            log_info "尝试使用 pip 安装 Docker Compose..."
+            yum install -y python3-pip
+            pip3 install docker-compose
+            
+            if ! command -v docker-compose &> /dev/null; then
+                log_error "Docker Compose 安装失败"
+                log_error "请手动安装: pip3 install docker-compose"
+                exit 1
+            fi
+        fi
+    fi
 else
     log_info "Docker Compose 已安装"
 fi
