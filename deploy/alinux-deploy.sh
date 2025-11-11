@@ -208,42 +208,6 @@ EOF
     systemctl restart docker
     
     log_info "✅ Docker 安装和配置完成"
-else
-    log_info "✅ Docker 已安装: $(docker --version)"
-    
-    # 确保 Docker 服务运行
-    if ! systemctl is-active --quiet docker; then
-        log_info "启动 Docker 服务..."
-        systemctl start docker
-        systemctl enable docker
-    else
-        log_info "Docker 服务已运行"
-    fi
-    
-    # 检查并配置镜像加速器
-    if [ ! -f /etc/docker/daemon.json ]; then
-        log_info "配置 Docker 镜像加速器..."
-        mkdir -p /etc/docker
-        cat > /etc/docker/daemon.json << 'EOF'
-{
-  "registry-mirrors": [
-    "https://docker.mirrors.ustc.edu.cn",
-    "https://hub-mirror.c.163.com",
-    "https://mirror.baidubce.com"
-  ],
-  "log-driver": "json-file",
-  "log-opts": {
-    "max-size": "100m",
-    "max-file": "3"
-  }
-}
-EOF
-        systemctl daemon-reload
-        systemctl restart docker
-        log_info "✅ Docker 镜像加速器配置完成"
-    else
-        log_info "Docker 镜像加速器已配置"
-    fi
 fi
 
 # 步骤3: 安装 Docker Compose
