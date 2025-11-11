@@ -82,7 +82,59 @@ fi
 
 # 步骤2: 安装 Docker
 log_step "检查并安装 Docker..."
-if ! command -v docker &> /dev/null; then
+
+# 检查是否安装了 podman（Alibaba Cloud Linux 3 默认）
+if command -v podman &> /dev/null; then
+    log_error "❌ 检测到 podman，这会与 Docker 冲突"
+    log_error "请先运行 podman 修复脚本: sudo ./deploy/fix-podman.sh"
+    exit 1
+fi
+
+# 检查 Docker 是否正确安装
+if command -v docker &> /dev/null; then
+    DOCKER_VERSION=$(docker --version 2>/dev/null)
+    if echo "$DOCKER_VERSION" | grep -q "podman"; then
+        log_error "❌ docker 命令实际指向 podman"
+        log_error "请先运行 podman 修复脚本: sudo ./deploy/fix-podman.sh"
+        exit 1
+    fi
+    
+    log_info "✅ Docker 已安装: $DOCKER_VERSION"
+    
+    # 确保 Docker 服务运行
+    if ! systemctl is-active --quiet docker; then
+        log_info "启动 Docker 服务..."
+        systemctl start docker
+        systemctl enable docker
+    else
+        log_info "Docker 服务已运行"
+    fi
+    
+    # 检查并配置镜像加速器
+    if [ ! -f /etc/docker/daemon.json ]; then
+        log_info "配置 Docker 镜像加速器..."
+        mkdir -p /etc/docker
+        cat > /etc/docker/daemon.json << 'EOF'
+{
+  "registry-mirrors": [
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://hub-mirror.c.163.com",
+    "https://mirror.baidubce.com"
+  ],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m",
+    "max-file": "3"
+  }
+}
+EOF
+        systemctl daemon-reload
+        systemctl restart docker
+        log_info "✅ Docker 镜像加速器配置完成"
+    else
+        log_info "Docker 镜像加速器已配置"
+    fi
+else
     log_info "Docker 未安装，开始安装..."
     
     # 方法1: 尝试阿里云镜像（推荐）
