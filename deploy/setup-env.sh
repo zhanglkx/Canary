@@ -87,6 +87,32 @@ setup_firewall() {
     
     if command -v firewall-cmd &> /dev/null; then
         # CentOS/RHEL/Alibaba Cloud Linux
+        log_info "检测到 firewalld..."
+        
+        # 检查 firewalld 服务状态
+        if ! systemctl is-active --quiet firewalld; then
+            log_warn "firewalld 服务未运行，尝试启动..."
+            
+            # 启动 firewalld 服务
+            systemctl start firewalld
+            systemctl enable firewalld
+            
+            # 等待服务启动
+            sleep 3
+            
+            if systemctl is-active --quiet firewalld; then
+                log_info "firewalld 服务启动成功"
+            else
+                log_error "firewalld 服务启动失败"
+                log_warn "跳过防火墙配置，请手动配置以下端口："
+                log_warn "  - 3000/tcp (前端)"
+                log_warn "  - 4000/tcp (API)"
+                log_warn "  - 80/tcp (HTTP)"
+                log_warn "  - 443/tcp (HTTPS)"
+                return 0
+            fi
+        fi
+        
         log_info "使用 firewalld 配置防火墙..."
         
         # 开放必要端口
@@ -111,8 +137,36 @@ setup_firewall() {
         
         log_info "防火墙规则配置完成"
         
+    elif command -v iptables &> /dev/null; then
+        # 使用 iptables 作为备选方案
+        log_info "使用 iptables 配置防火墙..."
+        
+        # 开放必要端口
+        iptables -I INPUT -p tcp --dport 3000 -j ACCEPT
+        iptables -I INPUT -p tcp --dport 4000 -j ACCEPT
+        iptables -I INPUT -p tcp --dport 80 -j ACCEPT
+        iptables -I INPUT -p tcp --dport 443 -j ACCEPT
+        
+        # 保存 iptables 规则
+        if command -v iptables-save &> /dev/null; then
+            iptables-save > /etc/sysconfig/iptables 2>/dev/null || true
+        fi
+        
+        log_info "iptables 规则配置完成"
+        
     else
-        log_warn "未检测到防火墙管理工具，请手动开放端口 3000, 4000, 80, 443"
+        log_warn "未检测到防火墙管理工具"
+        log_warn "请手动开放以下端口："
+        log_warn "  - 3000/tcp (前端)"
+        log_warn "  - 4000/tcp (API)" 
+        log_warn "  - 80/tcp (HTTP)"
+        log_warn "  - 443/tcp (HTTPS)"
+        log_warn ""
+        log_warn "阿里云安全组配置："
+        log_warn "1. 登录阿里云控制台"
+        log_warn "2. 进入 ECS 实例管理"
+        log_warn "3. 点击实例 -> 安全组 -> 配置规则"
+        log_warn "4. 添加入方向规则，开放上述端口"
     fi
 }
 
