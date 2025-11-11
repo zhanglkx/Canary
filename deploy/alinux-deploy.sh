@@ -539,6 +539,7 @@ cat > .env.production << EOF
 
 # 数据库配置
 DATABASE_URL="postgresql://canary_user:AliCloud2024!@postgres:5432/canary_db"
+DATABASE_PASSWORD=AliCloud2024!
 POSTGRES_DB=canary_db
 POSTGRES_USER=canary_user
 POSTGRES_PASSWORD=AliCloud2024!
@@ -547,7 +548,7 @@ POSTGRES_PASSWORD=AliCloud2024!
 REDIS_URL="redis://redis:6379"
 
 # JWT 配置
-JWT_SECRET="alibaba-cloud-canary-jwt-secret-2024"
+JWT_SECRET="alibaba-cloud-canary-jwt-secret-2024-super-secure-key"
 JWT_EXPIRES_IN="7d"
 
 # API 配置
@@ -569,6 +570,28 @@ UPLOAD_PATH="/app/uploads"
 CORS_ORIGIN="http://${PUBLIC_IP}:3000,http://localhost:3000"
 RATE_LIMIT_MAX=100
 RATE_LIMIT_WINDOW=900000
+
+# Stripe 配置（演示用，请替换为真实值）
+STRIPE_SECRET_KEY=sk_test_demo_key_replace_with_real_key
+STRIPE_WEBHOOK_SECRET=whsec_demo_secret_replace_with_real_secret
+
+# PayPal 配置（演示用，请替换为真实值）
+PAYPAL_CLIENT_ID=demo_client_id_replace_with_real_id
+PAYPAL_CLIENT_SECRET=demo_client_secret_replace_with_real_secret
+PAYPAL_MODE=sandbox
+
+# 邮件配置（可选）
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+SMTP_FROM=noreply@yourapp.com
+
+# 其他配置
+APP_NAME=Canary
+APP_URL="http://${PUBLIC_IP}:3000"
+SESSION_SECRET="canary-session-secret-2024"
+ENCRYPTION_KEY="canary-encryption-key-2024"
 EOF
 
 log_info "环境配置文件已创建（已配置公网 IP: ${PUBLIC_IP}）"
@@ -620,8 +643,44 @@ docker-compose down || true
 # 清理旧镜像
 docker system prune -f || true
 
+# 检查并修复 Docker 镜像拉取问题
+log_info "检查 Docker 镜像加速器配置..."
+if [ -f /etc/docker/daemon.json ]; then
+    log_info "Docker 镜像加速器已配置"
+else
+    log_warn "Docker 镜像加速器未配置，重新配置..."
+    mkdir -p /etc/docker
+    cat > /etc/docker/daemon.json << 'EOF'
+{
+  "registry-mirrors": [
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://hub-mirror.c.163.com",
+    "https://mirror.baidubce.com",
+    "https://registry.docker-cn.com"
+  ],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m",
+    "max-file": "3"
+  }
+}
+EOF
+    systemctl daemon-reload
+    systemctl restart docker
+    sleep 5
+fi
+
+# 预拉取基础镜像以避免超时
+log_info "预拉取基础镜像..."
+docker pull postgres:15-alpine || docker pull postgres:13-alpine || log_warn "PostgreSQL 镜像拉取失败，将在启动时重试"
+docker pull redis:7-alpine || docker pull redis:6-alpine || log_warn "Redis 镜像拉取失败，将在启动时重试"
+docker pull nginx:alpine || log_warn "Nginx 镜像拉取失败，将在启动时重试"
+
 # 启动服务
 log_info "启动 Docker 服务..."
+# 设置更长的超时时间
+export COMPOSE_HTTP_TIMEOUT=300
+export DOCKER_CLIENT_TIMEOUT=300
 docker-compose up -d --build
 
 # 等待服务启动
