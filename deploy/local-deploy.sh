@@ -13,6 +13,7 @@ PROJECT_NAME="canary"
 DEPLOY_PATH="/opt/${PROJECT_NAME}"
 BACKUP_PATH="/opt/backups/${PROJECT_NAME}"
 CURRENT_DIR=$(pwd)
+PUBLIC_IP="8.159.144.140"  # 阿里云公网 IP，如需修改请编辑此行
 
 # 颜色输出
 RED='\033[0;31m'
@@ -150,17 +151,87 @@ install_nodejs() {
     if ! command -v node &> /dev/null; then
         log_info "安装 Node.js..."
         
-        # 安装 NodeSource repository
-        if command -v yum &> /dev/null; then
-            curl -fsSL https://rpm.nodesource.com/setup_18.x | bash -
-            yum install -y nodejs
-        elif command -v apt-get &> /dev/null; then
-            curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
-            apt-get install -y nodejs
+        # 检测操作系统
+        if [ -f /etc/os-release ]; then
+            . /etc/os-release
+            OS_ID=$ID
         else
-            log_error "无法自动安装 Node.js，请手动安装"
+            OS_ID="unknown"
+        fi
+        
+        case "$OS_ID" in
+            "alinux"|"alios")
+                # Alibaba Cloud Linux 特殊处理
+                log_info "检测到 Alibaba Cloud Linux，使用 EPEL 源安装 Node.js..."
+                
+                # 安装 EPEL 源
+                yum install -y epel-release
+                
+                # 使用 yum 安装 nodejs 和 npm
+                yum install -y nodejs npm
+                
+                # 如果版本太低，尝试从官方二进制包安装
+                NODE_VERSION=$(node --version 2>/dev/null | cut -d'v' -f2 | cut -d'.' -f1)
+                if [ -z "$NODE_VERSION" ] || [ "$NODE_VERSION" -lt 16 ]; then
+                    log_info "系统 Node.js 版本过低，安装官方二进制包..."
+                    
+                    # 下载并安装 Node.js 18 二进制包
+                    cd /tmp
+                    wget https://nodejs.org/dist/v18.19.0/node-v18.19.0-linux-x64.tar.xz
+                    tar -xf node-v18.19.0-linux-x64.tar.xz
+                    
+                    # 复制到系统目录
+                    cp -r node-v18.19.0-linux-x64/{bin,lib,share,include} /usr/local/
+                    
+                    # 创建符号链接
+                    ln -sf /usr/local/bin/node /usr/bin/node
+                    ln -sf /usr/local/bin/npm /usr/bin/npm
+                    ln -sf /usr/local/bin/npx /usr/bin/npx
+                    
+                    # 清理临时文件
+                    rm -rf /tmp/node-v18.19.0-linux-x64*
+                fi
+                ;;
+            "centos"|"rhel"|"rocky"|"almalinux")
+                # CentOS/RHEL 系列
+                log_info "安装 Node.js (CentOS/RHEL)..."
+                
+                # 尝试使用 NodeSource 仓库
+                if curl -fsSL https://rpm.nodesource.com/setup_18.x | bash - 2>/dev/null; then
+                    yum install -y nodejs
+                else
+                    # 备用方案：使用 EPEL
+                    yum install -y epel-release
+                    yum install -y nodejs npm
+                fi
+                ;;
+            "ubuntu"|"debian")
+                # Ubuntu/Debian 系列
+                log_info "安装 Node.js (Ubuntu/Debian)..."
+                curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+                apt-get install -y nodejs
+                ;;
+            *)
+                # 通用方案：下载二进制包
+                log_info "使用通用方案安装 Node.js..."
+                cd /tmp
+                wget https://nodejs.org/dist/v18.19.0/node-v18.19.0-linux-x64.tar.xz
+                tar -xf node-v18.19.0-linux-x64.tar.xz
+                cp -r node-v18.19.0-linux-x64/{bin,lib,share,include} /usr/local/
+                ln -sf /usr/local/bin/node /usr/bin/node
+                ln -sf /usr/local/bin/npm /usr/bin/npm
+                ln -sf /usr/local/bin/npx /usr/bin/npx
+                rm -rf /tmp/node-v18.19.0-linux-x64*
+                ;;
+        esac
+        
+        # 验证安装
+        if ! command -v node &> /dev/null; then
+            log_error "Node.js 安装失败"
             exit 1
         fi
+        
+        log_info "Node.js 安装完成: $(node --version)"
     else
         log_info "Node.js 已安装: $(node --version)"
     fi
@@ -169,6 +240,14 @@ install_nodejs() {
     if ! command -v pnpm &> /dev/null; then
         log_info "安装 pnpm..."
         npm install -g pnpm
+        
+        # 验证 pnpm 安装
+        if ! command -v pnpm &> /dev/null; then
+            log_error "pnpm 安装失败"
+            exit 1
+        fi
+        
+        log_info "pnpm 安装完成: $(pnpm --version)"
     else
         log_info "pnpm 已安装: $(pnpm --version)"
     fi
@@ -234,10 +313,50 @@ copy_files() {
         cp env.production.example "${DEPLOY_PATH}/"
     fi
     
-    # 如果存在 .env.production 文件，也复制过去
-    if [ -f ".env.production" ]; then
-        cp .env.production "${DEPLOY_PATH}/"
+    # 创建或更新 .env.production 文件
+    if [ ! -f ".env.production" ]; then
+        log_info "创建环境配置文件..."
+        cat > .env.production << EOF
+# 生产环境配置
+# 公网 IP: ${PUBLIC_IP}
+
+# 数据库配置
+DATABASE_URL="postgresql://canary_user:secure_password_2024@postgres:5432/canary_db"
+POSTGRES_DB=canary_db
+POSTGRES_USER=canary_user
+POSTGRES_PASSWORD=secure_password_2024
+
+# Redis 配置
+REDIS_URL="redis://redis:6379"
+
+# JWT 配置
+JWT_SECRET="canary-production-jwt-secret-2024"
+JWT_EXPIRES_IN="7d"
+
+# API 配置
+API_PORT=4000
+API_HOST=0.0.0.0
+
+# 前端配置 - 使用公网 IP
+NEXT_PUBLIC_API_URL="http://${PUBLIC_IP}:4000/graphql"
+NEXT_PUBLIC_WS_URL="ws://${PUBLIC_IP}:4000/graphql"
+
+# 环境
+NODE_ENV=production
+
+# 文件上传配置
+MAX_FILE_SIZE=10485760
+UPLOAD_PATH="/app/uploads"
+
+# CORS 配置 - 允许公网 IP 访问
+CORS_ORIGIN="http://${PUBLIC_IP}:3000,http://localhost:3000"
+RATE_LIMIT_MAX=100
+RATE_LIMIT_WINDOW=900000
+EOF
     fi
+    
+    # 复制环境配置文件
+    cp .env.production "${DEPLOY_PATH}/"
     
     log_info "文件复制完成"
 }
@@ -329,8 +448,14 @@ show_deployment_info() {
     echo ""
     echo "📍 部署路径: ${DEPLOY_PATH}"
     echo "📍 备份路径: ${BACKUP_PATH}"
+    echo "📍 公网 IP: ${PUBLIC_IP}"
     echo ""
-    echo "🌐 访问地址:"
+    echo "🌐 本地访问地址（从你的电脑访问）:"
+    echo "   🖥️  前端应用: http://${PUBLIC_IP}:3000"
+    echo "   🔗 GraphQL API: http://${PUBLIC_IP}:4000/graphql"
+    echo "   ❤️  健康检查: http://${PUBLIC_IP}:4000/health"
+    echo ""
+    echo "🌐 服务器本地访问地址:"
     echo "   前端: http://localhost:3000"
     echo "   API:  http://localhost:4000/graphql"
     echo ""
@@ -338,6 +463,11 @@ show_deployment_info() {
     echo "   查看日志: cd ${DEPLOY_PATH} && docker-compose logs -f"
     echo "   重启服务: cd ${DEPLOY_PATH} && docker-compose restart"
     echo "   停止服务: cd ${DEPLOY_PATH} && docker-compose down"
+    echo ""
+    echo "⚠️  重要提醒："
+    echo "   1. 🔥 请在阿里云控制台配置安全组，开放端口 3000, 4000"
+    echo "   2. 🔐 建议修改数据库密码和 JWT 密钥"
+    echo "   3. 🌍 已自动配置公网 IP: ${PUBLIC_IP}"
     echo ""
 }
 

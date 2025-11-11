@@ -32,6 +32,13 @@ fi
 
 log_info "🔧 开始快速修复 FirewallD 问题..."
 
+# 安装常用工具
+log_info "安装常用编辑工具..."
+if ! command -v nano &> /dev/null; then
+    log_info "安装 nano 编辑器..."
+    yum install -y nano 2>/dev/null || dnf install -y nano 2>/dev/null || apt-get install -y nano 2>/dev/null || log_warn "nano 安装失败，请使用 vi 编辑器"
+fi
+
 # 方案1: 尝试启动 firewalld
 log_info "尝试启动 firewalld 服务..."
 if systemctl start firewalld 2>/dev/null && systemctl enable firewalld 2>/dev/null; then
