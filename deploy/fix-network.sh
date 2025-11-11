@@ -37,7 +37,16 @@ fi
 
 log_info "🔧 开始修复网络连接问题..."
 
-# 步骤1: 更新 DNS 配置
+# 步骤1: 安装编译依赖
+log_step "安装编译依赖..."
+yum groupinstall -y "Development Tools"
+yum install -y gcc gcc-c++ make cmake
+yum install -y openssl-devel libffi-devel python3-devel
+yum install -y rust cargo  # cryptography 新版本需要 Rust
+
+log_info "✅ 编译依赖安装完成"
+
+# 步骤2: 更新 DNS 配置
 log_step "配置 DNS..."
 cat > /etc/resolv.conf << 'EOF'
 nameserver 223.5.5.5
@@ -48,7 +57,7 @@ EOF
 
 log_info "✅ DNS 配置完成"
 
-# 步骤2: 配置阿里云镜像源
+# 步骤3: 配置阿里云镜像源
 log_step "配置阿里云镜像源..."
 
 # 备份原有源
@@ -90,7 +99,7 @@ yum makecache
 
 log_info "✅ 阿里云镜像源配置完成"
 
-# 步骤3: 手动安装 Docker（使用阿里云源）
+# 步骤4: 手动安装 Docker（使用阿里云源）
 log_step "使用阿里云源安装 Docker..."
 
 if ! command -v docker &> /dev/null; then
@@ -156,14 +165,22 @@ EOF
     log_info "✅ Docker 镜像加速器配置完成"
 fi
 
-# 步骤4: 安装 Docker Compose
+# 步骤5: 安装 Docker Compose
 log_step "安装 Docker Compose..."
 
 if ! command -v docker-compose &> /dev/null; then
     # 方法1: 使用 pip 安装（最稳定）
     log_info "使用 pip 安装 Docker Compose..."
     yum install -y python3-pip
-    pip3 install -i https://pypi.tuna.tsinghua.edu.cn/simple docker-compose
+    
+    # 更新 pip 和 setuptools
+    pip3 install --upgrade pip setuptools wheel -i https://pypi.tuna.tsinghua.edu.cn/simple
+    
+    # 设置环境变量以避免编译问题
+    export CRYPTOGRAPHY_DONT_BUILD_RUST=1
+    
+    # 安装 docker-compose（使用预编译版本）
+    pip3 install docker-compose -i https://pypi.tuna.tsinghua.edu.cn/simple --prefer-binary
     
     if ! command -v docker-compose &> /dev/null; then
         # 方法2: 手动下载二进制文件
@@ -179,7 +196,7 @@ else
     log_info "Docker Compose 已安装"
 fi
 
-# 步骤5: 安装 Node.js
+# 步骤6: 安装 Node.js
 log_step "安装 Node.js..."
 
 if ! command -v node &> /dev/null; then
@@ -212,7 +229,7 @@ else
     log_info "Node.js 已安装: $(node --version)"
 fi
 
-# 步骤6: 安装 pnpm
+# 步骤7: 安装 pnpm
 log_step "安装 pnpm..."
 
 if ! command -v pnpm &> /dev/null; then
@@ -225,7 +242,7 @@ else
     log_info "pnpm 已安装: $(pnpm --version)"
 fi
 
-# 步骤7: 测试网络连接
+# 步骤8: 测试网络连接
 log_step "测试网络连接..."
 
 # 测试 Docker

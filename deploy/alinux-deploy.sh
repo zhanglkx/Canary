@@ -57,14 +57,33 @@ else
 fi
 
 # 步骤1: 安装基础工具
-log_step "安装基础工具..."
-yum update -y
-yum install -y curl wget tar gzip unzip git nano
+log_step "检查并安装基础工具..."
+
+# 检查并安装基础工具
+tools_to_install=()
+basic_tools=("curl" "wget" "tar" "gzip" "unzip" "git" "nano")
+
+for tool in "${basic_tools[@]}"; do
+    if ! command -v "$tool" &> /dev/null; then
+        tools_to_install+=("$tool")
+    else
+        log_info "$tool 已安装"
+    fi
+done
+
+if [ ${#tools_to_install[@]} -gt 0 ]; then
+    log_info "需要安装: ${tools_to_install[*]}"
+    yum update -y
+    yum install -y "${tools_to_install[@]}"
+    log_info "✅ 基础工具安装完成"
+else
+    log_info "✅ 所有基础工具已安装"
+fi
 
 # 步骤2: 安装 Docker
-log_step "安装 Docker..."
+log_step "检查并安装 Docker..."
 if ! command -v docker &> /dev/null; then
-    log_info "安装 Docker..."
+    log_info "Docker 未安装，开始安装..."
     
     # 方法1: 尝试阿里云镜像（推荐）
     log_info "尝试使用阿里云镜像安装 Docker..."
@@ -138,15 +157,47 @@ EOF
     
     log_info "✅ Docker 安装和配置完成"
 else
-    log_info "Docker 已安装"
-    systemctl start docker || true
-    systemctl enable docker || true
+    log_info "✅ Docker 已安装: $(docker --version)"
+    
+    # 确保 Docker 服务运行
+    if ! systemctl is-active --quiet docker; then
+        log_info "启动 Docker 服务..."
+        systemctl start docker
+        systemctl enable docker
+    else
+        log_info "Docker 服务已运行"
+    fi
+    
+    # 检查并配置镜像加速器
+    if [ ! -f /etc/docker/daemon.json ]; then
+        log_info "配置 Docker 镜像加速器..."
+        mkdir -p /etc/docker
+        cat > /etc/docker/daemon.json << 'EOF'
+{
+  "registry-mirrors": [
+    "https://docker.mirrors.ustc.edu.cn",
+    "https://hub-mirror.c.163.com",
+    "https://mirror.baidubce.com"
+  ],
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "100m",
+    "max-file": "3"
+  }
+}
+EOF
+        systemctl daemon-reload
+        systemctl restart docker
+        log_info "✅ Docker 镜像加速器配置完成"
+    else
+        log_info "Docker 镜像加速器已配置"
+    fi
 fi
 
 # 步骤3: 安装 Docker Compose
-log_step "安装 Docker Compose..."
+log_step "检查并安装 Docker Compose..."
 if ! command -v docker-compose &> /dev/null; then
-    log_info "安装 Docker Compose..."
+    log_info "Docker Compose 未安装，开始安装..."
     
     # 检查是否已经通过 Docker CE 安装了 compose 插件
     if docker compose version &> /dev/null; then
@@ -198,16 +249,23 @@ EOF
         fi
     fi
 else
-    log_info "Docker Compose 已安装"
+    log_info "✅ Docker Compose 已安装: $(docker-compose --version)"
 fi
 
 # 步骤4: 安装 Node.js (专为 Alibaba Cloud Linux 优化)
-log_step "安装 Node.js..."
+log_step "检查并安装 Node.js..."
 if ! command -v node &> /dev/null; then
-    log_info "为 Alibaba Cloud Linux 安装 Node.js..."
+    log_info "Node.js 未安装，开始安装..."
     
-    # 方法1: 尝试 EPEL 源
-    yum install -y epel-release
+    # 检查并安装 EPEL 源
+    if ! yum repolist | grep -q epel; then
+        log_info "安装 EPEL 源..."
+        yum install -y epel-release
+    else
+        log_info "EPEL 源已安装"
+    fi
+    
+    # 安装 Node.js 和 npm
     yum install -y nodejs npm
     
     # 检查版本，如果太低则使用二进制包
@@ -235,48 +293,136 @@ if ! command -v node &> /dev/null; then
         # 清理
         rm -rf /tmp/node-v18.19.0-linux-x64*
     fi
+    
+    log_info "✅ Node.js 安装完成: $(node --version)"
 else
-    log_info "Node.js 已安装: $(node --version)"
+    log_info "✅ Node.js 已安装: $(node --version)"
+    
+    # 检查版本是否满足要求
+    NODE_VERSION=$(node --version 2>/dev/null | cut -d'v' -f2 | cut -d'.' -f1 2>/dev/null || echo "0")
+    if [ "$NODE_VERSION" -lt 16 ]; then
+        log_warn "Node.js 版本过低 (v$NODE_VERSION)，建议升级到 v16 或更高版本"
+        log_info "升级 Node.js 到最新版本..."
+        
+        # 下载并安装最新版本
+        cd /tmp
+        wget -q https://nodejs.org/dist/v18.19.0/node-v18.19.0-linux-x64.tar.xz
+        tar -xf node-v18.19.0-linux-x64.tar.xz
+        
+        # 备份旧版本
+        mv /usr/bin/node /usr/bin/node.old 2>/dev/null || true
+        mv /usr/bin/npm /usr/bin/npm.old 2>/dev/null || true
+        
+        # 安装新版本
+        cp -r node-v18.19.0-linux-x64/{bin,lib,share,include} /usr/local/
+        ln -sf /usr/local/bin/node /usr/bin/node
+        ln -sf /usr/local/bin/npm /usr/bin/npm
+        ln -sf /usr/local/bin/npx /usr/bin/npx
+        
+        # 清理
+        rm -rf /tmp/node-v18.19.0-linux-x64*
+        
+        log_info "✅ Node.js 升级完成: $(node --version)"
+    else
+        log_info "Node.js 版本满足要求"
+    fi
 fi
 
 # 步骤5: 安装 pnpm
-log_step "安装 pnpm..."
+log_step "检查并安装 pnpm..."
 if ! command -v pnpm &> /dev/null; then
-    log_info "安装 pnpm..."
+    log_info "pnpm 未安装，开始安装..."
+    
+    # 配置 npm 镜像源以加速安装
+    npm config set registry https://registry.npmmirror.com
     npm install -g pnpm
+    
+    log_info "✅ pnpm 安装完成: $(pnpm --version)"
 else
-    log_info "pnpm 已安装: $(pnpm --version)"
+    log_info "✅ pnpm 已安装: $(pnpm --version)"
 fi
 
 # 步骤6: 创建目录
-log_step "创建必要目录..."
-mkdir -p "${DEPLOY_PATH}"
-mkdir -p "${BACKUP_PATH}"
-mkdir -p "${DEPLOY_PATH}/ssl"
+log_step "检查并创建必要目录..."
+
+directories=("${DEPLOY_PATH}" "${BACKUP_PATH}" "${DEPLOY_PATH}/ssl")
+for dir in "${directories[@]}"; do
+    if [ ! -d "$dir" ]; then
+        mkdir -p "$dir"
+        log_info "创建目录: $dir"
+    else
+        log_info "目录已存在: $dir"
+    fi
+done
+
+log_info "✅ 目录检查完成"
 
 # 步骤7: 配置防火墙
-log_step "配置防火墙..."
+log_step "检查并配置防火墙..."
+
+required_ports=("3000/tcp" "4000/tcp" "80/tcp" "443/tcp")
+
 if systemctl is-active --quiet firewalld; then
-    log_info "配置 firewalld 规则..."
-    firewall-cmd --permanent --add-port=3000/tcp
-    firewall-cmd --permanent --add-port=4000/tcp
-    firewall-cmd --permanent --add-port=80/tcp
-    firewall-cmd --permanent --add-port=443/tcp
-    firewall-cmd --reload
+    log_info "使用 firewalld 配置防火墙规则..."
+    
+    # 检查端口是否已开放
+    ports_to_add=()
+    for port in "${required_ports[@]}"; do
+        if ! firewall-cmd --list-ports | grep -q "$port"; then
+            ports_to_add+=("$port")
+        else
+            log_info "端口 $port 已开放"
+        fi
+    done
+    
+    if [ ${#ports_to_add[@]} -gt 0 ]; then
+        log_info "需要开放端口: ${ports_to_add[*]}"
+        for port in "${ports_to_add[@]}"; do
+            firewall-cmd --permanent --add-port="$port"
+        done
+        firewall-cmd --reload
+        log_info "✅ firewalld 规则配置完成"
+    else
+        log_info "✅ 所有必要端口已开放"
+    fi
+    
 elif command -v iptables &> /dev/null; then
-    log_info "配置 iptables 规则..."
-    iptables -I INPUT -p tcp --dport 3000 -j ACCEPT
-    iptables -I INPUT -p tcp --dport 4000 -j ACCEPT
-    iptables -I INPUT -p tcp --dport 80 -j ACCEPT
-    iptables -I INPUT -p tcp --dport 443 -j ACCEPT
-    # 保存规则
-    iptables-save > /etc/sysconfig/iptables 2>/dev/null || true
+    log_info "使用 iptables 配置防火墙规则..."
+    
+    # 检查并添加 iptables 规则
+    ports_to_add=()
+    for port in "3000" "4000" "80" "443"; do
+        if ! iptables -L INPUT -n | grep -q "dpt:$port"; then
+            ports_to_add+=("$port")
+        else
+            log_info "端口 $port 已开放"
+        fi
+    done
+    
+    if [ ${#ports_to_add[@]} -gt 0 ]; then
+        log_info "需要开放端口: ${ports_to_add[*]}"
+        for port in "${ports_to_add[@]}"; do
+            iptables -I INPUT -p tcp --dport "$port" -j ACCEPT
+        done
+        # 保存规则
+        iptables-save > /etc/sysconfig/iptables 2>/dev/null || true
+        log_info "✅ iptables 规则配置完成"
+    else
+        log_info "✅ 所有必要端口已开放"
+    fi
+    
 else
-    log_warn "未找到防火墙工具，请手动配置端口"
+    log_warn "未找到防火墙工具，请手动配置端口: ${required_ports[*]}"
 fi
 
 # 步骤8: 创建环境配置
-log_step "创建环境配置..."
+log_step "检查并创建环境配置..."
+
+if [ -f ".env.production" ]; then
+    log_info "环境配置文件已存在，创建备份..."
+    cp .env.production ".env.production.backup.$(date +%Y%m%d-%H%M%S)"
+fi
+
 log_info "配置公网 IP: ${PUBLIC_IP}"
 
 cat > .env.production << EOF
