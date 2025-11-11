@@ -38,6 +38,33 @@ log_step() {
     echo -e "${BLUE}[STEP]${NC} $1"
 }
 
+# 确保 pnpm 可用的函数
+ensure_pnpm() {
+    # 刷新 PATH 环境变量
+    export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+    hash -r
+    
+    # 如果 pnpm 不可用，尝试创建符号链接
+    if ! command -v pnpm &> /dev/null; then
+        # 查找 pnpm 的可能位置
+        local pnpm_locations=(
+            "$(npm root -g)/pnpm/bin/pnpm.js"
+            "/usr/local/lib/node_modules/pnpm/bin/pnpm.js"
+            "/usr/lib/node_modules/pnpm/bin/pnpm.js"
+        )
+        
+        for location in "${pnpm_locations[@]}"; do
+            if [ -f "$location" ]; then
+                ln -sf "$location" /usr/local/bin/pnpm 2>/dev/null || true
+                ln -sf "$location" /usr/bin/pnpm 2>/dev/null || true
+                chmod +x /usr/local/bin/pnpm /usr/bin/pnpm 2>/dev/null || true
+                hash -r
+                break
+            fi
+        done
+    fi
+}
+
 # 检查是否为 root 用户
 if [ "$EUID" -ne 0 ]; then
     log_error "请使用 root 权限运行此脚本"
@@ -346,16 +373,81 @@ fi
 
 # 步骤5: 安装 pnpm
 log_step "检查并安装 pnpm..."
-if ! command -v pnpm &> /dev/null; then
-    log_info "pnpm 未安装，开始安装..."
+
+# 刷新 PATH 环境变量
+export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+hash -r
+
+# 检查多个可能的 pnpm 位置
+PNPM_PATHS=(
+    "/usr/local/bin/pnpm"
+    "/usr/bin/pnpm"
+    "$(which pnpm 2>/dev/null)"
+    "$(npm root -g)/pnpm/bin/pnpm.js"
+)
+
+PNPM_FOUND=false
+PNPM_PATH=""
+
+for path in "${PNPM_PATHS[@]}"; do
+    if [ -n "$path" ] && [ -f "$path" ] && [ -x "$path" ]; then
+        PNPM_FOUND=true
+        PNPM_PATH="$path"
+        log_info "找到 pnpm: $path"
+        break
+    fi
+done
+
+if [ "$PNPM_FOUND" = true ]; then
+    # 创建符号链接确保 pnpm 可用
+    if [ ! -f "/usr/local/bin/pnpm" ]; then
+        ln -sf "$PNPM_PATH" /usr/local/bin/pnpm
+    fi
+    if [ ! -f "/usr/bin/pnpm" ]; then
+        ln -sf "$PNPM_PATH" /usr/bin/pnpm
+    fi
+    
+    # 再次刷新 PATH
+    hash -r
+    
+    # 验证 pnpm 可用性
+    if command -v pnpm &> /dev/null; then
+        log_info "✅ pnpm 已安装: $(pnpm --version)"
+    else
+        log_warn "pnpm 文件存在但命令不可用，重新安装..."
+        PNPM_FOUND=false
+    fi
+fi
+
+if [ "$PNPM_FOUND" = false ]; then
+    log_info "pnpm 未正确安装，开始安装..."
     
     # 配置 npm 镜像源以加速安装
     npm config set registry https://registry.npmmirror.com
+    
+    # 安装 pnpm
     npm install -g pnpm
     
-    log_info "✅ pnpm 安装完成: $(pnpm --version)"
-else
-    log_info "✅ pnpm 已安装: $(pnpm --version)"
+    # 刷新 PATH 和命令缓存
+    export PATH="/usr/local/bin:/usr/bin:/bin:$PATH"
+    hash -r
+    
+    # 创建符号链接
+    PNPM_GLOBAL_PATH=$(npm root -g)/pnpm/bin/pnpm.js
+    if [ -f "$PNPM_GLOBAL_PATH" ]; then
+        ln -sf "$PNPM_GLOBAL_PATH" /usr/local/bin/pnpm
+        ln -sf "$PNPM_GLOBAL_PATH" /usr/bin/pnpm
+        chmod +x /usr/local/bin/pnpm /usr/bin/pnpm
+    fi
+    
+    # 最终验证
+    if command -v pnpm &> /dev/null; then
+        log_info "✅ pnpm 安装完成: $(pnpm --version)"
+    else
+        log_error "pnpm 安装失败，请手动检查"
+        log_error "尝试运行: npm install -g pnpm --registry=https://registry.npmmirror.com"
+        exit 1
+    fi
 fi
 
 # 步骤6: 创建目录
@@ -487,6 +579,9 @@ if [ ! -f "package.json" ]; then
     log_error "请在项目根目录运行此脚本"
     exit 1
 fi
+
+# 确保 pnpm 可用
+ensure_pnpm
 
 # 安装依赖
 log_info "安装项目依赖..."
