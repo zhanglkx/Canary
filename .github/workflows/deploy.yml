@@ -17,7 +17,7 @@ jobs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
     
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
@@ -31,7 +31,7 @@ jobs:
         uses: pnpm/action-setup@v2
         with:
           version: 9
-          
+
       - name: 打包项目
         run: |
           echo "开始打包项目..."
@@ -101,10 +101,12 @@ jobs:
           echo "开始在服务器上部署..."
           ssh -i ~/.ssh/aliyun_key.pem \
             -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=60 \
+            -o ServerAliveCountMax=10 \
             root@${{ secrets.ALIYUN_HOST }} << 'ENDSSH'
           
-          # 创建部署目录
-          mkdir -p /opt/canary
+            # 创建部署目录
+            mkdir -p /opt/canary
           cd /opt/canary
           
           # 解压文件
@@ -122,43 +124,88 @@ jobs:
           echo "清理未使用的 Docker 资源..."
           docker system prune -f || true
           
-          # 构建并启动服务
-          echo "构建并启动服务..."
-          docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build
+          # 在后台构建并启动服务（避免 SSH 超时）
+          echo "构建并启动服务（后台运行）..."
+          nohup docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build > /tmp/docker-deploy.log 2>&1 &
           
-          # 等待服务启动
-          echo "等待服务启动..."
-          sleep 10
+          # 记录 PID
+          DEPLOY_PID=$!
+          echo "部署进程 PID: $DEPLOY_PID"
           
-          # 检查服务状态
-          echo "检查服务状态..."
-          docker ps --filter "name=canary"
+          # 等待一段时间让构建开始
+          sleep 5
           
-          # 检查健康状态
-          echo "检查 API 健康状态..."
-          if curl -f http://localhost:4000/health; then
-            echo "✓ API 服务健康检查通过"
+          # 检查进程是否还在运行
+          if kill -0 $DEPLOY_PID 2>/dev/null; then
+            echo "✓ 部署进程正在后台运行"
+            echo "日志文件: /tmp/docker-deploy.log"
           else
-            echo "⚠ API 服务可能还在启动中"
+            echo "⚠ 部署进程已结束，检查日志"
+            tail -20 /tmp/docker-deploy.log
           fi
           
           echo "=========================================="
-          echo "✓ 部署完成！"
+          echo "✓ 部署已启动！"
           echo "=========================================="
+          echo "注意: Docker 镜像构建在后台进行，可能需要 5-10 分钟"
+          echo "使用以下命令查看进度:"
+          echo "  ssh root@${{ secrets.ALIYUN_HOST }}"
+          echo "  tail -f /tmp/docker-deploy.log"
           
           ENDSSH
           
       - name: 验证部署
         run: |
-          echo "验证部署..."
-          sleep 5
+          echo "等待服务启动（60秒）..."
+          sleep 60
           
-          # 检查服务是否可访问
-          if curl -f http://${{ secrets.ALIYUN_HOST }}/health; then
-            echo "✓ 部署验证成功！服务正常运行"
+          echo "连接服务器检查状态..."
+          ssh -i ~/.ssh/aliyun_key.pem \
+            -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=60 \
+            root@${{ secrets.ALIYUN_HOST }} << 'ENDSSH'
+          
+          echo "=== 容器状态 ==="
+          docker ps --filter "name=canary" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || true
+          
+          echo ""
+          echo "=== 部署日志（最后30行）==="
+          tail -30 /tmp/docker-deploy.log || echo "日志文件不存在"
+          
+          echo ""
+          echo "=== 检查服务健康状态 ==="
+          if docker ps | grep -q "canary-api-prod.*Up"; then
+            echo "✓ API 容器正在运行"
+            if curl -f http://localhost:4000/health 2>/dev/null; then
+              echo "✓ API 健康检查通过"
+            else
+              echo "⚠ API 容器运行但健康检查失败（可能还在启动中）"
+            fi
           else
-            echo "⚠ 服务可能还在启动中，请稍后手动检查"
+            echo "⚠ API 容器未运行或正在构建中"
           fi
+          
+          if docker ps | grep -q "canary-web-prod.*Up"; then
+            echo "✓ Web 容器正在运行"
+          else
+            echo "⚠ Web 容器未运行或正在构建中"
+          fi
+          
+          if docker ps | grep -q "canary-db-prod.*Up"; then
+            echo "✓ 数据库容器正在运行"
+          else
+            echo "⚠ 数据库容器未运行"
+          fi
+          
+          ENDSSH
+          
+          echo ""
+          echo "=========================================="
+          echo "提示: 如果容器还在构建中，请稍后手动检查："
+          echo "  ssh -i ~/.ssh/aliyun_key.pem root@${{ secrets.ALIYUN_HOST }}"
+          echo "  docker ps"
+          echo "  tail -f /tmp/docker-deploy.log"
+          echo "=========================================="
           
       - name: 通知部署结果
         if: always()
