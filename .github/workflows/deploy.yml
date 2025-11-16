@@ -160,89 +160,49 @@ jobs:
           echo "等待服务启动（60秒）..."
           sleep 60
 
-          echo "连接服务器检查状态（最多重试3次）..."
+          echo "连接服务器检查状态..."
+          ssh -i ~/.ssh/aliyun_key.pem \
+            -o StrictHostKeyChecking=no \
+            -o ServerAliveInterval=60 \
+            -o ConnectTimeout=30 \
+            root@${{ secrets.ALIYUN_HOST }} 'bash -s' << 'ENDSSH'
 
-          # 重试机制
-          MAX_RETRIES=3
-          RETRY_COUNT=0
-          SUCCESS=false
+          echo "=== 容器状态 ==="
+          docker ps --filter "name=canary" || true
 
-          while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = "false" ]; do
-            RETRY_COUNT=$((RETRY_COUNT + 1))
-            echo "尝试连接服务器 (第 $RETRY_COUNT 次)..."
-            
-            if ssh -i ~/.ssh/aliyun_key.pem \
-              -o StrictHostKeyChecking=no \
-              -o ServerAliveInterval=60 \
-              -o ConnectTimeout=30 \
-              root@${{ secrets.ALIYUN_HOST }} << 'ENDSSH'
-            
-            echo "=== 容器状态 ==="
-            docker ps --filter "name=canary" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || true
-            
-            echo ""
-            echo "=== 部署日志（最后30行）==="
-            tail -30 /tmp/docker-deploy.log 2>/dev/null || echo "日志文件不存在或构建刚开始"
-            
-            echo ""
-            echo "=== 检查服务健康状态 ==="
-            if docker ps | grep -q "canary-api-prod.*Up"; then
-              echo "✓ API 容器正在运行"
-              if curl -f http://localhost:4000/health 2>/dev/null; then
-                echo "✓ API 健康检查通过"
-              else
-                echo "⚠ API 容器运行但健康检查失败（可能还在启动中）"
-              fi
-            else
-              echo "⚠ API 容器未运行或正在构建中"
-            fi
-            
-            if docker ps | grep -q "canary-web-prod.*Up"; then
-              echo "✓ Web 容器正在运行"
-            else
-              echo "⚠ Web 容器未运行或正在构建中"
-            fi
-            
-            if docker ps | grep -q "canary-db-prod.*Up"; then
-              echo "✓ 数据库容器正在运行"
-            else
-              echo "⚠ 数据库容器未运行"
-            fi
-            
-            ENDSSH
-            then
-              SUCCESS=true
-              echo "✓ 成功连接并检查状态"
-            else
-              echo "⚠ 连接失败，等待30秒后重试..."
-              sleep 30
-            fi
-          done
+          echo ""
+          echo "=== 部署日志（最后50行）==="
+          tail -50 /tmp/docker-deploy.log 2>/dev/null || echo "日志文件不存在"
 
-          if [ "$SUCCESS" = "false" ]; then
-            echo ""
-            echo "=========================================="
-            echo "⚠ 无法连接到服务器进行验证"
-            echo "可能原因："
-            echo "  1. 服务器防火墙限制短时间内多次 SSH 连接"
-            echo "  2. 服务器负载过高"
-            echo "  3. 网络临时不稳定"
-            echo ""
-            echo "建议手动检查部署状态："
-            echo "  ssh -i ~/.ssh/aliyun_key.pem root@${{ secrets.ALIYUN_HOST }}"
-            echo "  docker ps"
-            echo "  tail -f /tmp/docker-deploy.log"
-            echo "=========================================="
+          echo ""
+          echo "=== 检查服务 ==="
+          if docker ps | grep -q "canary-api-prod"; then
+            echo "✓ API 容器存在"
           else
-            echo ""
-            echo "=========================================="
-            echo "✓ 部署验证完成"
-            echo ""
-            echo "如果容器还在构建中，请等待5-10分钟后检查："
-            echo "  访问: http://${{ secrets.ALIYUN_HOST }}"
-            echo "  或手动检查: ssh -i ~/.ssh/aliyun_key.pem root@${{ secrets.ALIYUN_HOST }}"
-            echo "=========================================="
+            echo "✗ API 容器不存在"
           fi
+
+          if docker ps | grep -q "canary-web-prod"; then
+            echo "✓ Web 容器存在"
+          else
+            echo "✗ Web 容器不存在"
+          fi
+
+          if docker ps | grep -q "canary-db-prod"; then
+            echo "✓ 数据库容器存在"
+          else
+            echo "✗ 数据库容器不存在"
+          fi
+
+          ENDSSH
+
+          echo ""
+          echo "=========================================="
+          echo "手动检查命令："
+          echo "  ssh -i ~/.ssh/aliyun_key.pem root@${{ secrets.ALIYUN_HOST }}"
+          echo "  docker ps"
+          echo "  tail -f /tmp/docker-deploy.log"
+          echo "=========================================="
 
       - name: 通知部署结果
         if: always()
