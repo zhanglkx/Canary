@@ -15,18 +15,18 @@ jobs:
   deploy:
     # 只在 PR 合并后或直接推送到 main/master 时运行
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.merged == true)
-    
+
     runs-on: ubuntu-latest
 
     steps:
       - name: 检出代码
         uses: actions/checkout@v4
-        
+
       - name: 设置 Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20'
-          
+
       - name: 安装 pnpm
         uses: pnpm/action-setup@v2
         with:
@@ -55,23 +55,23 @@ jobs:
             .
           TAR_EXIT=$?
           set -e
-          
+
           # 退出码 1 通常表示文件在读取时被修改，这是可以接受的
           # 其他退出码表示真正的错误
           if [ $TAR_EXIT -ne 0 ] && [ $TAR_EXIT -ne 1 ]; then
             echo "错误: tar 命令失败，退出码: $TAR_EXIT"
             exit $TAR_EXIT
           fi
-          
+
           # 验证打包文件是否创建成功
           if [ ! -f canary-deploy.tar.gz ]; then
             echo "错误: 打包文件未创建"
             exit 1
           fi
-          
+
           echo "✓ 项目打包完成"
           ls -lh canary-deploy.tar.gz
-          
+
       - name: 配置 SSH 密钥
         run: |
           mkdir -p ~/.ssh
@@ -86,7 +86,7 @@ jobs:
             echo "错误: SSH 密钥格式无效"
             exit 1
           }
-          
+
       - name: 上传到服务器
         run: |
           echo "开始上传文件到服务器..."
@@ -95,7 +95,7 @@ jobs:
             canary-deploy.tar.gz \
             root@${{ secrets.ALIYUN_HOST }}:/opt/
           echo "✓ 文件上传完成"
-          
+
       - name: 部署到服务器
         run: |
           echo "开始在服务器上部署..."
@@ -104,37 +104,37 @@ jobs:
             -o ServerAliveInterval=60 \
             -o ServerAliveCountMax=10 \
             root@${{ secrets.ALIYUN_HOST }} << 'ENDSSH'
-          
+
             # 创建部署目录
             mkdir -p /opt/canary
           cd /opt/canary
-          
+
           # 解压文件
           echo "解压项目文件..."
           tar xzf /opt/canary-deploy.tar.gz
           rm /opt/canary-deploy.tar.gz
-          
+
           # 停止现有服务
           echo "停止现有服务..."
           if [ -f docker-compose.prod.yml ]; then
             docker compose -f docker-compose.prod.yml --env-file .env.production down || true
           fi
-          
+
           # 清理旧的镜像（可选，节省空间）
           echo "清理未使用的 Docker 资源..."
           docker system prune -f || true
-          
+
           # 在后台构建并启动服务（避免 SSH 超时）
           echo "构建并启动服务（后台运行）..."
           nohup docker compose -f docker-compose.prod.yml --env-file .env.production up -d --build > /tmp/docker-deploy.log 2>&1 &
-          
+
           # 记录 PID
           DEPLOY_PID=$!
           echo "部署进程 PID: $DEPLOY_PID"
-          
+
           # 等待一段时间让构建开始
           sleep 5
-          
+
           # 检查进程是否还在运行
           if kill -0 $DEPLOY_PID 2>/dev/null; then
             echo "✓ 部署进程正在后台运行"
@@ -143,7 +143,7 @@ jobs:
             echo "⚠ 部署进程已结束，检查日志"
             tail -20 /tmp/docker-deploy.log
           fi
-          
+
           echo "=========================================="
           echo "✓ 部署已启动！"
           echo "=========================================="
@@ -151,62 +151,99 @@ jobs:
           echo "使用以下命令查看进度:"
           echo "  ssh root@${{ secrets.ALIYUN_HOST }}"
           echo "  tail -f /tmp/docker-deploy.log"
-          
+
           ENDSSH
-          
+
       - name: 验证部署
+        continue-on-error: true
         run: |
           echo "等待服务启动（60秒）..."
           sleep 60
-          
-          echo "连接服务器检查状态..."
-          ssh -i ~/.ssh/aliyun_key.pem \
-            -o StrictHostKeyChecking=no \
-            -o ServerAliveInterval=60 \
-            root@${{ secrets.ALIYUN_HOST }} << 'ENDSSH'
-          
-          echo "=== 容器状态 ==="
-          docker ps --filter "name=canary" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || true
-          
-          echo ""
-          echo "=== 部署日志（最后30行）==="
-          tail -30 /tmp/docker-deploy.log || echo "日志文件不存在"
-          
-          echo ""
-          echo "=== 检查服务健康状态 ==="
-          if docker ps | grep -q "canary-api-prod.*Up"; then
-            echo "✓ API 容器正在运行"
-            if curl -f http://localhost:4000/health 2>/dev/null; then
-              echo "✓ API 健康检查通过"
+
+          echo "连接服务器检查状态（最多重试3次）..."
+
+          # 重试机制
+          MAX_RETRIES=3
+          RETRY_COUNT=0
+          SUCCESS=false
+
+          while [ $RETRY_COUNT -lt $MAX_RETRIES ] && [ "$SUCCESS" = "false" ]; do
+            RETRY_COUNT=$((RETRY_COUNT + 1))
+            echo "尝试连接服务器 (第 $RETRY_COUNT 次)..."
+            
+            if ssh -i ~/.ssh/aliyun_key.pem \
+              -o StrictHostKeyChecking=no \
+              -o ServerAliveInterval=60 \
+              -o ConnectTimeout=30 \
+              root@${{ secrets.ALIYUN_HOST }} << 'ENDSSH'
+            
+            echo "=== 容器状态 ==="
+            docker ps --filter "name=canary" --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" || true
+            
+            echo ""
+            echo "=== 部署日志（最后30行）==="
+            tail -30 /tmp/docker-deploy.log 2>/dev/null || echo "日志文件不存在或构建刚开始"
+            
+            echo ""
+            echo "=== 检查服务健康状态 ==="
+            if docker ps | grep -q "canary-api-prod.*Up"; then
+              echo "✓ API 容器正在运行"
+              if curl -f http://localhost:4000/health 2>/dev/null; then
+                echo "✓ API 健康检查通过"
+              else
+                echo "⚠ API 容器运行但健康检查失败（可能还在启动中）"
+              fi
             else
-              echo "⚠ API 容器运行但健康检查失败（可能还在启动中）"
+              echo "⚠ API 容器未运行或正在构建中"
             fi
+            
+            if docker ps | grep -q "canary-web-prod.*Up"; then
+              echo "✓ Web 容器正在运行"
+            else
+              echo "⚠ Web 容器未运行或正在构建中"
+            fi
+            
+            if docker ps | grep -q "canary-db-prod.*Up"; then
+              echo "✓ 数据库容器正在运行"
+            else
+              echo "⚠ 数据库容器未运行"
+            fi
+            
+            ENDSSH
+            then
+              SUCCESS=true
+              echo "✓ 成功连接并检查状态"
+            else
+              echo "⚠ 连接失败，等待30秒后重试..."
+              sleep 30
+            fi
+          done
+
+          if [ "$SUCCESS" = "false" ]; then
+            echo ""
+            echo "=========================================="
+            echo "⚠ 无法连接到服务器进行验证"
+            echo "可能原因："
+            echo "  1. 服务器防火墙限制短时间内多次 SSH 连接"
+            echo "  2. 服务器负载过高"
+            echo "  3. 网络临时不稳定"
+            echo ""
+            echo "建议手动检查部署状态："
+            echo "  ssh -i ~/.ssh/aliyun_key.pem root@${{ secrets.ALIYUN_HOST }}"
+            echo "  docker ps"
+            echo "  tail -f /tmp/docker-deploy.log"
+            echo "=========================================="
           else
-            echo "⚠ API 容器未运行或正在构建中"
+            echo ""
+            echo "=========================================="
+            echo "✓ 部署验证完成"
+            echo ""
+            echo "如果容器还在构建中，请等待5-10分钟后检查："
+            echo "  访问: http://${{ secrets.ALIYUN_HOST }}"
+            echo "  或手动检查: ssh -i ~/.ssh/aliyun_key.pem root@${{ secrets.ALIYUN_HOST }}"
+            echo "=========================================="
           fi
-          
-          if docker ps | grep -q "canary-web-prod.*Up"; then
-            echo "✓ Web 容器正在运行"
-          else
-            echo "⚠ Web 容器未运行或正在构建中"
-          fi
-          
-          if docker ps | grep -q "canary-db-prod.*Up"; then
-            echo "✓ 数据库容器正在运行"
-          else
-            echo "⚠ 数据库容器未运行"
-          fi
-          
-          ENDSSH
-          
-          echo ""
-          echo "=========================================="
-          echo "提示: 如果容器还在构建中，请稍后手动检查："
-          echo "  ssh -i ~/.ssh/aliyun_key.pem root@${{ secrets.ALIYUN_HOST }}"
-          echo "  docker ps"
-          echo "  tail -f /tmp/docker-deploy.log"
-          echo "=========================================="
-          
+
       - name: 通知部署结果
         if: always()
         run: |
