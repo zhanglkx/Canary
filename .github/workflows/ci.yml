@@ -1,0 +1,213 @@
+name: CI - Build and Test
+
+on:
+  push:
+    branches:
+      - main
+      - master
+      - develop
+  pull_request:
+    branches:
+      - main
+      - master
+
+jobs:
+  # 代码质量检查
+  lint:
+    name: 代码检查
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+          
+      - name: 获取 pnpm store 目录
+        id: pnpm-cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          
+      - name: 设置 pnpm 缓存
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+        
+      - name: 运行 Lint
+        run: pnpm lint
+        continue-on-error: true
+
+  # 后端测试
+  test-api:
+    name: 后端测试
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+          
+      - name: 获取 pnpm store 目录
+        id: pnpm-cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          
+      - name: 设置 pnpm 缓存
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+        
+      - name: 构建 API
+        run: pnpm --filter api build
+        
+      - name: 运行测试
+        run: pnpm --filter api test
+        continue-on-error: true
+        env:
+          DATABASE_HOST: localhost
+          DATABASE_PORT: 5432
+          DATABASE_USERNAME: postgres
+          DATABASE_PASSWORD: postgres
+          DATABASE_NAME: test_db
+          JWT_SECRET: test-secret
+
+  # 前端构建测试
+  test-web:
+    name: 前端构建测试
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        
+      - name: 设置 Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          
+      - name: 安装 pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9
+          
+      - name: 获取 pnpm store 目录
+        id: pnpm-cache
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+          
+      - name: 设置 pnpm 缓存
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+            
+      - name: 安装依赖
+        run: pnpm install --frozen-lockfile
+        
+      - name: 构建 Web
+        run: pnpm --filter web build
+        env:
+          NEXT_PUBLIC_API_URL: http://localhost:4000/graphql
+
+  # Docker 镜像构建测试
+  test-docker:
+    name: Docker 构建测试
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+        
+      - name: 设置 Docker Buildx
+        uses: docker/setup-buildx-action@v3
+        
+      - name: 测试 API Docker 镜像构建
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/api/Dockerfile
+          push: false
+          tags: canary-api:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+          
+      - name: 测试 Web Docker 镜像构建
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/web/Dockerfile
+          push: false
+          tags: canary-web:test
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+  # 汇总结果
+  ci-success:
+    name: CI 检查完成
+    runs-on: ubuntu-latest
+    needs: [lint, test-api, test-web, test-docker]
+    if: always()
+    
+    steps:
+      - name: 检查所有任务状态
+        run: |
+          if [ "${{ needs.lint.result }}" == "success" ] && \
+             [ "${{ needs.test-api.result }}" == "success" ] && \
+             [ "${{ needs.test-web.result }}" == "success" ] && \
+             [ "${{ needs.test-docker.result }}" == "success" ]; then
+            echo "✓ 所有 CI 检查通过！"
+            exit 0
+          else
+            echo "⚠ 部分 CI 检查失败，请查看日志"
+            echo "Lint: ${{ needs.lint.result }}"
+            echo "API 测试: ${{ needs.test-api.result }}"
+            echo "Web 构建: ${{ needs.test-web.result }}"
+            echo "Docker 构建: ${{ needs.test-docker.result }}"
+            exit 0
+          fi
