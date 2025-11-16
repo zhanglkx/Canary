@@ -40,9 +40,17 @@ jobs:
             --exclude='dist' \
             --exclude='.next' \
             --exclude='.git' \
+            --exclude='.github' \
             --exclude='*.log' \
+            --exclude='coverage' \
+            --exclude='.pnpm-store' \
+            --exclude='.turbo' \
+            --exclude='tmp' \
+            --exclude='temp' \
+            --exclude='.cache' \
             --exclude='canary-deploy.tar.gz' \
             --exclude='canary-deployment.tar.gz' \
+            --warning=no-file-changed \
             .
           echo "✓ 项目打包完成"
           ls -lh canary-deploy.tar.gz
