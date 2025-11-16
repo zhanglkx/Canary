@@ -11,24 +11,23 @@ Error: Process completed with exit code 1.
 ### 原因
 在 GitHub Actions 运行时，某些文件（如 pnpm 缓存、临时文件）在打包过程中被修改，导致 tar 命令报错并退出。
 
-### 解决方案 ✅
+### 解决方案 ✅ (已修复)
 
-已在以下文件中修复：
-- `.github/workflows/deploy.yml`
-- `deploy-to-aliyun.sh`
+**问题分析**：
+1. 初始尝试使用 `--warning=no-file-changed` 参数，但该参数在某些 tar 版本中不被支持
+2. GitHub Actions 的 runner 使用的 tar 版本可能不支持此选项
 
-**修复内容**：
-1. 添加 `--warning=no-file-changed` 参数，让 tar 忽略文件变化警告
-2. 排除更多可能变化的目录：
-   - `.pnpm-store` - pnpm 缓存
-   - `.turbo` - Turbo 缓存
-   - `coverage` - 测试覆盖率文件
-   - `tmp`, `temp` - 临时目录
-   - `.cache` - 各种缓存目录
-   - `.github` - GitHub 配置（不需要部署）
+**最终解决方案**：
+1. 移除不兼容的 `--warning=no-file-changed` 参数
+2. 使用 `set +e` 临时禁用错误退出
+3. 捕获 tar 命令的退出码
+4. 只接受退出码 0 和 1（1 表示文件在读取时被修改，这是正常的）
+5. 验证打包文件确实创建成功
 
-**修复后的打包命令**：
+**修复后的打包脚本**：
 ```bash
+# 使用 set +e 临时允许命令失败
+set +e
 tar czf canary-deploy.tar.gz \
   --exclude='node_modules' \
   --exclude='dist' \
@@ -44,9 +43,28 @@ tar czf canary-deploy.tar.gz \
   --exclude='.cache' \
   --exclude='canary-deploy.tar.gz' \
   --exclude='canary-deployment.tar.gz' \
-  --warning=no-file-changed \
   .
+TAR_EXIT=$?
+set -e
+
+# 退出码 1 通常表示文件在读取时被修改，这是可以接受的
+# 其他退出码表示真正的错误
+if [ $TAR_EXIT -ne 0 ] && [ $TAR_EXIT -ne 1 ]; then
+  echo "错误: tar 命令失败，退出码: $TAR_EXIT"
+  exit $TAR_EXIT
+fi
+
+# 验证打包文件是否创建成功
+if [ ! -f canary-deploy.tar.gz ]; then
+  echo "错误: 打包文件未创建"
+  exit 1
+fi
 ```
+
+**tar 退出码说明**：
+- `0`: 成功，无警告
+- `1`: 文件在读取时被修改（可接受）
+- `2`: 致命错误（必须失败）
 
 ---
 

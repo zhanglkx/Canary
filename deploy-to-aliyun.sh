@@ -35,6 +35,9 @@ echo "✓ 远程目录创建完成: ${REMOTE_DIR}"
 # 3. 打包项目文件
 echo ""
 echo "步骤 3/5: 打包项目文件..."
+
+# 使用 set +e 临时允许命令失败
+set +e
 tar czf canary-deploy.tar.gz \
     --exclude='node_modules' \
     --exclude='dist' \
@@ -50,9 +53,24 @@ tar czf canary-deploy.tar.gz \
     --exclude='.cache' \
     --exclude='canary-deploy.tar.gz' \
     --exclude='canary-deployment.tar.gz' \
-    --warning=no-file-changed \
     .
+TAR_EXIT=$?
+set -e
+
+# 退出码 1 通常表示文件在读取时被修改，这是可以接受的
+if [ $TAR_EXIT -ne 0 ] && [ $TAR_EXIT -ne 1 ]; then
+    echo "✗ 错误: tar 命令失败，退出码: $TAR_EXIT"
+    exit $TAR_EXIT
+fi
+
+# 验证打包文件是否创建成功
+if [ ! -f canary-deploy.tar.gz ]; then
+    echo "✗ 错误: 打包文件未创建"
+    exit 1
+fi
+
 echo "✓ 项目打包完成: canary-deploy.tar.gz"
+ls -lh canary-deploy.tar.gz
 
 # 4. 上传到服务器
 echo ""

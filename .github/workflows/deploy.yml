@@ -35,6 +35,8 @@ jobs:
       - name: 打包项目
         run: |
           echo "开始打包项目..."
+          # 使用 set +e 临时允许命令失败
+          set +e
           tar czf canary-deploy.tar.gz \
             --exclude='node_modules' \
             --exclude='dist' \
@@ -50,8 +52,23 @@ jobs:
             --exclude='.cache' \
             --exclude='canary-deploy.tar.gz' \
             --exclude='canary-deployment.tar.gz' \
-            --warning=no-file-changed \
             .
+          TAR_EXIT=$?
+          set -e
+          
+          # 退出码 1 通常表示文件在读取时被修改，这是可以接受的
+          # 其他退出码表示真正的错误
+          if [ $TAR_EXIT -ne 0 ] && [ $TAR_EXIT -ne 1 ]; then
+            echo "错误: tar 命令失败，退出码: $TAR_EXIT"
+            exit $TAR_EXIT
+          fi
+          
+          # 验证打包文件是否创建成功
+          if [ ! -f canary-deploy.tar.gz ]; then
+            echo "错误: 打包文件未创建"
+            exit 1
+          fi
+          
           echo "✓ 项目打包完成"
           ls -lh canary-deploy.tar.gz
           
