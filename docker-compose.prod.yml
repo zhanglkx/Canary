@@ -14,7 +14,6 @@ services:
       - '5432:5432'
     volumes:
       - postgres_prod_data:/var/lib/postgresql/data
-      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${DATABASE_USERNAME:-postgres}']
       interval: 30s
@@ -55,7 +54,7 @@ services:
     networks:
       - canary-network
     healthcheck:
-      test: ['CMD', 'curl', '-f', 'http://localhost:4000/health']
+      test: ['CMD', 'wget', '--spider', '-q', 'http://localhost:4000/health']
       interval: 30s
       timeout: 10s
       retries: 3
@@ -71,6 +70,7 @@ services:
       - .env.production
     environment:
       NODE_ENV: production
+      PORT: 3000
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/graphql}
       NEXT_TELEMETRY_DISABLED: '1'
     ports:
