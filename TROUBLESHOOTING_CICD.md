@@ -70,34 +70,99 @@ fi
 
 ## 问题 2: SSH 连接失败
 
-### 错误信息
+### 错误信息 A: 权限被拒绝
 ```
 Permission denied (publickey)
 ```
 
-### 解决方案
+### 错误信息 B: libcrypto 错误 ⚠️ 常见
+```
+Load key "/home/runner/.ssh/aliyun_key.pem": error in libcrypto
+root@***: Permission denied (publickey,gssapi-keyex,gssapi-with-mic).
+```
 
-1. **检查 GitHub Secrets 配置**
+### 原因
+1. SSH 私钥格式不正确（Windows 换行符、额外空格）
+2. 私钥在复制到 GitHub Secrets 时被截断或损坏
+3. 私钥权限不正确
+4. 私钥未添加到服务器的 authorized_keys
+
+### 解决方案 ✅
+
+#### 步骤 1: 检查本地 SSH 密钥
+
+运行检查脚本：
+```bash
+./check-ssh-key.sh
+```
+
+这个脚本会：
+- 验证密钥格式
+- 检查文件权限
+- 测试 SSH 连接
+- 生成正确的 GitHub Secret 内容
+
+#### 步骤 2: 测试本地连接
+
+```bash
+# 测试 SSH 连接
+ssh -i ~/.ssh/aliyun_key.pem root@8.159.144.140 "echo 'SSH 连接成功'"
+
+# 如果失败，查看详细日志
+ssh -vvv -i ~/.ssh/aliyun_key.pem root@8.159.144.140
+```
+
+#### 步骤 3: 重新配置 GitHub Secrets
+
+如果本地测试成功但 GitHub Actions 失败：
+
+1. **获取正确的密钥内容**：
    ```bash
-   # 确保 ALIYUN_SSH_KEY 包含完整的私钥
-   # 包括开头和结尾标记：
-   -----BEGIN RSA PRIVATE KEY-----
-   ...内容...
-   -----END RSA PRIVATE KEY-----
+   cat ~/.ssh/aliyun_key.pem
    ```
 
-2. **检查私钥格式**
-   ```bash
-   # 在本地测试私钥是否有效
-   ssh -i ~/.ssh/aliyun_key.pem root@8.159.144.140 "echo 'SSH 连接成功'"
-   ```
+2. **确保复制完整内容**：
+   - 包括 `-----BEGIN RSA PRIVATE KEY-----`
+   - 包括 `-----END RSA PRIVATE KEY-----`
+   - 不要有额外的空格或空行
 
-3. **检查私钥权限**
-   ```bash
-   # GitHub Actions 会自动设置权限为 600
-   # 但本地需要手动设置
-   chmod 600 ~/.ssh/aliyun_key.pem
-   ```
+3. **更新 GitHub Secret**：
+   - 访问：https://github.com/zhanglkx/Canary/settings/secrets/actions
+   - 找到 `ALIYUN_SSH_KEY`
+   - 点击 "Update"
+   - 粘贴完整的密钥内容
+   - 保存
+
+#### 步骤 4: 验证密钥格式
+
+在 GitHub Actions 工作流中已添加验证步骤：
+```yaml
+- name: 配置 SSH 密钥
+  run: |
+    echo "${{ secrets.ALIYUN_SSH_KEY }}" | tr -d '\r' > ~/.ssh/aliyun_key.pem
+    chmod 600 ~/.ssh/aliyun_key.pem
+    ssh-keygen -l -f ~/.ssh/aliyun_key.pem  # 验证密钥
+```
+
+如果这一步失败，说明 GitHub Secret 中的密钥有问题。
+
+### 常见错误原因
+
+1. **Windows 换行符问题**
+   - 症状：在 Windows 上复制密钥
+   - 解决：使用 `tr -d '\r'` 移除 Windows 换行符
+
+2. **密钥被截断**
+   - 症状：只复制了部分密钥内容
+   - 解决：确保复制完整的密钥，包括开头和结尾标记
+
+3. **额外的空格**
+   - 症状：密钥前后有空格或空行
+   - 解决：只复制密钥本身，不要有额外内容
+
+4. **密钥类型不匹配**
+   - 症状：服务器不支持该密钥类型
+   - 解决：使用 RSA 密钥（最兼容）
 
 ---
 
