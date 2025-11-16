@@ -287,3 +287,25 @@ docker system prune -a
 ---
 
 🎉 **恭喜！完成部署后，你将拥有一个完整的全栈电商应用！**
+
+# 1. 创建 Docker 守护进程配置
+sudo mkdir -p /etc/docker
+sudo tee /etc/docker/daemon.json <<-'EOF'
+{
+  "registry-mirrors": ["https://99e0hvuv.mirror.aliyuncs.com"]
+}
+EOF
+
+# 2. 重启 Docker 服务（关键步骤！）
+sudo systemctl daemon-reload
+sudo systemctl restart docker
+
+# 3. 验证配置
+docker info | grep "Registry Mirrors" -A 2
+# 应显示：
+#  Registry Mirrors:
+#   https://99e0hvuv.mirror.aliyuncs.com/
+
+mv /Users/zlk/Downloads/Iterm2.pem ~/.ssh/aliyun_key.pem
+
+ssh -i ~/.ssh/aliyun_key.pem root@8.159.144.140

@@ -4,6 +4,8 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: canary-db-prod
+    env_file:
+      - .env.production
     environment:
       POSTGRES_DB: ${DATABASE_NAME:-canary_production}
       POSTGRES_USER: ${DATABASE_USERNAME:-postgres}
@@ -27,6 +29,8 @@ services:
       context: .
       dockerfile: apps/api/Dockerfile
     container_name: canary-api-prod
+    env_file:
+      - .env.production
     environment:
       NODE_ENV: production
       PORT: 4000
@@ -63,6 +67,8 @@ services:
       args:
         NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/graphql}
     container_name: canary-web-prod
+    env_file:
+      - .env.production
     environment:
       NODE_ENV: production
       NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/graphql}
@@ -80,10 +86,8 @@ services:
     container_name: canary-nginx-prod
     ports:
       - '80:80'
-      - '443:443'
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf
-      - ./ssl:/etc/nginx/ssl
+      - ./nginx.prod.conf:/etc/nginx/nginx.conf
     depends_on:
       - web
       - api
