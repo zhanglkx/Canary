@@ -158,7 +158,7 @@ jobs:
         continue-on-error: true
         run: |
           echo "等待服务启动（60秒）..."
-          sleep 60
+          sleep 600
 
           echo "连接服务器检查状态..."
           ssh -i ~/.ssh/aliyun_key.pem \

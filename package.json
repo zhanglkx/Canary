@@ -25,8 +25,5 @@
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"
-  },
-  "dependencies": {
-    "sqlite3": "^5.1.7"
   }
 }
