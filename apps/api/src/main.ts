@@ -30,12 +30,14 @@ async function bootstrap() {
   app.enableCors({
     // 允许的来源地址（前端应用的 URL）
     origin: [
-      process.env.FRONTEND_URL || 'http://localhost:3000',  // 主前端应用
-      'http://localhost:3001',  // 备用前端地址
-      'http://localhost:3002',  // 第三个备用地址
+      process.env.FRONTEND_URL || 'http://localhost:3000', // 主前端应用
+      'http://localhost:3000', // 本地开发
+      'http://localhost:3001', // 备用前端地址
+      'http://localhost:3002', // 第三个备用地址
+      'http://8.159.144.140', // 阿里云服务器公网 IP
     ],
-    credentials: true,  // 允许发送凭据（如 JWT Token）
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],  // 允许的 HTTP 方法
+    credentials: true, // 允许发送凭据（如 JWT Token）
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // 允许的 HTTP 方法
     // 允许的请求头，包括用于身份认证的 Authorization 头
     allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
   });
@@ -45,8 +47,8 @@ async function bootstrap() {
   // 就像对所有请求进行"质量检查"，确保数据格式正确
   app.useGlobalPipes(
     new ValidationPipe({
-      whitelist: true,  // 移除未声明的属性（安全特性）
-      transform: true,  // 自动转换数据类型（如字符串 "123" 转为数字 123）
+      whitelist: true, // 移除未声明的属性（安全特性）
+      transform: true, // 自动转换数据类型（如字符串 "123" 转为数字 123）
     }),
   );
 

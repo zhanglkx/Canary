@@ -125,7 +125,7 @@ export default function CartPage() {
                   quantity={item.quantity}
                   unitPrice={item.unitPrice}
                   itemTotal={item.itemTotal}
-                  itemDiscountCents={item.itemDiscountCents}
+                  itemDiscountCents={item.itemDiscount}
                   promoCode={item.promoCode}
                   stockStatus={item.stockStatus}
                   attributeSnapshot={item.attributeSnapshot}
@@ -137,10 +137,10 @@ export default function CartPage() {
           {/* Cart Summary Sidebar */}
           <div className="lg:col-span-1">
             <CartSummary
-              subtotalCents={cart.subtotalCents}
-              taxCents={cart.taxCents}
-              discountCents={cart.discountCents}
-              totalCents={cart.totalCents}
+              subtotalCents={cart.subtotal}
+              taxCents={cart.taxAmount}
+              discountCents={0} // GraphQL doesn't return cart-level discount
+              totalCents={cart.total}
               itemCount={cart.items.length}
               isEmpty={cart.isEmpty}
               isAbandoned={cart.isAbandoned}

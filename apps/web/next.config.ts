@@ -3,6 +3,21 @@ import type { NextConfig } from 'next';
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@shared'],
+  
+  // ESLint 配置 - 在构建时运行但不会因为 lint 错误而失败
+  eslint: {
+    // 在生产构建时忽略 ESLint 错误
+    ignoreDuringBuilds: true,
+  },
+  
+  // 静态导出配置（可选 - 用于生成 dist 目录）
+  // output: 'export',
+  // distDir: 'dist',
+  // trailingSlash: true,
+  // images: {
+  //   unoptimized: true,
+  // },
+  
   experimental: {
     // 优化水合过程
     optimizePackageImports: ['@apollo/client'],

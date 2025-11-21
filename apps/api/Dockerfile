@@ -3,11 +3,14 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
 FROM base AS dependencies
+# 配置 npm 镜像
+RUN echo "registry=https://registry.npmmirror.com" > /root/.npmrc
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/api/package.json ./apps/api/
 RUN mkdir -p ./libs/shared
 COPY libs/shared/package.json ./libs/shared/
-RUN pnpm install --frozen-lockfile
+# 忽略 sqlite3 可选依赖，避免编译问题
+RUN pnpm install --frozen-lockfile --no-optional
 
 FROM base AS build
 COPY tsconfig.base.json ./
@@ -16,7 +19,8 @@ COPY apps/api ./apps/api
 COPY libs/shared ./libs/shared
 WORKDIR /app/apps/api
 # Install dependencies inside the build stage to ensure pnpm workspace layout is correct
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile
+# 忽略 sqlite3 可选依赖，避免编译问题
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile --no-optional
 RUN pnpm build
 
 FROM base AS production

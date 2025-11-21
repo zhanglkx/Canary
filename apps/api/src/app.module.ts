@@ -76,9 +76,12 @@ import { ApolloStudioController } from './apollo-studio.controller';
         password: configService.get('DATABASE_PASSWORD', 'postgres'),
         database: configService.get('DATABASE_NAME', 'learning_nest_next'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') !== 'production',
+        // 允许通过环境变量 TYPEORM_SYNCHRONIZE 控制同步行为
+        synchronize: configService.get('TYPEORM_SYNCHRONIZE') === 'true' 
+          ? true 
+          : configService.get('NODE_ENV') !== 'production',
         logging: configService.get('NODE_ENV') === 'development',
-        ssl: configService.get('NODE_ENV') === 'production' ? { rejectUnauthorized: false } : false,
+        ssl: configService.get('DATABASE_SSL') === 'true' ? { rejectUnauthorized: false } : false,
       }),
       inject: [ConfigService],
     }),

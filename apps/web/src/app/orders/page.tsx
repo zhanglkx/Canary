@@ -146,7 +146,7 @@ export default function OrdersPage() {
                         {order.items.length} item{order.items.length !== 1 ? 's' : ''}
                       </td>
                       <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                        ¥{(order.totalCents / 100).toFixed(2)}
+                        ¥{(order.totalAmount / 100).toFixed(2)}
                       </td>
                       <td className="px-6 py-4 text-sm">
                         <Link
