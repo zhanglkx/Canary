@@ -1,0 +1,14 @@
+# Next.js Frontend
+
+/node_modules
+/.next
+/dist
+/coverage
+
+.env.local
+.env.*.local
+
+.vscode/
+.idea/
+*.swp
+*.swo

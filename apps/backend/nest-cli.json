@@ -1,0 +1,9 @@
+{
+  "language": "ts",
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "src",
+  "monorepoMode": false,
+  "compilerOptions": {
+    "plugins": []
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "extends": "next/eslint-config-next",
+  "parser": "@typescript-eslint/parser",
+  "rules": {
+    "@next/next/no-html-link-for-pages": "off"
+  }
+}

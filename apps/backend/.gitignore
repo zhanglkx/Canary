@@ -1,0 +1,15 @@
+# NestJS Backend
+
+/node_modules
+/dist
+/coverage
+/db.sqlite
+
+.env
+.env.*.local
+
+.vscode/
+.idea/
+*.swp
+*.swo
+*.log

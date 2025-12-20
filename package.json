@@ -1,0 +1,21 @@
+{
+  "name": "canary-fullstack",
+  "version": "1.0.0",
+  "description": "Full-stack monorepo: Next.js 16 + NestJS 11 + TypeScript",
+  "private": true,
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm -r --parallel run dev",
+    "build": "pnpm -r run build",
+    "build:web": "pnpm -F @canary/frontend build",
+    "build:api": "pnpm -F @canary/backend build",
+    "start": "pnpm -r --parallel run start",
+    "start:prod": "pnpm -F @canary/backend start:prod",
+    "test": "pnpm -r run test",
+    "lint": "pnpm -r run lint",
+    "type-check": "pnpm -r run type-check",
+    "clean": "pnpm -r exec rm -rf node_modules dist .next coverage && rm -rf pnpm-lock.yaml",
+    "setup": "pnpm install && pnpm run type-check"
+  },
+  "devDependencies": {}
+}
