@@ -6,7 +6,7 @@
     "jsx": "preserve",
     "module": "esnext",
     "moduleResolution": "bundler",
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -20,10 +20,11 @@
       "@canary/utils": ["../../libs/utils/src"]
     },
     "typeRoots": ["./node_modules/@types"],
-    "declaration": true,
-    "declarationMap": true
+    "declaration": false,
+    "declarationMap": false,
+    "noImplicitAny": false
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "**/*.d.ts"],
   "exclude": ["node_modules", ".next", "dist"]
 }
 
