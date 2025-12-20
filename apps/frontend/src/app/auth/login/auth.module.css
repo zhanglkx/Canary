@@ -1,7 +1,7 @@
 .container {
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: center;  
   min-height: 100vh;
   padding: 1rem;
 }
@@ -14,38 +14,38 @@
   border-radius: 8px;
   background: white;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
 
-  h1 {
-    margin-bottom: 1.5rem;
-    text-align: center;
-    color: #0070f3;
-  }
+.formTitle {
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #0070f3;
 }
 
 .formGroup {
   margin-bottom: 1rem;
+}
 
-  label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-    color: #333;
-  }
+.formLabel {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
 
-  input {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 1rem;
-    transition: border-color 0.3s;
+.formInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  transition: border-color 0.3s;
+}
 
-    &:focus {
-      outline: none;
-      border-color: #0070f3;
-      box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
-    }
-  }
+.formInput:focus {
+  outline: none;
+  border-color: #0070f3;
+  box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
 }
 
 .submitBtn {
@@ -59,27 +59,27 @@
   font-weight: 600;
   cursor: pointer;
   transition: background 0.3s;
-
-  &:hover {
-    background: #0051cc;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
 }
 
-p {
+.submitBtn:hover {
+  background: #0051cc;
+}
+
+.submitBtn:active {
+  transform: scale(0.98);
+}
+
+.formFooter {
   margin-top: 1rem;
   text-align: center;
   color: #666;
+}
 
-  a {
-    color: #0070f3;
-    text-decoration: none;
+.formLink {
+  color: #0070f3;
+  text-decoration: none;
+}
 
-    &:hover {
-      text-decoration: underline;
-    }
-  }
+.formLink:hover {
+  text-decoration: underline;
 }

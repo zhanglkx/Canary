@@ -1,12 +1,14 @@
 'use client';
 
-import styles from '../login/auth.module.css';
+import styles from '@/app/auth/login/auth.module.less';
 
 export default function DashboardPage() {
   return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Dashboard</h1>
-      <p>Welcome to your dashboard!</p>
+    <div className={styles.container}>
+      <div className={styles.formWrapper}>
+        <h1 className={styles.formTitle}>Dashboard</h1>
+        <p style={{ marginBottom: '1rem' }}>Welcome to your dashboard!</p>
+      </div>
     </div>
   );
 }

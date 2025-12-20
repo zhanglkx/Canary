@@ -2,9 +2,10 @@
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
     "module": "commonjs",
+    "moduleResolution": "node",
     "target": "ES2022",
     "lib": ["ES2022"],
-    "strict": true,
+    "strict": false,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
@@ -14,6 +15,8 @@
     "baseUrl": "./",
     "incremental": true,
     "sourceMap": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
     "paths": {
       "src/*": ["src/*"],
       "@canary/shared-types": ["../../libs/shared-types/src"],

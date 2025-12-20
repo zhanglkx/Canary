@@ -4,7 +4,10 @@
       "WebFetch(domain:docs.nestjs.com)",
       "WebFetch(domain:www.npmjs.com)",
       "Bash(cat:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\n重组文档结构并添加详细代码注释\n\n主要改进：\n1. 文档重组到 docs/ 目录，建立清晰的分类结构\n   - docs/api/ - API 文档（端点、认证、示例）\n   - docs/guides/ - 快速开始和学习指南\n   - docs/setup/ - 安装和配置说明\n   - docs/backend/ - 后端架构和模块说明\n   - docs/frontend/ - 前端架构和组件说明\n   - docs/deployment/ - 部署指南\n\n2. 创建新文档\n   - docs/README.md - 文档导航中心\n   - docs/api/endpoints.md - 完整 API 端点文档\n   - docs/api/authentication.md - JWT 认证详解\n   - docs/api/examples.md - 7 种 API 调用示例\n   - docs/guides/GETTING_STARTED.md - 5分钟快速开始\n   - docs/setup/INSTALLATION.md - 详细安装步骤\n   - docs/backend/architecture.md - 后端架构说明\n   - docs/PROGRESS.md - 进度报告\n\n3. 添加详细代码注释（进行中）\n   - main.ts: 应用启动入口详解（200+ 行注释）\n   - app.module.ts: 根模块配置详解（150+ 行注释）\n   - 后续将继续为所有代码文件添加注释\n\n这是一个学习项目，优先考虑代码清晰性和初学者友好性。\n\n🧠 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(npm run build:*)",
+      "Bash(pnpm install:*)"
     ],
     "deny": [],
     "ask": []

@@ -1,0 +1,176 @@
+/**
+ * 登录页面样式 - LESS Module
+ *
+ * 这个文件使用 LESS 预处理器
+ * 优势：
+ * 1. 支持嵌套选择器（保持代码结构清晰）
+ * 2. 支持变量和混入
+ * 3. 支持运算
+ * 4. 代码复用性更高
+ */
+
+// ==================== 颜色变量 ====================
+@primary-color: #0070f3;
+@primary-hover: #0051cc;
+@border-color: #ddd;
+@light-border: #e0e0e0;
+@text-color: #333;
+@light-text: #666;
+@error-color: #ff0000;
+@shadow-color: rgba(0, 0, 0, 0.1);
+
+// ==================== 尺寸变量 ====================
+@spacing-sm: 0.5rem;
+@spacing-base: 1rem;
+@spacing-lg: 1.5rem;
+@spacing-xl: 2rem;
+@border-radius: 4px;
+@border-radius-lg: 8px;
+
+// ==================== 混入 (Mixins) ====================
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.transition-smooth {
+  transition: all 0.3s ease;
+}
+
+.input-focus {
+  &:focus {
+    outline: none;
+    border-color: @primary-color;
+    box-shadow: 0 0 0 3px rgba(0, 112, 243, 0.1);
+  }
+}
+
+// ==================== 主容器 ====================
+.container {
+  .flex-center();
+  min-height: 100vh;
+  padding: @spacing-base;
+  background: #f5f5f5;
+}
+
+// ==================== 表单包装器 ====================
+.formWrapper {
+  width: 100%;
+  max-width: 400px;
+  padding: @spacing-xl;
+  border: 1px solid @light-border;
+  border-radius: @border-radius-lg;
+  background: white;
+  box-shadow: 0 2px 8px @shadow-color;
+}
+
+// ==================== 标题 ====================
+.formTitle {
+  margin-bottom: @spacing-lg;
+  text-align: center;
+  color: @primary-color;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+// ==================== 表单组 ====================
+.formGroup {
+  margin-bottom: @spacing-base;
+}
+
+// ==================== 标签 ====================
+.formLabel {
+  display: block;
+  margin-bottom: @spacing-sm;
+  font-weight: 500;
+  color: @text-color;
+  font-size: 0.95rem;
+}
+
+// ==================== 输入框 ====================
+.formInput {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid @border-color;
+  border-radius: @border-radius;
+  font-size: 1rem;
+  .transition-smooth();
+
+  // Focus 状态
+  .input-focus();
+
+  // Placeholder 样式
+  &::placeholder {
+    color: #999;
+  }
+}
+
+// ==================== 提交按钮 ====================
+.submitBtn {
+  width: 100%;
+  padding: 0.75rem;
+  background: @primary-color;
+  color: white;
+  border: none;
+  border-radius: @border-radius;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  .transition-smooth();
+
+  // Hover 状态
+  &:hover {
+    background: @primary-hover;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 112, 243, 0.3);
+  }
+
+  // Active 状态
+  &:active {
+    transform: scale(0.98);
+  }
+
+  // Disabled 状态
+  &:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+}
+
+// ==================== 表单底部 ====================
+.formFooter {
+  margin-top: @spacing-base;
+  text-align: center;
+  color: @light-text;
+  font-size: 0.9rem;
+}
+
+// ==================== 表单链接 ====================
+.formLink {
+  color: @primary-color;
+  text-decoration: none;
+  font-weight: 500;
+  .transition-smooth();
+
+  &:hover {
+    text-decoration: underline;
+    opacity: 0.8;
+  }
+}
+
+// ==================== 响应式设计 ====================
+@media (max-width: 600px) {
+  .container {
+    padding: @spacing-sm;
+  }
+
+  .formWrapper {
+    padding: @spacing-base;
+  }
+
+  .formTitle {
+    font-size: 1.2rem;
+  }
+}

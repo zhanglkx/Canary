@@ -1,6 +1,6 @@
 'use client';
 
-import styles from './auth.module.css';
+import styles from './auth.module.less';
 
 export default function LoginPage() {
   const handleLogin = (e: React.FormEvent<HTMLFormElement>) => {
@@ -11,23 +11,25 @@ export default function LoginPage() {
   return (
     <div className={styles.container}>
       <div className={styles.formWrapper}>
-        <h1>Login</h1>
+        <h1 className={styles.formTitle}>Login</h1>
         <form onSubmit={handleLogin}>
           <div className={styles.formGroup}>
-            <label htmlFor="email">Email</label>
+            <label htmlFor="email" className={styles.formLabel}>Email</label>
             <input
               type="email"
               id="email"
               placeholder="your@email.com"
+              className={styles.formInput}
               required
             />
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="password">Password</label>
+            <label htmlFor="password" className={styles.formLabel}>Password</label>
             <input
               type="password"
               id="password"
               placeholder="Enter your password"
+              className={styles.formInput}
               required
             />
           </div>
@@ -35,10 +37,10 @@ export default function LoginPage() {
             Sign In
           </button>
         </form>
-        <p>
+        <div className={styles.formFooter}>
           Don't have an account?{' '}
-          <a href="/auth/register">Register here</a>
-        </p>
+          <a href="/auth/register" className={styles.formLink}>Register here</a>
+        </div>
       </div>
     </div>
   );

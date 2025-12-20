@@ -13,12 +13,18 @@
     "resolveJsonModule": true,
     "allowJs": true,
     "noEmit": true,
+    "baseUrl": "./src",
     "paths": {
-      "@/*": ["./src/*"],
+      "@/*": ["./*"],
       "@canary/shared-types": ["../../libs/shared-types/src"],
       "@canary/utils": ["../../libs/utils/src"]
-    }
+    },
+    "typeRoots": ["./node_modules/@types"],
+    "declaration": true,
+    "declarationMap": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
   "exclude": ["node_modules", ".next", "dist"]
 }
+
+
