@@ -271,4 +271,3 @@ grep -r "@apollo\|@nestjs/graphql" apps/ --include="*.json" | grep -v "node_modu
 **报告生成时间**: 2024-12-21
 **完成者**: AI Assistant (Claude Sonnet 4.5)
 **分支**: feature/rest-api-migration
-

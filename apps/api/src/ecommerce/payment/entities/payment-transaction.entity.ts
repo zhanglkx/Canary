@@ -20,8 +20,6 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { ObjectType, Field, Int, registerEnumType } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 import { Payment } from './payment.entity';
 
 /**
@@ -47,8 +45,6 @@ export enum TransactionType {
 }
 
 // Register enums for GraphQL
-registerEnumType(TransactionStatus, { name: 'TransactionStatus' });
-registerEnumType(TransactionType, { name: 'TransactionType' });
 
 /**
  * 支付交易实体
@@ -57,7 +53,6 @@ registerEnumType(TransactionType, { name: 'TransactionType' });
  * 支持重试：支付失败后可以创建新的交易记录再次尝试
  */
 @Entity('payment_transactions')
-@ObjectType()
 @Index('IDX_transaction_payment', ['paymentId'])
 @Index('IDX_transaction_status', ['status'])
 @Index('IDX_transaction_type', ['type'])
@@ -67,14 +62,12 @@ export class PaymentTransaction {
    * 交易ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
    * 所属支付ID
    */
   @Column({ type: 'uuid' })
-  @HideField()
   paymentId: string;
 
   /**
@@ -84,34 +77,29 @@ export class PaymentTransaction {
     onDelete: 'CASCADE',
     lazy: false,
   })
-  @HideField()
   payment: Payment;
 
   /**
    * 交易类型
    */
   @Column({ type: 'enum', enum: TransactionType, default: TransactionType.CHARGE })
-  @Field(() => TransactionType)
   type: TransactionType;
 
   /**
    * 交易状态
    */
   @Column({ type: 'enum', enum: TransactionStatus, default: TransactionStatus.INITIATED })
-  @Field(() => TransactionStatus)
   status: TransactionStatus;
 
   /**
    * 金额（人民币分）
    */
   @Column({ type: 'int' })
-  @HideField()
   amountCents: number;
 
   /**
    * 金额（元）
    */
-  @Field()
   get amount(): number {
     return this.amountCents / 100;
   }
@@ -121,21 +109,18 @@ export class PaymentTransaction {
    * 用于查询和跟踪网关端的交易
    */
   @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
-  @Field({ nullable: true })
   gatewayTransactionId?: string;
 
   /**
    * 支付意图ID（用于某些网关）
    */
   @Column({ type: 'varchar', length: 255, nullable: true })
-  @HideField()
   intentId?: string;
 
   /**
    * 请求数据（发送到网关的数据）
    */
   @Column({ type: 'jsonb', nullable: true })
-  @HideField()
   requestData?: {
     amount?: number;
     currency?: string;
@@ -149,13 +134,11 @@ export class PaymentTransaction {
    * 响应数据（从网关返回的数据）
    */
   @Column({ type: 'jsonb', nullable: true })
-  @Field(() => String, { nullable: true })
   get responseData(): string | undefined {
     return this.responseDataRaw ? JSON.stringify(this.responseDataRaw) : undefined;
   }
 
   @Column({ type: 'jsonb', nullable: true, select: false })
-  @HideField()
   responseDataRaw?: {
     transactionId?: string;
     status?: string;
@@ -169,90 +152,77 @@ export class PaymentTransaction {
    * 错误代码
    */
   @Column({ type: 'varchar', length: 50, nullable: true })
-  @Field({ nullable: true })
   errorCode?: string;
 
   /**
    * 错误信息
    */
   @Column({ type: 'text', nullable: true })
-  @Field({ nullable: true })
   errorMessage?: string;
 
   /**
    * 错误详情（JSON）
    */
   @Column({ type: 'jsonb', nullable: true })
-  @HideField()
   errorDetails?: Record<string, any>;
 
   /**
    * 重试次数
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   attemptNumber: number;
 
   /**
    * 3D Secure 结果（如适用）
    */
   @Column({ type: 'varchar', length: 50, nullable: true })
-  @Field({ nullable: true })
   threeDSecureResult?: string;
 
   /**
    * 是否需要客户确认
    */
   @Column({ type: 'boolean', default: false })
-  @Field()
   requiresConfirmation: boolean;
 
   /**
    * 确认令牌（用于需要确认的支付）
    */
   @Column({ type: 'varchar', length: 255, nullable: true })
-  @HideField()
   confirmationToken?: string;
 
   /**
    * 交易完成时间
    */
   @Column({ type: 'timestamp', nullable: true })
-  @Field({ nullable: true })
   completedAt?: Date;
 
   /**
    * 元数据（JSON）
    */
   @Column({ type: 'jsonb', nullable: true })
-  @Field(() => String, { nullable: true })
   get metadata(): string | undefined {
     return this.metadataRaw ? JSON.stringify(this.metadataRaw) : undefined;
   }
 
   @Column({ type: 'jsonb', nullable: true, select: false })
-  @HideField()
   metadataRaw?: Record<string, any>;
 
   /**
    * 备注
    */
   @Column({ type: 'text', nullable: true })
-  @Field({ nullable: true })
   notes?: string;
 
   /**
    * 创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
    * 更新时间
    */
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 
   /**

@@ -7,7 +7,6 @@
  * @module Ecommerce/Product
  */
 
-import { InputType, Field, Float, Int } from '@nestjs/graphql';
 import {
   IsString,
   IsNotEmpty,
@@ -40,12 +39,10 @@ import { Type } from 'class-transformer';
  *   weight: 250 // 克
  * };
  */
-@InputType()
 export class CreateProductSkuInput {
   /**
    * 所属产品ID
    */
-  @Field()
   @IsUUID('all', { message: '产品ID必须是有效的UUID' })
   productId: string;
 
@@ -58,7 +55,6 @@ export class CreateProductSkuInput {
    * - TSHIRT-RED-M（易读）
    * - 202501-RED-M-XL（包含日期）
    */
-  @Field()
   @IsString()
   @IsNotEmpty({ message: 'SKU编码不能为空' })
   @MaxLength(100, { message: 'SKU编码长度不超过100字符' })
@@ -70,7 +66,6 @@ export class CreateProductSkuInput {
    * 用户可读的SKU描述，通常由属性值组合而成
    * 示例：'T恤-红色-M码'
    */
-  @Field()
   @IsString()
   @IsNotEmpty({ message: 'SKU名称不能为空' })
   @MaxLength(200, { message: 'SKU名称长度不超过200字符' })
@@ -90,7 +85,6 @@ export class CreateProductSkuInput {
    * 这用于标识SKU的具体变体
    * 多个产品可以共享相同的属性定义
    */
-  @Field(() => Object)
   @IsObject({ message: '属性值必须是对象' })
   attributeValues: Record<string, string>;
 
@@ -106,7 +100,6 @@ export class CreateProductSkuInput {
    *
    * 用于某些SKU有特殊定价的情况
    */
-  @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsPositive({ message: '价格必须大于0' })
   @Type(() => Number)
@@ -117,7 +110,6 @@ export class CreateProductSkuInput {
    *
    * 该SKU的初始库存数
    */
-  @Field(() => Int)
   @IsInt({ message: '库存必须是整数' })
   @Min(0, { message: '库存不能为负数' })
   @Type(() => Number)
@@ -130,7 +122,6 @@ export class CreateProductSkuInput {
    *
    * @default 0
    */
-  @Field(() => Int, { nullable: true })
   @IsOptional()
   @IsInt({ message: '已预留库存必须是整数' })
   @Min(0, { message: '已预留库存不能为负数' })
@@ -143,7 +134,6 @@ export class CreateProductSkuInput {
    * 如果这个SKU有特定的图片，可以覆盖产品主图
    * 例如：某个SKU的颜色图片
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(500, { message: 'SKU图片URL长度不超过500字符' })
@@ -154,7 +144,6 @@ export class CreateProductSkuInput {
    *
    * 该SKU的重量，用于运费计算
    */
-  @Field(() => Int, { nullable: true })
   @IsOptional()
   @IsInt({ message: '重量必须是整数' })
   @Min(0, { message: '重量不能为负数' })
@@ -166,7 +155,6 @@ export class CreateProductSkuInput {
    *
    * @default true
    */
-  @Field({ nullable: true })
   @IsOptional()
   isActive?: boolean;
 }

@@ -23,23 +23,19 @@ import {
   ManyToMany,
   ManyToOne,
 } from 'typeorm';
-import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Todo } from '../todo/todo.entity';
 import { User } from '../user/user.entity';
 
 /**
  * @Entity('tags') - 在数据库中创建 tags 表
- * @ObjectType() - 在 GraphQL Schema 中定义 Tag 类型
  */
 @Entity('tags')
-@ObjectType()
 export class Tag {
   /**
    * 标签唯一 ID
    * @PrimaryGeneratedColumn('uuid') - 自动生成的 UUID 主键
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field(() => ID)
   id: string;
 
   /**
@@ -48,7 +44,6 @@ export class Tag {
    * 同一个用户不能有重复的标签名
    */
   @Column()
-  @Field()
   name: string;
 
   /**
@@ -57,7 +52,6 @@ export class Tag {
    * 方便前端美化展示
    */
   @Column({ default: '#3B82F6' })
-  @Field()
   color: string;
 
   /**
@@ -65,7 +59,6 @@ export class Tag {
    * 每个用户维护自己的标签集合
    */
   @ManyToOne(() => User)
-  @Field(() => User)
   user: User;
 
   /**
@@ -88,7 +81,6 @@ export class Tag {
    * 表名通常是：tag_todos_todo
    */
   @ManyToMany(() => Todo, (todo) => todo.tags)
-  @Field(() => [Todo], { nullable: true })
   todos?: Todo[];
 
   /**
@@ -96,6 +88,5 @@ export class Tag {
    * @CreateDateColumn() - 自动记录
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 }

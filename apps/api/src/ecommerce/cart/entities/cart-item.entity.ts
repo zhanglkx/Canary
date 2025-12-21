@@ -17,8 +17,6 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 import { ShoppingCart } from './shopping-cart.entity';
 import { ProductSku } from '../../product/entities/product-sku.entity';
 import { Product } from '../../product/entities/product.entity';
@@ -30,7 +28,6 @@ import { Product } from '../../product/entities/product.entity';
  * 冗余存储SKU名称、价格等，避免后续数据更改影响历史购物车
  */
 @Entity('cart_items')
-@ObjectType()
 @Index('IDX_cart_item_cart', ['cartId'])
 @Index('IDX_cart_item_sku', ['skuId'])
 export class CartItem {
@@ -38,14 +35,12 @@ export class CartItem {
    * 项目ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
    * 所属购物车ID
    */
   @Column({ type: 'uuid' })
-  @HideField()
   cartId: string;
 
   /**
@@ -55,14 +50,12 @@ export class CartItem {
     onDelete: 'CASCADE',
     lazy: false,
   })
-  @HideField()
   cart: ShoppingCart;
 
   /**
    * SKU ID
    */
   @Column({ type: 'uuid' })
-  @Field()
   skuId: string;
 
   /**
@@ -72,7 +65,6 @@ export class CartItem {
    * 此时应使用冗余存储的信息
    */
   @ManyToOne(() => ProductSku, { onDelete: 'SET NULL', lazy: false, nullable: true })
-  @HideField()
   sku?: ProductSku;
 
   /**
@@ -81,14 +73,12 @@ export class CartItem {
    * 用于快速查询商品信息
    */
   @Column({ type: 'uuid' })
-  @Field()
   productId: string;
 
   /**
    * 关联的产品
    */
   @ManyToOne(() => Product, { onDelete: 'SET NULL', lazy: false, nullable: true })
-  @HideField()
   product?: Product;
 
   /**
@@ -98,7 +88,6 @@ export class CartItem {
    * 防止商品被删除时失去名称信息
    */
   @Column({ type: 'varchar', length: 200 })
-  @Field()
   productName: string;
 
   /**
@@ -107,7 +96,6 @@ export class CartItem {
    * 例如：RED-M, BLUE-L
    */
   @Column({ type: 'varchar', length: 50 })
-  @Field()
   skuCode: string;
 
   /**
@@ -117,10 +105,8 @@ export class CartItem {
    * 单位：人民币分（显示时需除以100）
    */
   @Column({ type: 'int', select: false })
-  @HideField()
   unitPriceCents: number;
 
-  @Field(() => Float)
   get unitPrice(): number {
     return this.unitPriceCents / 100;
   }
@@ -129,13 +115,11 @@ export class CartItem {
    * 商品数量
    */
   @Column({ type: 'int', default: 1 })
-  @Field(() => Int)
   quantity: number;
 
   /**
    * 项目总价（单价 × 数量）
    */
-  @Field(() => Float)
   get itemTotal(): number {
     return this.unitPrice * this.quantity;
   }
@@ -153,7 +137,6 @@ export class CartItem {
     enum: ['AVAILABLE', 'LOW_STOCK', 'OUT_OF_STOCK'],
     default: 'AVAILABLE',
   })
-  @Field()
   stockStatus: 'AVAILABLE' | 'LOW_STOCK' | 'OUT_OF_STOCK';
 
   /**
@@ -167,10 +150,8 @@ export class CartItem {
    * }
    */
   @Column({ type: 'jsonb', nullable: true, select: false })
-  @HideField()
   attributeSnapshotData?: Record<string, string>;
 
-  @Field(() => String, { nullable: true })
   get attributeSnapshot(): string | undefined {
     return this.attributeSnapshotData ? JSON.stringify(this.attributeSnapshotData) : undefined;
   }
@@ -179,17 +160,14 @@ export class CartItem {
    * 优惠券/促销代码（项目级）
    */
   @Column({ type: 'varchar', length: 50, nullable: true })
-  @Field({ nullable: true })
   promoCode?: string;
 
   /**
    * 项目级折扣（元，可能为0）
    */
   @Column({ type: 'int', default: 0, select: false })
-  @HideField()
   itemDiscountCents: number;
 
-  @Field(() => Float)
   get itemDiscount(): number {
     return this.itemDiscountCents / 100;
   }
@@ -198,14 +176,12 @@ export class CartItem {
    * 创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
    * 更新时间
    */
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 
   /**

@@ -267,4 +267,3 @@ git push origin feature/rest-api-migration
 **所有 GraphQL 代码已删除！无残留！**
 
 迁移成功的关键是我们创建了高质量的 API 客户端和服务层，剩余的页面迁移只是简单的模式替换。
-

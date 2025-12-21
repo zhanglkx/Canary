@@ -31,8 +31,6 @@ import {
   Index,
   Unique,
 } from 'typeorm';
-import { ObjectType, Field } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 
 /**
  * 库存锁实体
@@ -41,7 +39,6 @@ import { HideField } from '@nestjs/graphql';
  * 用于防止同一时刻多个并发请求对同一SKU的库存操作
  */
 @Entity('inventory_locks')
-@ObjectType()
 @Unique('UQ_inventory_sku_lock', ['skuId', 'lockType'])
 @Index('IDX_inventory_lock_sku', ['skuId'])
 @Index('IDX_inventory_lock_expiry', ['expiryTime'])
@@ -50,14 +47,12 @@ export class InventoryLock {
    * 锁ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
    * SKU ID（被锁定的资源）
    */
   @Column({ type: 'uuid' })
-  @Field()
   skuId: string;
 
   /**
@@ -69,7 +64,6 @@ export class InventoryLock {
    * - 'CHECK': 库存检查锁
    */
   @Column({ type: 'varchar', length: 20 })
-  @Field()
   lockType: 'RESERVE' | 'DEDUCT' | 'RESTOCK' | 'CHECK';
 
   /**
@@ -79,7 +73,6 @@ export class InventoryLock {
    * 可以是订单ID、预订单ID等
    */
   @Column({ type: 'varchar', length: 100 })
-  @Field()
   operationId: string;
 
   /**
@@ -89,7 +82,6 @@ export class InventoryLock {
    * 例如：ORDER, BATCH, RESTOCK_JOB等
    */
   @Column({ type: 'varchar', length: 50, nullable: true })
-  @Field({ nullable: true })
   operationType?: string;
 
   /**
@@ -101,7 +93,6 @@ export class InventoryLock {
    * 通常设置为：当前时间 + TTL（如5分钟）
    */
   @Column({ type: 'timestamp' })
-  @Field()
   expiryTime: Date;
 
   /**
@@ -110,14 +101,12 @@ export class InventoryLock {
    * false表示锁已过期或已主动释放
    */
   @Column({ type: 'boolean', default: true })
-  @Field()
   isActive: boolean;
 
   /**
    * 锁创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
@@ -126,7 +115,6 @@ export class InventoryLock {
    * 记录锁的原因、持有者等信息
    */
   @Column({ type: 'text', nullable: true })
-  @HideField()
   remarks?: string;
 
   /**

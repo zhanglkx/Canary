@@ -76,4 +76,3 @@ export const authApi = {
   logoutAll: () =>
     apiClient.post<{ success: boolean }>('/auth/logout-all'),
 };
-

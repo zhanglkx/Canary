@@ -24,23 +24,19 @@ import {
   UpdateDateColumn,
   ManyToOne,
 } from 'typeorm';
-import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Todo } from '../todo/todo.entity';
 import { User } from '../user/user.entity';
 
 /**
  * @Entity('comments') - 在数据库中创建 comments 表
- * @ObjectType() - 在 GraphQL Schema 中定义 Comment 类型
  */
 @Entity('comments')
-@ObjectType()
 export class Comment {
   /**
    * 评论唯一 ID
    * @PrimaryGeneratedColumn('uuid') - 自动生成的 UUID 主键
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field(() => ID)
   id: string;
 
   /**
@@ -48,7 +44,6 @@ export class Comment {
    * 用户在评论中输入的文字内容
    */
   @Column()
-  @Field()
   content: string;
 
   /**
@@ -59,7 +54,6 @@ export class Comment {
   @ManyToOne(() => Todo, (todo) => todo.comments, {
     onDelete: 'CASCADE',
   })
-  @Field(() => Todo)
   todo: Todo;
 
   /**
@@ -73,7 +67,6 @@ export class Comment {
    * 哪个用户发表了这条评论
    */
   @ManyToOne(() => User)
-  @Field(() => User)
   author: User;
 
   /**
@@ -87,7 +80,6 @@ export class Comment {
    * @CreateDateColumn() - 自动记录
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
@@ -95,6 +87,5 @@ export class Comment {
    * @UpdateDateColumn() - 每次修改时自动更新
    */
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 }

@@ -62,4 +62,3 @@ export const productApi = {
   delete: (id: string) =>
     apiClient.delete<{ success: boolean }>(`/products/${id}`),
 };
-

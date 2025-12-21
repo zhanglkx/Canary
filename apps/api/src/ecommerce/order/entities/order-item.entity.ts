@@ -17,8 +17,6 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { ObjectType, Field, Int, Float } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 import { Order } from './order.entity';
 import { ProductSku } from '../../product/entities/product-sku.entity';
 import { Product } from '../../product/entities/product.entity';
@@ -29,7 +27,6 @@ import { Product } from '../../product/entities/product.entity';
  * 从CartItem转化而来，保留快照信息
  */
 @Entity('order_items')
-@ObjectType()
 @Index('IDX_order_item_order', ['orderId'])
 @Index('IDX_order_item_sku', ['skuId'])
 export class OrderItem {
@@ -37,14 +34,12 @@ export class OrderItem {
    * 项目ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
    * 所属订单ID
    */
   @Column({ type: 'uuid' })
-  @HideField()
   orderId: string;
 
   /**
@@ -54,14 +49,12 @@ export class OrderItem {
     onDelete: 'CASCADE',
     lazy: false,
   })
-  @HideField()
   order: Order;
 
   /**
    * SKU ID
    */
   @Column({ type: 'uuid' })
-  @Field()
   skuId: string;
 
   /**
@@ -69,35 +62,30 @@ export class OrderItem {
    * 可能为null，如果SKU已被删除
    */
   @ManyToOne(() => ProductSku, { onDelete: 'SET NULL', lazy: false, nullable: true })
-  @HideField()
   sku?: ProductSku;
 
   /**
    * 产品ID（快照）
    */
   @Column({ type: 'uuid' })
-  @Field()
   productId: string;
 
   /**
    * 关联的产品
    */
   @ManyToOne(() => Product, { onDelete: 'SET NULL', lazy: false, nullable: true })
-  @HideField()
   product?: Product;
 
   /**
    * 产品名称（快照）
    */
   @Column({ type: 'varchar', length: 200 })
-  @Field()
   productName: string;
 
   /**
    * SKU代码（快照）
    */
   @Column({ type: 'varchar', length: 50 })
-  @Field()
   skuCode: string;
 
   /**
@@ -105,13 +93,11 @@ export class OrderItem {
    * 显示时需除以100
    */
   @Column({ type: 'int' })
-  @HideField()
   unitPriceCents: number;
 
   /**
    * 单价（元）
    */
-  @Field(() => Float)
   get unitPrice(): number {
     return this.unitPriceCents / 100;
   }
@@ -120,13 +106,11 @@ export class OrderItem {
    * 商品数量
    */
   @Column({ type: 'int', default: 1 })
-  @Field(() => Int)
   quantity: number;
 
   /**
    * 项目总价（单价 × 数量）
    */
-  @Field(() => Float)
   get itemTotal(): number {
     return this.unitPrice * this.quantity;
   }
@@ -142,10 +126,8 @@ export class OrderItem {
    * }
    */
   @Column({ type: 'jsonb', nullable: true, name: 'attributeSnapshotData' })
-  @HideField()
   attributeSnapshotData?: Record<string, string>;
 
-  @Field(() => String, { nullable: true })
   get attributeSnapshot(): string | undefined {
     return this.attributeSnapshotData ? JSON.stringify(this.attributeSnapshotData) : undefined;
   }
@@ -154,13 +136,11 @@ export class OrderItem {
    * 项目级折扣（人民币分）
    */
   @Column({ type: 'int', default: 0 })
-  @HideField()
   itemDiscountCents: number;
 
   /**
    * 项目级折扣（元）
    */
-  @Field(() => Float)
   get itemDiscount(): number {
     return this.itemDiscountCents / 100;
   }
@@ -168,7 +148,6 @@ export class OrderItem {
   /**
    * 获取项目最终价格（包含折扣）
    */
-  @Field(() => Float)
   get finalPrice(): number {
     return this.itemTotal - this.itemDiscount;
   }
@@ -177,14 +156,12 @@ export class OrderItem {
    * 创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
    * 更新时间
    */
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 
   /**

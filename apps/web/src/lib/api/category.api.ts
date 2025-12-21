@@ -75,4 +75,3 @@ export const categoryApi = {
   delete: (id: string) =>
     apiClient.delete<{ success: boolean }>(`/categories/${id}`),
 };
-

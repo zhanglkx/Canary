@@ -8,7 +8,6 @@
  * @module Ecommerce/Product
  */
 
-import { InputType, Field, Float, Int } from '@nestjs/graphql';
 import {
   IsString,
   IsOptional,
@@ -37,14 +36,12 @@ import {
  *   order: 'DESC'
  * };
  */
-@InputType()
 export class ProductFilterInput {
   /**
    * 搜索关键字
    *
    * 在产品名称和描述中进行模糊搜索
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   keyword?: string;
@@ -54,7 +51,6 @@ export class ProductFilterInput {
    *
    * 按指定分类查询，包括该分类的子分类产品
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsUUID('all', { message: '分类ID必须是有效的UUID' })
   categoryId?: string;
@@ -64,7 +60,6 @@ export class ProductFilterInput {
    *
    * 例如：100元 = 10000分
    */
-  @Field(() => Int, { nullable: true })
   @IsOptional()
   @IsNumber()
   @Min(0, { message: '最低价格不能为负数' })
@@ -75,7 +70,6 @@ export class ProductFilterInput {
    *
    * 例如：10000元 = 1000000分
    */
-  @Field(() => Int, { nullable: true })
   @IsOptional()
   @IsNumber()
   @Min(0, { message: '最高价格不能为负数' })
@@ -86,7 +80,6 @@ export class ProductFilterInput {
    *
    * 范围：0-5，过滤出评分大于等于指定值的产品
    */
-  @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsNumber()
   @Min(0, { message: '评分最小值为0' })
@@ -105,7 +98,6 @@ export class ProductFilterInput {
    *
    * @default 'createdAt'
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsEnum(['createdAt', 'salesCount', 'basePrice', 'averageRating', 'viewCount'], {
     message: '排序字段不支持',
@@ -120,7 +112,6 @@ export class ProductFilterInput {
    *
    * @default 'DESC'
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsEnum(['ASC', 'DESC'], { message: '排序顺序必须是 ASC 或 DESC' })
   order?: 'ASC' | 'DESC';
@@ -130,7 +121,6 @@ export class ProductFilterInput {
    *
    * @default 1
    */
-  @Field(() => Int)
   @IsPositive({ message: '页码必须大于0' })
   @Min(1, { message: '页码最小值为1' })
   page: number = 1;
@@ -142,7 +132,6 @@ export class ProductFilterInput {
    *
    * @default 20
    */
-  @Field(() => Int)
   @IsPositive({ message: '每页记录数必须大于0' })
   @Min(1, { message: '每页记录数最小值为1' })
   @Max(100, { message: '每页记录数最多100条' })

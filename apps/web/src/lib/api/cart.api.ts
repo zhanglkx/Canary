@@ -50,4 +50,3 @@ export const cartApi = {
   clear: () =>
     apiClient.delete<{ success: boolean }>('/cart'),
 };
-

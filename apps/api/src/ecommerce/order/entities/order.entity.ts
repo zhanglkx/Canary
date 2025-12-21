@@ -25,8 +25,6 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { ObjectType, Field, Int, Float, registerEnumType } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 import { User } from '../../../user/user.entity';
 import { OrderItem } from './order-item.entity';
 
@@ -52,14 +50,11 @@ export enum PaymentMethod {
 }
 
 // Register enums for GraphQL
-registerEnumType(OrderStatus, { name: 'OrderStatus' });
-registerEnumType(PaymentMethod, { name: 'PaymentMethod' });
 
 /**
  * 订单实体
  */
 @Entity('orders')
-@ObjectType()
 @Index('IDX_order_user_status', ['userId', 'status'])
 @Index('IDX_order_status', ['status'])
 @Index('IDX_order_created', ['createdAt'])
@@ -69,7 +64,6 @@ export class Order {
    * 订单ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
@@ -77,28 +71,24 @@ export class Order {
    * 格式：ORD-20251103-000001
    */
   @Column({ type: 'varchar', length: 50, unique: true })
-  @Field()
   orderNumber: string;
 
   /**
    * 所属用户ID
    */
   @Column({ type: 'uuid' })
-  @HideField()
   userId: string;
 
   /**
    * 所属用户
    */
   @ManyToOne(() => User, { onDelete: 'CASCADE', lazy: false })
-  @HideField()
   user: User;
 
   /**
    * 订单状态
    */
   @Column({ type: 'enum', enum: OrderStatus, default: OrderStatus.PENDING })
-  @Field(() => OrderStatus)
   status: OrderStatus;
 
   /**
@@ -108,7 +98,6 @@ export class Order {
     cascade: ['insert', 'update', 'remove'],
     eager: true,
   })
-  @Field(() => [OrderItem])
   items: OrderItem[];
 
   /**
@@ -116,35 +105,30 @@ export class Order {
    * 单位：人民币分
    */
   @Column({ type: 'int' })
-  @HideField()
   subtotalCents: number;
 
   /**
    * 税费（人民币分）
    */
   @Column({ type: 'int', default: 0 })
-  @HideField()
   taxCents: number;
 
   /**
    * 配送费（人民币分）
    */
   @Column({ type: 'int', default: 0 })
-  @HideField()
   shippingCents: number;
 
   /**
    * 优惠金额（人民币分）
    */
   @Column({ type: 'int', default: 0 })
-  @HideField()
   discountCents: number;
 
   /**
    * 总价（元）
    * Computed: (subtotal + tax + shipping - discount) / 100
    */
-  @Field(() => Float)
   get totalAmount(): number {
     const total =
       this.subtotalCents +
@@ -157,7 +141,6 @@ export class Order {
   /**
    * 商品小计（元）
    */
-  @Field(() => Float)
   get subtotal(): number {
     return this.subtotalCents / 100;
   }
@@ -165,7 +148,6 @@ export class Order {
   /**
    * 税费（元）
    */
-  @Field(() => Float)
   get tax(): number {
     return this.taxCents / 100;
   }
@@ -173,7 +155,6 @@ export class Order {
   /**
    * 配送费（元）
    */
-  @Field(() => Float)
   get shipping(): number {
     return this.shippingCents / 100;
   }
@@ -181,7 +162,6 @@ export class Order {
   /**
    * 优惠金额（元）
    */
-  @Field(() => Float)
   get discount(): number {
     return this.discountCents / 100;
   }
@@ -190,77 +170,66 @@ export class Order {
    * 支付方式
    */
   @Column({ type: 'enum', enum: PaymentMethod, nullable: true })
-  @Field(() => PaymentMethod, { nullable: true })
   paymentMethod?: PaymentMethod;
 
   /**
    * 支付时间
    */
   @Column({ type: 'timestamp', nullable: true })
-  @Field({ nullable: true })
   paidAt?: Date;
 
   /**
    * 发货时间
    */
   @Column({ type: 'timestamp', nullable: true })
-  @Field({ nullable: true })
   shippedAt?: Date;
 
   /**
    * 送达时间
    */
   @Column({ type: 'timestamp', nullable: true })
-  @Field({ nullable: true })
   deliveredAt?: Date;
 
   /**
    * 取消时间
    */
   @Column({ type: 'timestamp', nullable: true })
-  @Field({ nullable: true })
   cancelledAt?: Date;
 
   /**
    * 配送地址
    */
   @Column({ type: 'text', nullable: true })
-  @Field({ nullable: true })
   shippingAddress?: string;
 
   /**
    * 收货人姓名
    */
   @Column({ type: 'varchar', length: 100, nullable: true })
-  @Field({ nullable: true })
   recipientName?: string;
 
   /**
    * 收货人电话
    */
   @Column({ type: 'varchar', length: 20, nullable: true })
-  @Field({ nullable: true })
   recipientPhone?: string;
 
   /**
    * 备注
    */
   @Column({ type: 'text', nullable: true })
-  @Field({ nullable: true })
   notes?: string;
 
   /**
    * 创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
    * 最后更新时间
    */
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 
   /**

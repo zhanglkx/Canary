@@ -29,8 +29,6 @@ import {
   Index,
   VersionColumn,
 } from 'typeorm';
-import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 import { ProductSku } from '../../product/entities/product-sku.entity';
 
 /**
@@ -42,7 +40,6 @@ import { ProductSku } from '../../product/entities/product-sku.entity';
  * - 一个ProductSku对应一个Inventory记录
  */
 @Entity('inventories')
-@ObjectType()
 @Index('IDX_inventory_sku', ['skuId'])
 @Index('IDX_inventory_stock_level', ['currentStock'])
 export class Inventory {
@@ -50,21 +47,18 @@ export class Inventory {
    * 库存ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
    * SKU ID
    */
   @Column({ type: 'uuid' })
-  @HideField()
   skuId: string;
 
   /**
    * 关联的产品SKU
    */
   @ManyToOne(() => ProductSku, { onDelete: 'CASCADE', lazy: false })
-  @HideField()
   sku: ProductSku;
 
   /**
@@ -73,7 +67,6 @@ export class Inventory {
    * 与ProductSku.stock一致
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   currentStock: number;
 
   /**
@@ -83,7 +76,6 @@ export class Inventory {
    * 用户下单但未支付时的库存
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   reservedStock: number;
 
   /**
@@ -91,7 +83,6 @@ export class Inventory {
    *
    * availableStock = currentStock - reservedStock
    */
-  @Field(() => Int)
   get availableStock(): number {
     return this.currentStock - this.reservedStock;
   }
@@ -102,7 +93,6 @@ export class Inventory {
    * 用于库存统计和审计
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   inboundTotal: number;
 
   /**
@@ -111,7 +101,6 @@ export class Inventory {
    * 用于库存统计和审计
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   outboundTotal: number;
 
   /**
@@ -120,14 +109,12 @@ export class Inventory {
    * 库存盘点中发现的损耗
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   damageCount: number;
 
   /**
    * 最后一次库存检查时间
    */
   @Column({ type: 'timestamp', nullable: true })
-  @Field({ nullable: true })
   lastCheckTime?: Date;
 
   /**
@@ -136,7 +123,6 @@ export class Inventory {
    * 当库存低于此值时，系统会发出警告
    */
   @Column({ type: 'int', default: 10 })
-  @Field(() => Int)
   warningThreshold: number;
 
   /**
@@ -144,7 +130,6 @@ export class Inventory {
    *
    * 计算字段，用于快速查询
    */
-  @Field()
   get isLowStock(): boolean {
     return this.currentStock <= this.warningThreshold;
   }
@@ -156,28 +141,24 @@ export class Inventory {
    * 每次修改库存时版本号自动增加
    */
   @VersionColumn()
-  @HideField()
   version: number;
 
   /**
    * 备注
    */
   @Column({ type: 'text', nullable: true })
-  @Field({ nullable: true })
   remarks?: string;
 
   /**
    * 创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
    * 更新时间
    */
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 
   /**

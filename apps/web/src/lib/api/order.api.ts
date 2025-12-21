@@ -40,4 +40,3 @@ export const orderApi = {
   cancel: (id: string) =>
     apiClient.put<Order>(`/orders/${id}/cancel`),
 };
-

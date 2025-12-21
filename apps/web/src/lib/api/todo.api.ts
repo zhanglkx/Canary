@@ -74,4 +74,3 @@ export const todoApi = {
   delete: (id: string) =>
     apiClient.delete<{ success: boolean }>(`/todos/${id}`),
 };
-

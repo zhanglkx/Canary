@@ -38,4 +38,3 @@ export const userApi = {
   getStats: () =>
     apiClient.get('/users/stats'),
 };
-

@@ -24,8 +24,6 @@ import {
   JoinTable,
   Index,
 } from 'typeorm';
-import { ObjectType, Field, Float, Int } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 import { ProductCategory } from './product-category.entity';
 import { ProductImage } from './product-image.entity';
 import { ProductSku } from './product-sku.entity';
@@ -40,7 +38,6 @@ import { User } from '../../../user/user.entity';
  * - sku列表：一个产品包含多个具体的SKU变体
  */
 @Entity('products')
-@ObjectType()
 @Index('IDX_product_category_status', ['categoryId', 'status'])
 @Index('IDX_product_name', ['name'])
 @Index('IDX_product_sku', ['sku'])
@@ -50,42 +47,36 @@ export class Product {
    * 产品ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
    * 产品名称
    */
   @Column({ type: 'varchar', length: 200 })
-  @Field()
   name: string;
 
   /**
    * 产品描述
    */
   @Column({ type: 'text' })
-  @Field()
   description: string;
 
   /**
    * 产品SKU（库存单位编号，唯一标识）
    */
   @Column({ type: 'varchar', length: 100, unique: true })
-  @Field()
   sku: string;
 
   /**
    * 产品分类ID
    */
   @Column({ type: 'uuid' })
-  @HideField()
   categoryId: string;
 
   /**
    * 产品分类
    */
   @ManyToOne(() => ProductCategory, { onDelete: 'SET NULL', nullable: true })
-  @Field(() => ProductCategory, { nullable: true })
   category?: ProductCategory;
 
   /**
@@ -94,22 +85,18 @@ export class Product {
    * 显示时需除以100
    */
   @Column({ type: 'int' })
-  @Field(() => Float)
   basePrice: number;
 
   /**
    * 成本价格（人民币，单位：分）
-   * @HideField 隐藏在GraphQL中（敏感信息）
    */
   @Column({ type: 'int', default: 0 })
-  @HideField()
   costPrice: number;
 
   /**
    * 产品简介（用于列表显示）
    */
   @Column({ type: 'varchar', length: 500, nullable: true })
-  @Field({ nullable: true })
   summary?: string;
 
   /**
@@ -123,28 +110,24 @@ export class Product {
     enum: ['active', 'inactive', 'deleted'],
     default: 'active',
   })
-  @Field()
   status: 'active' | 'inactive' | 'deleted';
 
   /**
    * 销售数量（用于热度排序）
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   salesCount: number;
 
   /**
    * 平均评分（0-5之间）
    */
   @Column({ type: 'decimal', precision: 3, scale: 2, default: 0 })
-  @Field(() => Float)
   averageRating: number;
 
   /**
    * 评价数量
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   reviewCount: number;
 
   /**
@@ -154,7 +137,6 @@ export class Product {
     cascade: ['insert', 'update', 'remove'],
     eager: false,
   })
-  @Field(() => [ProductImage], { nullable: true })
   images?: ProductImage[];
 
   /**
@@ -164,7 +146,6 @@ export class Product {
     eager: false,
     cascade: ['insert', 'update'],
   })
-  @Field(() => [ProductSku], { nullable: true })
   skus?: ProductSku[];
 
   /**
@@ -173,42 +154,36 @@ export class Product {
    */
   @ManyToMany(() => User, { eager: false })
   @JoinTable({ name: 'product_tags' })
-  @HideField()
   tags?: User[];
 
   /**
    * 浏览次数
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   viewCount: number;
 
   /**
    * SEO友好的URL名称
    */
   @Column({ type: 'varchar', length: 200, unique: true, nullable: true })
-  @Field({ nullable: true })
   slug?: string;
 
   /**
    * SEO关键词
    */
   @Column({ type: 'varchar', length: 500, nullable: true })
-  @HideField()
   seoKeywords?: string;
 
   /**
    * 创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
    * 更新时间
    */
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 
   /**
