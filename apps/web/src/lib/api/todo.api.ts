@@ -7,12 +7,8 @@ import { apiClient } from '../api-client';
 
 export type Priority = 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
 
-export interface Category {
-  id: string;
-  name: string;
-  color: string;
-  icon: string;
-}
+// 从 category.api.ts 导入 Category 接口，避免重复定义
+import type { Category } from './category.api';
 
 export interface Todo {
   id: string;

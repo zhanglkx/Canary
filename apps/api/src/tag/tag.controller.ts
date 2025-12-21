@@ -20,12 +20,12 @@ export class TagController {
 
   @Post()
   async create(@Body() createTagDto: CreateTagDto, @CurrentUser() user: User) {
-    return this.tagService.create(createTagDto, user.id);
+    return this.tagService.create(createTagDto, user);
   }
 
   @Get()
   async findAll(@CurrentUser() user: User) {
-    return this.tagService.findAll(user.id);
+    return this.tagService.findByUser(user.id);
   }
 
   @Delete(':id')

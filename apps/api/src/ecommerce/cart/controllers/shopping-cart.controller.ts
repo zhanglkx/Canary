@@ -20,17 +20,17 @@ export class ShoppingCartController {
 
   @Post('items')
   async addItem(@Body() addItemDto: any, @CurrentUser() user: User) {
-    return this.cartService.addItem(user.id, addItemDto.skuId, addItemDto.quantity);
+    return this.cartService.addToCart(user.id, { skuId: addItemDto.skuId, quantity: addItemDto.quantity });
   }
 
   @Put('items/:itemId')
-  async updateItem(@Param('itemId') itemId: string, @Body('quantity') quantity: number) {
-    return this.cartService.updateQuantity(itemId, quantity);
+  async updateItem(@Param('itemId') itemId: string, @Body() body: { quantity: number }, @CurrentUser() user: User) {
+    return this.cartService.updateItemQuantity(user.id, itemId, body.quantity);
   }
 
   @Delete('items/:itemId')
-  async removeItem(@Param('itemId') itemId: string) {
-    return this.cartService.removeItem(itemId);
+  async removeItem(@Param('itemId') itemId: string, @CurrentUser() user: User) {
+    return this.cartService.removeFromCart(user.id, itemId);
   }
 
   @Delete()

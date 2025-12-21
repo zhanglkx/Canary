@@ -14,23 +14,23 @@ export class ProductController {
 
   @Post()
   @UseGuards(JwtAuthGuard)
-  async create(@Body() createProductDto: any, @CurrentUser() user: User) {
-    return this.productService.createProduct(createProductDto, user.id);
+  async create(@Body() createProductDto: any) {
+    return this.productService.createProduct(createProductDto);
   }
 
   @Get()
   async findAll(@Query() query: any) {
-    return this.productService.getProducts(query);
+    return this.productService.findProducts(query);
   }
 
   @Get('stats')
-  async getStats() {
-    return this.productService.getProductStats();
+  async getStats(@Query('id') id: string) {
+    return this.productService.getProductStats(id);
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return this.productService.getProductById(id);
+    return this.productService.findProductDetail(id);
   }
 
   @Put(':id')

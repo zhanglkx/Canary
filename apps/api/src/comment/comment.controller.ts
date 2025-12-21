@@ -23,12 +23,12 @@ export class CommentController {
     @Body() createCommentDto: CreateCommentDto,
     @CurrentUser() user: User,
   ) {
-    return this.commentService.create(todoId, createCommentDto.content, user.id);
+    return this.commentService.create({ content: createCommentDto.content, todoId }, user);
   }
 
   @Get('todos/:todoId/comments')
-  async findByTodo(@Param('todoId') todoId: string, @CurrentUser() user: User) {
-    return this.commentService.findByTodo(todoId, user.id);
+  async findByTodo(@Param('todoId') todoId: string) {
+    return this.commentService.findByTodoId(todoId);
   }
 
   @Delete('comments/:id')

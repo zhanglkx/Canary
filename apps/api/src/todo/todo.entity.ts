@@ -33,10 +33,7 @@ export enum Priority {
   URGENT = 'URGENT',
 }
 
-// 在 REST API schema 中注册枚举类型
-  name: 'Priority',
-  description: 'Todo 优先级',
-});
+// Priority 枚举已定义，可在 REST API 中使用
 
 @Entity('todos')
 export class Todo {

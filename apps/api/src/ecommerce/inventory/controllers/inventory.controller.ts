@@ -13,16 +13,16 @@ export class InventoryController {
 
   @Get(':skuId')
   async getStock(@Param('skuId') skuId: string) {
-    return this.inventoryService.getStock(skuId);
+    return this.inventoryService.getInventory(skuId);
   }
 
   @Post(':skuId/reserve')
-  async reserve(@Param('skuId') skuId: string, @Body('quantity') quantity: number) {
-    return this.inventoryService.reserveStock(skuId, quantity);
+  async reserve(@Param('skuId') skuId: string, @Body() body: { quantity: number; orderId?: string }) {
+    return this.inventoryService.reserveStock(skuId, body.quantity, body.orderId);
   }
 
   @Post(':skuId/release')
-  async release(@Param('skuId') skuId: string, @Body('quantity') quantity: number) {
-    return this.inventoryService.releaseStock(skuId, quantity);
+  async release(@Param('skuId') skuId: string, @Body() body: { quantity: number; orderId?: string }) {
+    return this.inventoryService.cancelReserve(skuId, body.quantity, body.orderId);
   }
 }

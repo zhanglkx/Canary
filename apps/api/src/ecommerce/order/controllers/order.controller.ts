@@ -15,7 +15,7 @@ export class OrderController {
 
   @Post()
   async create(@Body() createOrderDto: any, @CurrentUser() user: User) {
-    return this.orderService.createOrder(user.id, createOrderDto);
+    return this.orderService.createOrderFromCart(user.id, createOrderDto);
   }
 
   @Get()
@@ -24,12 +24,12 @@ export class OrderController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string, @CurrentUser() user: User) {
-    return this.orderService.getOrderById(id, user.id);
+  async findOne(@Param('id') id: string) {
+    return this.orderService.getOrder(id);
   }
 
   @Put(':id/cancel')
-  async cancel(@Param('id') id: string, @CurrentUser() user: User) {
-    return this.orderService.cancelOrder(id, user.id);
+  async cancel(@Param('id') id: string) {
+    return this.orderService.cancelOrder(id);
   }
 }

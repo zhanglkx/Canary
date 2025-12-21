@@ -29,7 +29,7 @@ import { ProductSku } from './entities/product-sku.entity';
 import { ProductImage } from './entities/product-image.entity';
 import { ProductService } from './services/product.service';
 import { ProductRepository } from './repositories/product.repository';
-import { ProductResolver } from './resolvers/product.resolver';
+import { ProductController } from './controllers/product.controller';
 
 /**
  * 产品模块
@@ -47,7 +47,8 @@ import { ProductResolver } from './resolvers/product.resolver';
       ProductImage,
     ]),
   ],
-  providers: [ProductService, ProductRepository, ProductResolver],
+  providers: [ProductService, ProductRepository],
+  controllers: [ProductController],
   exports: [ProductService],
 })
 export class ProductModule {}

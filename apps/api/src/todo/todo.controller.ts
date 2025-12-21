@@ -12,27 +12,11 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, UseGuards } from '@nestjs/common';
 import { TodoService } from './todo.service';
 import { Todo } from './todo.entity';
+import { CreateTodoInput } from './dto/create-todo.input';
+import { UpdateTodoInput } from './dto/update-todo.input';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import { User } from '../user/user.entity';
-
-// 我们需要创建 DTO 类
-export class CreateTodoDto {
-  title: string;
-  description?: string;
-  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-  dueDate?: string;
-  categoryId?: string;
-}
-
-export class UpdateTodoDto {
-  title?: string;
-  description?: string;
-  completed?: boolean;
-  priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
-  dueDate?: string;
-  categoryId?: string;
-}
 
 @Controller('todos')
 @UseGuards(JwtAuthGuard)
@@ -41,10 +25,10 @@ export class TodoController {
 
   @Post()
   async create(
-    @Body() createTodoDto: CreateTodoDto,
+    @Body() createTodoInput: CreateTodoInput,
     @CurrentUser() user: User,
   ): Promise<Todo> {
-    return this.todoService.create(createTodoDto, user.id);
+    return this.todoService.create(createTodoInput, user.id);
   }
 
   @Get()
@@ -63,10 +47,10 @@ export class TodoController {
   @Put(':id')
   async update(
     @Param('id') id: string,
-    @Body() updateTodoDto: UpdateTodoDto,
+    @Body() updateTodoInput: UpdateTodoInput,
     @CurrentUser() user: User,
   ): Promise<Todo> {
-    return this.todoService.update(id, updateTodoDto, user.id);
+    return this.todoService.update(id, updateTodoInput, user.id);
   }
 
   @Delete(':id')
