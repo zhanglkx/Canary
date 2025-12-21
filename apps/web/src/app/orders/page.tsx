@@ -1,15 +1,20 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { orderApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { Button } from '@/components/ui/button';
+import styles from './page.module.less';
 
 export default function OrdersPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { isAuthenticated } = useAuth();
   const [orders, setOrders] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+  const showSuccess = searchParams.get('success') === 'true';
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -34,48 +39,127 @@ export default function OrdersPage() {
     }
   };
 
+  const toggleOrderExpand = (orderId: string) => {
+    const newExpanded = new Set(expandedOrders);
+    if (newExpanded.has(orderId)) {
+      newExpanded.delete(orderId);
+    } else {
+      newExpanded.add(orderId);
+    }
+    setExpandedOrders(newExpanded);
+  };
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return styles.pending;
+      case 'processing':
+        return styles.processing;
+      case 'completed':
+        return styles.completed;
+      case 'cancelled':
+        return styles.cancelled;
+      default:
+        return styles.pending;
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex justify-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
-          </div>
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <div className={styles.spinner}></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">My Orders</h1>
+    <div className={styles.container}>
+      <div className={styles.wrapper}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>My Orders</h1>
+          {showSuccess && (
+            <span className={styles.success}>✓ Order placed successfully!</span>
+          )}
+        </div>
 
         {orders.length === 0 ? (
-          <div className="text-center py-12 text-gray-500">
-            No orders yet
+          <div className={styles.empty}>
+            <p>You haven't placed any orders yet</p>
+            <Button onClick={() => router.push('/shop')} variant="primary">
+              Start Shopping
+            </Button>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className={styles.ordersList}>
             {orders.map((order) => (
-              <div key={order.id} className="bg-white rounded-lg shadow-sm p-6">
-                <div className="flex justify-between items-start mb-4">
-                  <div>
-                    <h3 className="font-semibold">Order #{order.orderNumber}</h3>
-                    <p className="text-sm text-gray-600">
-                      {new Date(order.createdAt).toLocaleDateString()}
-                    </p>
+              <div key={order.id} className={styles.orderCard}>
+                <div
+                  className={styles.orderHeader}
+                  onClick={() => toggleOrderExpand(order.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className={styles.orderInfo}>
+                    <div className={styles.orderNumber}>
+                      Order #{order.orderNumber}
+                    </div>
+                    <div className={styles.orderDate}>
+                      {new Date(order.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </div>
                   </div>
-                  <span className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-                    {order.status}
+                  <span className={`${styles.statusBadge} ${getStatusBadgeClass(order.status)}`}>
+                    {order.status || 'Pending'}
                   </span>
                 </div>
-                <div className="border-t pt-4">
-                  <div className="flex justify-between">
-                    <span>Total</span>
-                    <span className="font-semibold">
-                      ${(order.totalAmount / 100).toFixed(2)}
+
+                {expandedOrders.has(order.id) && (
+                  <div className={styles.orderContent}>
+                    <div className={styles.itemsList}>
+                      <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                        Items:
+                      </h4>
+                      {order.items?.map((item: any, index: number) => (
+                        <div key={index} className={styles.item}>
+                          <div className={styles.itemName}>
+                            {item.productName} x {item.quantity}
+                          </div>
+                          <div className={styles.itemPrice}>
+                            ${((item.itemTotal || 0) / 100).toFixed(2)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className={styles.orderFooter}>
+                  <div className={styles.totalAmount}>
+                    <span className={styles.totalLabel}>Total Amount</span>
+                    <span className={styles.totalPrice}>
+                      ${((order.totalAmount || 0) / 100).toFixed(2)}
                     </span>
+                  </div>
+
+                  <div className={styles.actions}>
+                    <Button
+                      onClick={() => toggleOrderExpand(order.id)}
+                      variant="secondary"
+                      className={styles.button}
+                    >
+                      {expandedOrders.has(order.id) ? 'Hide Details' : 'View Details'}
+                    </Button>
+                    <Button
+                      onClick={() => router.push(`/orders/${order.id}`)}
+                      variant="primary"
+                      className={styles.button}
+                    >
+                      Track Order
+                    </Button>
                   </div>
                 </div>
               </div>
