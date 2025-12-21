@@ -68,7 +68,7 @@ export default function HomePage() {
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-3xl mx-auto">
               一个现代化的待办事项管理应用，帮助你组织任务、提升效率、实现目标。
-              使用 NestJS、Next.js 和 GraphQL 构建的全栈解决方案。
+              使用 NestJS、Next.js 和 REST API 构建的全栈解决方案。
             </p>
 
             <NoSSR fallback={<div className="h-12 bg-gray-200 dark:bg-gray-700 rounded-lg animate-pulse"></div>}>
@@ -246,7 +246,7 @@ export default function HomePage() {
             {[
               { name: 'Next.js 15', icon: '⚛️' },
               { name: 'NestJS 10', icon: '🐱' },
-              { name: 'GraphQL', icon: '🚀' },
+              { name: 'REST API', icon: '🚀' },
               { name: 'TypeScript', icon: '📘' },
               { name: 'PostgreSQL', icon: '🐘' },
               { name: 'Tailwind CSS', icon: '🎨' },
@@ -269,13 +269,13 @@ export default function HomePage() {
             </h3>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a
-                href="http://localhost:4000/graphql"
+                href="http://localhost:4000/api"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transform hover:scale-105 transition-all duration-200 shadow-lg"
               >
                 <span className="mr-2">🔧</span>
-                GraphQL Playground
+                API 文档
               </a>
               <a
                 href="http://localhost:4000"
@@ -310,13 +310,13 @@ export default function HomePage() {
                 免费注册
               </Link>
               <a
-                href="http://localhost:4000/graphql"
+                href="http://localhost:4000/api"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center px-8 py-4 bg-transparent text-white font-semibold rounded-xl border-2 border-white hover:bg-white hover:text-blue-600 transform hover:scale-105 transition-all duration-200"
               >
                 <span className="mr-2">🔧</span>
-                GraphQL Playground
+                API 文档
               </a>
             </div>
           </div>

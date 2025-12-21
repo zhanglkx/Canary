@@ -1,13 +1,12 @@
 import type { Metadata } from 'next';
 import './globals.css';
-import { ApolloWrapper } from '@/lib/apollo-wrapper';
 import { AuthProvider } from '@/lib/auth-context';
 import { Navbar } from '@/components/layout/navbar';
 import { ErrorBoundary } from '@/components/error-boundary';
 
 export const metadata: Metadata = {
-  title: 'Learning NestJS + Next.js + GraphQL',
-  description: 'A learning project with NestJS, Next.js, and GraphQL',
+  title: 'Learning NestJS + Next.js + REST API',
+  description: 'A learning project with NestJS, Next.js, and REST API',
 };
 
 export default function RootLayout({
@@ -19,12 +18,10 @@ export default function RootLayout({
     <html lang="en">
       <body suppressHydrationWarning={true}>
         <ErrorBoundary>
-          <ApolloWrapper>
-            <AuthProvider>
-              <Navbar />
-              {children}
-            </AuthProvider>
-          </ApolloWrapper>
+          <AuthProvider>
+            <Navbar />
+            {children}
+          </AuthProvider>
         </ErrorBoundary>
       </body>
     </html>

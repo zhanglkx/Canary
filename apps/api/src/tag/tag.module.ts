@@ -13,7 +13,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Tag } from './tag.entity';
 import { TagService } from './tag.service';
-import { TagResolver } from './tag.resolver';
+import { TagController } from './tag.controller';
 import { Todo } from '../todo/todo.entity';
 
 @Module({
@@ -21,8 +21,9 @@ import { Todo } from '../todo/todo.entity';
   // 需要 Todo 是因为 TagService 需要操作 Todo 与 Tag 的关系
   imports: [TypeOrmModule.forFeature([Tag, Todo])],
 
-  // 这个模块提供的服务
-  providers: [TagService, TagResolver],
+  // 这个模块提供的控制器和服务
+  controllers: [TagController],
+  providers: [TagService],
 
   // 导出 TagService，以防其他模块需要使用它
   exports: [TagService],

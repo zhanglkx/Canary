@@ -1,10 +1,9 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LOGIN } from '@/lib/graphql/mutations';
+import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,16 +15,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('admin@admin.com');
   const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
-
-  const [loginMutation, { loading }] = useMutation(LOGIN, {
-    onCompleted: (data) => {
-      login(data.login.accessToken, data.login.user);
-      router.push('/todos');
-    },
-    onError: (error) => {
-      setError(error.message || 'Login failed. Please check your credentials.');
-    },
-  });
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -36,15 +26,16 @@ export default function LoginPage() {
       return;
     }
 
+    setLoading(true);
+
     try {
-      await loginMutation({
-        variables: {
-          email,
-          password,
-        },
-      });
-    } catch (err) {
-      // Error handled by onError callback
+      const response = await authApi.login({ email, password });
+      login(response.accessToken, response.user);
+      router.push('/todos');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -99,13 +90,10 @@ export default function LoginPage() {
               Sign in
             </Button>
 
-            <div className="text-center">
-              <Link
-                href="/"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-              >
-                Back to home
-              </Link>
+            <div className="text-center text-sm text-gray-600 dark:text-gray-400">
+              <p>Demo Credentials:</p>
+              <p className="font-mono">Email: admin@admin.com</p>
+              <p className="font-mono">Password: password</p>
             </div>
           </form>
         </NoSSR>

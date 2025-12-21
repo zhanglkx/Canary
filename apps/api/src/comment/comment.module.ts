@@ -22,7 +22,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Comment } from './comment.entity';
 import { CommentService } from './comment.service';
-import { CommentResolver } from './comment.resolver';
+import { CommentController } from './comment.controller';
 
 /**
  * @Module 装饰器定义了这个 NestJS 模块
@@ -38,10 +38,12 @@ import { CommentResolver } from './comment.resolver';
   // 这样 CommentService 就可以通过 @InjectRepository 注入它
   imports: [TypeOrmModule.forFeature([Comment])],
 
+  // controllers: REST API 控制器
+  controllers: [CommentController],
+  
   // providers: 这个模块提供的所有可注入的类
   // - CommentService: 业务逻辑服务
-  // - CommentResolver: GraphQL 解析器（会自动注册 GraphQL Query/Mutation/Subscription）
-  providers: [CommentService, CommentResolver],
+  providers: [CommentService],
 
   // exports: 导出 CommentService 给其他模块使用
   // 例如 TodoModule 可能需要用到 CommentService

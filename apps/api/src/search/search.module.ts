@@ -7,11 +7,12 @@
 
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { SearchResolver } from './search.resolver';
+import { SearchController } from './search.controller';
 import { Todo } from '../todo/todo.entity';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Todo])],
-  providers: [SearchResolver],
+  controllers: [SearchController],
+  providers: [],
 })
 export class SearchModule {}

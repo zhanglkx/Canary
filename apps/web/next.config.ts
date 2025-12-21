@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
   
   experimental: {
     // 优化水合过程
-    optimizePackageImports: ['@apollo/client'],
+    optimizePackageImports: ['axios'],
   },
   // 添加自定义 webpack 配置来处理 SSR 问题
   webpack: (config, { isServer }) => {

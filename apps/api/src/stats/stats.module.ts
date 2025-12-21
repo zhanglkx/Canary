@@ -7,7 +7,7 @@
 
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { StatsResolver } from './stats.resolver';
+import { StatsController } from './stats.controller';
 import { Todo } from '../todo/todo.entity';
 import { Category } from '../category/category.entity';
 
@@ -15,7 +15,8 @@ import { Category } from '../category/category.entity';
   // 导入 TypeORM 模块，注册 Todo 和 Category 实体
   imports: [TypeOrmModule.forFeature([Todo, Category])],
 
-  // 提供 StatsResolver
-  providers: [StatsResolver],
+  // 提供 StatsController
+  controllers: [StatsController],
+  providers: [],
 })
 export class StatsModule {}
