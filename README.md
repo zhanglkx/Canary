@@ -62,7 +62,7 @@ docker compose -f docker-compose.prod.yml --env-file .env.production up -d
 
 - 🌐 主页: http://8.159.144.140
 - 💚 健康检查: http://8.159.144.140/health
-- 🔍 GraphQL: http://8.159.144.140/graphql
+- 🔍 REST API: http://8.159.144.140/api
 
 ## 文档索引
 

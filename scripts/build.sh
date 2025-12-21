@@ -152,11 +152,8 @@ build_web() {
     log_info "运行 Web 代码检查..."
     pnpm lint
     
-    # 生成 GraphQL 类型
-    if [ -f "codegen.ts" ]; then
-        log_info "生成 GraphQL 类型..."
-        pnpm codegen
-    fi
+    # 构建完成
+    log_info "Web 应用构建完成"
     
     # 构建
     log_info "构建 Web 应用..."
