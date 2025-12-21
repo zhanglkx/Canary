@@ -1,9 +1,9 @@
 /**
  * User 实体定义 (User Entity)
  *
- * 这个文件展示了 NestJS 中 GraphQL 和 TypeORM 的完美整合：
+ * 这个文件展示了 NestJS 中 REST API 和 TypeORM 的完美整合：
  * 1. TypeORM 装饰器（@Entity, @Column）- 用于数据库表映射
- * 3. 同一个类同时定义了：数据库模型 + GraphQL API 类型
+ * 3. 同一个类同时定义了：数据库模型 + REST API API 类型
  *
  * 优势：代码简洁，避免重复定义同样的数据结构
  */
@@ -24,8 +24,8 @@ import { RefreshToken } from '../auth/entities/refresh-token.entity';
  * @Entity('users') - TypeORM 装饰器
  * 告诉 TypeORM 这个类对应数据库中的 'users' 表
  *
- * 告诉 NestJS/GraphQL 这个类是一个 GraphQL 对象类型
- * 它会自动在 GraphQL schema 中生成对应的类型定义
+ * 告诉 NestJS/REST API 这个类是一个 REST API 对象类型
+ * 它会自动在 REST API schema 中生成对应的类型定义
  */
 @Entity('users')
 export class User {
@@ -53,7 +53,7 @@ export class User {
   /**
    * 用户密码 - 已加密存储
    * @Column() - 存储在数据库中
-   * 我们永远不应该在 GraphQL 响应中返回密码
+   * 我们永远不应该在 REST API 响应中返回密码
    */
   @Column()
   password: string;
@@ -63,7 +63,7 @@ export class User {
    * @OneToMany(() => Todo, (todo) => todo.user)
    *   - 一个用户可以拥有多个待办事项
    *   - 与 Todo 的 @ManyToOne 关系对应
-   *   - 在 GraphQL 中是一个 Todo 对象数组
+   *   - 在 REST API 中是一个 Todo 对象数组
    *   - nullable: true 表示可以为 null（用户可能还没有创建待办事项）
    */
   @OneToMany(() => Todo, (todo) => todo.user)

@@ -39,4 +39,3 @@ export const searchApi = {
   searchCategories: (query: string) =>
     apiClient.get('/search/categories', { params: { query } }),
 };
-

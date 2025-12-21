@@ -54,4 +54,3 @@ export const tagApi = {
   delete: (id: string) =>
     apiClient.delete<{ success: boolean }>(`/tags/${id}`),
 };
-

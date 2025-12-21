@@ -65,4 +65,3 @@ export const commentApi = {
   delete: (id: string) =>
     apiClient.delete<{ success: boolean }>(`/comments/${id}`),
 };
-

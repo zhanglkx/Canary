@@ -44,7 +44,7 @@ export enum TransactionType {
   CAPTURE = 'CAPTURE',               // 确认扣款
 }
 
-// Register enums for GraphQL
+// Register enums for REST API
 
 /**
  * 支付交易实体

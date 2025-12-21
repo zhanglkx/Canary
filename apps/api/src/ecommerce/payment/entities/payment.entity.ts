@@ -55,7 +55,7 @@ export enum PaymentGateway {
   WECHAT_PAY = 'WECHAT_PAY',
 }
 
-// Register enums for GraphQL
+// Register enums for REST API
 
 /**
  * 支付实体

@@ -13,7 +13,7 @@
  * 依赖注入：
  * - TypeORM 仓储
  * - 业务服务
- * - GraphQL 解析器
+ * - REST API 解析器
  *
  * @author Claude
  * @module Ecommerce/Product

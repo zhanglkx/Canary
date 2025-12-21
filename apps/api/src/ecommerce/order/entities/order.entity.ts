@@ -49,7 +49,7 @@ export enum PaymentMethod {
   BANK_TRANSFER = 'BANK_TRANSFER',
 }
 
-// Register enums for GraphQL
+// Register enums for REST API
 
 /**
  * 订单实体

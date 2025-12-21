@@ -1,7 +1,7 @@
 /**
  * 创建标签的输入 DTO
  *
- * GraphQL 变更示例：
+ * REST API 变更示例：
  * mutation {
  *   createTag(createTagInput: {
  *     name: "紧急"

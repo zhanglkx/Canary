@@ -1,7 +1,7 @@
 /**
  * UpdateUserInput DTO - 用户更新数据传输对象
  *
- * 用于 GraphQL 中的用户信息更新操作
+ * 用于 REST API 中的用户信息更新操作
  */
 
 import { IsOptional, IsString, MinLength, IsEmail } from 'class-validator';

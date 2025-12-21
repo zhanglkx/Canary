@@ -4,9 +4,9 @@
  * DTO 的作用：
  * 1. 定义客户端应该如何提交数据
  * 2. 自动验证输入数据
- * 3. 确保 GraphQL 参数的类型安全
+ * 3. 确保 REST API 参数的类型安全
  *
- * 使用示例 (GraphQL 变更)：
+ * 使用示例 (REST API 变更)：
  * mutation {
  *   createComment(createCommentInput: {
  *     content: "这个需求很紧急，需要明天完成"
@@ -22,8 +22,8 @@
 import { IsNotEmpty, IsString, IsUUID, MinLength } from 'class-validator';
 
 /**
- * 标记这个类为 GraphQL 的输入类型
- * 在 GraphQL Schema 中会生成 CreateCommentInput 类型
+ * 标记这个类为 REST API 的输入类型
+ * 在 REST API Schema 中会生成 CreateCommentInput 类型
  */
 export class CreateCommentInput {
   /**

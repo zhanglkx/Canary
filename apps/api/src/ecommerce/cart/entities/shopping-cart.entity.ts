@@ -35,7 +35,7 @@ export enum CartStatus {
   CONVERTED = 'CONVERTED',
 }
 
-// Register enum for GraphQL
+// Register enum for REST API
 
 /**
  * 购物车实体

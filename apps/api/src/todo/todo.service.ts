@@ -8,11 +8,11 @@
  * 核心职责：
  * 1. 封装数据库操作 - 通过 TypeORM Repository 进行 CRUD 操作
  * 2. 实现业务规则 - 如权限检查、数据验证等
- * 3. 错误处理 - 抛出适当的异常，由 Resolver 层捕获并转换为 GraphQL 错误
+ * 3. 错误处理 - 抛出适当的异常，由 Resolver 层捕获并转换为 REST API 错误
  * 4. 数据关联加载 - 自动加载关联的 User 和 Category 数据
  *
  * 架构设计：
- * GraphQL Resolver (API 入口)
+ * REST API Resolver (API 入口)
  *         ↓
  *    TodoService (业务逻辑)
  *         ↓
@@ -83,8 +83,8 @@ export class TodoService {
    * 5. 保存到数据库
    * 6. 返回保存后的 Todo 对象（包含生成的 ID 和时间戳）
    *
-   * @param createTodoInput - 来自 GraphQL mutation 的输入数据
-   *        例：{ title: "学习 GraphQL", priority: "HIGH", dueDate: "2024-12-31" }
+   * @param createTodoInput - 来自 REST API mutation 的输入数据
+   *        例：{ title: "学习 REST API", priority: "HIGH", dueDate: "2024-12-31" }
    * @param userId - 当前已认证用户的 ID（由 Resolver 通过 @CurrentUser 装饰器提供）
    *
    * @returns 返回创建成功的 Todo 对象，包括：
@@ -95,8 +95,8 @@ export class TodoService {
    *
    * @throws 如果数据库操作失败，会抛出异常（由 NestJS 异常过滤器处理）
    *
-   * GraphQL 示例：
-   * ```graphql
+   * REST API 示例：
+   * ```rest-api
    * mutation {
    *   createTodo(createTodoInput: {
    *     title: "完成项目文档"
@@ -149,8 +149,8 @@ export class TodoService {
    * ORDER BY created_at DESC
    * ```
    *
-   * GraphQL 示例：
-   * ```graphql
+   * REST API 示例：
+   * ```rest-api
    * query {
    *   todos {
    *     id title priority completed
@@ -201,8 +201,8 @@ export class TodoService {
    * 2. 更新 Todo 前的权限验证
    * 3. 删除 Todo 前的权限验证
    *
-   * GraphQL 示例：
-   * ```graphql
+   * REST API 示例：
+   * ```rest-api
    * query {
    *   todo(id: "todo-uuid") {
    *     id title priority completed
@@ -270,8 +270,8 @@ export class TodoService {
    * - dueDate: 修改截止日期
    * - categoryId: 移动到其他分类
    *
-   * GraphQL 示例：
-   * ```graphql
+   * REST API 示例：
+   * ```rest-api
    * mutation {
    *   updateTodo(
    *     id: "todo-uuid"
@@ -331,8 +331,8 @@ export class TodoService {
    *
    * @throws NotFoundException 如果 Todo 不存在或不属于当前用户
    *
-   * GraphQL 示例：
-   * ```graphql
+   * REST API 示例：
+   * ```rest-api
    * mutation {
    *   removeTodo(id: "todo-uuid")
    * }

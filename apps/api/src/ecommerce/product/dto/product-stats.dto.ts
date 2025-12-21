@@ -11,7 +11,7 @@
 /**
  * 产品统计信息
  *
- * 用于 productStats GraphQL Query 返回值
+ * 用于 productStats REST API Query 返回值
  */
 export class ProductStatsDto {
   /**

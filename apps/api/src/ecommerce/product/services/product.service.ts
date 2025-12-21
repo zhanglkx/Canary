@@ -545,7 +545,7 @@ export class ProductService {
    * 功能：
    * - 根据ID列表批量查询产品
    * - 避免N+1查询问题
-   * - 用于GraphQL DataLoader优化
+   * - 用于REST API DataLoader优化
    *
    * 设计模式：
    * - 接收ID数组，返回对应的产品数组
