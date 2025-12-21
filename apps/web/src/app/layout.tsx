@@ -1,5 +1,5 @@
 import type { Metadata } from 'next';
-import './globals.css';
+import '@/styles/globals.less';
 import { AuthProvider } from '@/lib/auth-context';
 import { Navbar } from '@/components/layout/navbar';
 import { ErrorBoundary } from '@/components/error-boundary';

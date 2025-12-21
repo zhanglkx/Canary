@@ -1,0 +1,647 @@
+@import '../styles/variables.less';
+@import '../styles/mixins.less';
+
+.container {
+  min-height: 100vh;
+  background: linear-gradient(to bottom right, @gray-50, @gray-100);
+  
+  :global(.dark) & {
+    background: linear-gradient(to bottom right, @gray-900, @gray-800);
+  }
+}
+
+// Hero Section
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+.heroBackground {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to right, fade(@primary-color, 10%), fade(@secondary-color, 10%));
+  
+  :global(.dark) & {
+    background: linear-gradient(to right, fade(@primary-color, 5%), fade(@secondary-color, 5%));
+  }
+}
+
+.heroContent {
+  position: relative;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: @spacing-4xl @spacing-md;
+  text-align: center;
+}
+
+.title {
+  font-size: @font-size-4xl;
+  font-weight: bold;
+  color: @gray-900;
+  margin-bottom: @spacing-lg;
+  
+  :global(.dark) & {
+    color: white;
+  }
+  
+  @media (min-width: @breakpoint-md) {
+    font-size: @font-size-6xl;
+  }
+}
+
+.gradient {
+  background: linear-gradient(to right, @primary-color, @secondary-color);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.description {
+  font-size: @font-size-xl;
+  color: @gray-600;
+  margin-bottom: @spacing-xl;
+  max-width: 48rem;
+  margin-left: auto;
+  margin-right: auto;
+  
+  :global(.dark) & {
+    color: @gray-300;
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-md;
+  justify-content: center;
+  
+  @media (min-width: @breakpoint-sm) {
+    flex-direction: row;
+  }
+}
+
+.button {
+  .button-base();
+}
+
+.buttonPrimary {
+  composes: button;
+  .gradient-primary();
+  color: white;
+  box-shadow: @shadow-lg;
+  
+  &:hover {
+    filter: brightness(1.1);
+  }
+}
+
+.buttonSecondary {
+  composes: button;
+  background: white;
+  color: @gray-900;
+  box-shadow: @shadow-lg;
+  border: 1px solid @gray-200;
+  
+  :global(.dark) & {
+    background: @gray-800;
+    color: white;
+    border-color: @gray-700;
+  }
+  
+  &:hover {
+    background: @gray-50;
+    
+    :global(.dark) & {
+      background: @gray-700;
+    }
+  }
+}
+
+.welcomeMessage {
+  margin-top: @spacing-xl;
+  padding: @spacing-md;
+  background: fade(#3b82f6, 5%);
+  border-radius: @border-radius-xl;
+  border: 1px solid fade(#3b82f6, 20%);
+  color: darken(#3b82f6, 20%);
+  
+  :global(.dark) & {
+    background: fade(#3b82f6, 20%);
+    border-color: fade(#3b82f6, 80%);
+    color: lighten(#3b82f6, 20%);
+  }
+}
+
+.username {
+  font-weight: 600;
+}
+
+// Stats Section
+.statsSection {
+  padding: @spacing-4xl 0;
+  background: white;
+  
+  :global(.dark) & {
+    background: @gray-800;
+  }
+}
+
+.statsContainer {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 @spacing-md;
+}
+
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: @spacing-xl;
+  
+  @media (min-width: @breakpoint-md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.statItem {
+  text-align: center;
+}
+
+.statIcon {
+  font-size: @font-size-3xl;
+  margin-bottom: @spacing-sm;
+}
+
+.statValue {
+  font-size: @font-size-3xl;
+  font-weight: bold;
+  color: @gray-900;
+  margin-bottom: @spacing-xs;
+  
+  :global(.dark) & {
+    color: white;
+  }
+}
+
+.statLabel {
+  font-size: @font-size-sm;
+  color: @gray-600;
+  
+  :global(.dark) & {
+    color: @gray-400;
+  }
+}
+
+// Features Section
+.featuresSection {
+  padding: @spacing-4xl 0;
+  background: @gray-50;
+  
+  :global(.dark) & {
+    background: @gray-900;
+  }
+}
+
+.sectionHeader {
+  text-align: center;
+  margin-bottom: @spacing-4xl;
+}
+
+.sectionTitle {
+  font-size: @font-size-3xl;
+  font-weight: bold;
+  color: @gray-900;
+  margin-bottom: @spacing-md;
+  
+  :global(.dark) & {
+    color: white;
+  }
+  
+  @media (min-width: @breakpoint-md) {
+    font-size: @font-size-4xl;
+  }
+}
+
+.sectionDescription {
+  font-size: @font-size-xl;
+  color: @gray-600;
+  max-width: 40rem;
+  margin: 0 auto;
+  
+  :global(.dark) & {
+    color: @gray-300;
+  }
+}
+
+.featuresGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: @spacing-xl;
+  
+  @media (min-width: @breakpoint-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: @breakpoint-lg) {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.featureCard {
+  position: relative;
+  background: white;
+  border-radius: @border-radius-2xl;
+  padding: @spacing-xl;
+  box-shadow: @shadow-lg;
+  border: 1px solid @gray-200;
+  transition: all @transition-base;
+  
+  :global(.dark) & {
+    background: @gray-800;
+    border-color: @gray-700;
+  }
+  
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: @shadow-xl;
+  }
+}
+
+.featureIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: @border-radius-xl;
+  font-size: @font-size-2xl;
+  margin-bottom: @spacing-lg;
+  color: white;
+}
+
+.featureIconBlue {
+  composes: featureIcon;
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+}
+
+.featureIconPurple {
+  composes: featureIcon;
+  background: linear-gradient(to right, #8b5cf6, #7c3aed);
+}
+
+.featureIconGreen {
+  composes: featureIcon;
+  background: linear-gradient(to right, #10b981, #059669);
+}
+
+.featureIconYellow {
+  composes: featureIcon;
+  background: linear-gradient(to right, #f59e0b, #d97706);
+}
+
+.featureIconPink {
+  composes: featureIcon;
+  background: linear-gradient(to right, #ec4899, #db2777);
+}
+
+.featureIconIndigo {
+  composes: featureIcon;
+  background: linear-gradient(to right, #6366f1, #4f46e5);
+}
+
+.featureTitle {
+  font-size: @font-size-xl;
+  font-weight: 600;
+  color: @gray-900;
+  margin-bottom: @spacing-sm;
+  
+  :global(.dark) & {
+    color: white;
+  }
+}
+
+.featureDescription {
+  color: @gray-600;
+  line-height: 1.6;
+  
+  :global(.dark) & {
+    color: @gray-300;
+  }
+}
+
+// Quick Access
+.quickAccessSection {
+  composes: statsSection;
+}
+
+.quickAccessGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: @spacing-lg;
+  
+  @media (min-width: @breakpoint-md) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  @media (min-width: @breakpoint-lg) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.quickAccessCard {
+  padding: @spacing-lg;
+  border-radius: @border-radius-xl;
+  transition: all @transition-base;
+  border: 1px solid;
+}
+
+.quickAccessCardBlue {
+  composes: quickAccessCard;
+  background: linear-gradient(to bottom right, fade(#3b82f6, 5%), fade(#3b82f6, 10%));
+  border-color: fade(#3b82f6, 20%);
+  
+  :global(.dark) & {
+    background: linear-gradient(to bottom right, fade(#3b82f6, 20%), fade(#3b82f6, 10%));
+    border-color: fade(#3b82f6, 80%);
+  }
+  
+  &:hover {
+    background: linear-gradient(to bottom right, fade(#3b82f6, 10%), fade(#3b82f6, 20%));
+    
+    :global(.dark) & {
+      background: linear-gradient(to bottom right, fade(#3b82f6, 30%), fade(#3b82f6, 20%));
+    }
+  }
+}
+
+.quickAccessCardGreen {
+  composes: quickAccessCard;
+  background: linear-gradient(to bottom right, fade(#10b981, 5%), fade(#10b981, 10%));
+  border-color: fade(#10b981, 20%);
+  
+  :global(.dark) & {
+    background: linear-gradient(to bottom right, fade(#10b981, 20%), fade(#10b981, 10%));
+    border-color: fade(#10b981, 80%);
+  }
+  
+  &:hover {
+    background: linear-gradient(to bottom right, fade(#10b981, 10%), fade(#10b981, 20%));
+    
+    :global(.dark) & {
+      background: linear-gradient(to bottom right, fade(#10b981, 30%), fade(#10b981, 20%));
+    }
+  }
+}
+
+.quickAccessCardPurple {
+  composes: quickAccessCard;
+  background: linear-gradient(to bottom right, fade(#8b5cf6, 5%), fade(#8b5cf6, 10%));
+  border-color: fade(#8b5cf6, 20%);
+  
+  :global(.dark) & {
+    background: linear-gradient(to bottom right, fade(#8b5cf6, 20%), fade(#8b5cf6, 10%));
+    border-color: fade(#8b5cf6, 80%);
+  }
+  
+  &:hover {
+    background: linear-gradient(to bottom right, fade(#8b5cf6, 10%), fade(#8b5cf6, 20%));
+    
+    :global(.dark) & {
+      background: linear-gradient(to bottom right, fade(#8b5cf6, 30%), fade(#8b5cf6, 20%));
+    }
+  }
+}
+
+.quickAccessCardYellow {
+  composes: quickAccessCard;
+  background: linear-gradient(to bottom right, fade(#f59e0b, 5%), fade(#f59e0b, 10%));
+  border-color: fade(#f59e0b, 20%);
+  
+  :global(.dark) & {
+    background: linear-gradient(to bottom right, fade(#f59e0b, 20%), fade(#f59e0b, 10%));
+    border-color: fade(#f59e0b, 80%);
+  }
+  
+  &:hover {
+    background: linear-gradient(to bottom right, fade(#f59e0b, 10%), fade(#f59e0b, 20%));
+    
+    :global(.dark) & {
+      background: linear-gradient(to bottom right, fade(#f59e0b, 30%), fade(#f59e0b, 20%));
+    }
+  }
+}
+
+.quickAccessIcon {
+  font-size: @font-size-3xl;
+  margin-bottom: @spacing-sm;
+}
+
+.quickAccessTitle {
+  font-weight: 600;
+  color: @gray-900;
+  margin-bottom: @spacing-sm;
+  
+  :global(.dark) & {
+    color: white;
+  }
+}
+
+.quickAccessDescription {
+  font-size: @font-size-sm;
+  color: @gray-600;
+  
+  :global(.dark) & {
+    color: @gray-400;
+  }
+}
+
+// Technology Stack
+.techSection {
+  composes: featuresSection;
+}
+
+.techGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: @spacing-xl;
+  margin-bottom: @spacing-3xl;
+  
+  @media (min-width: @breakpoint-md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  @media (min-width: @breakpoint-lg) {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+
+.techItem {
+  text-align: center;
+}
+
+.techIcon {
+  font-size: @font-size-4xl;
+  margin-bottom: @spacing-sm;
+  transition: transform @transition-base;
+  display: inline-block;
+  
+  &:hover {
+    transform: scale(1.1);
+  }
+}
+
+.techName {
+  font-size: @font-size-sm;
+  font-weight: 500;
+  color: @gray-900;
+  
+  :global(.dark) & {
+    color: white;
+  }
+}
+
+.devToolsHeader {
+  font-size: @font-size-xl;
+  font-weight: 600;
+  color: @gray-900;
+  margin-bottom: @spacing-lg;
+  text-align: center;
+  
+  :global(.dark) & {
+    color: white;
+  }
+}
+
+.devToolsButtons {
+  display: flex;
+  flex-direction: column;
+  gap: @spacing-md;
+  justify-content: center;
+  
+  @media (min-width: @breakpoint-sm) {
+    flex-direction: row;
+  }
+}
+
+.devToolButton {
+  .button-base();
+  color: white;
+  box-shadow: @shadow-lg;
+}
+
+.devToolButtonBlue {
+  composes: devToolButton;
+  background: #3b82f6;
+  
+  &:hover {
+    background: #2563eb;
+  }
+}
+
+.devToolButtonGreen {
+  composes: devToolButton;
+  background: #10b981;
+  
+  &:hover {
+    background: #059669;
+  }
+}
+
+// CTA Section
+.ctaSection {
+  padding: @spacing-4xl 0;
+  background: linear-gradient(to right, @primary-color, @secondary-color);
+}
+
+.ctaContainer {
+  max-width: 64rem;
+  margin: 0 auto;
+  text-align: center;
+  padding: 0 @spacing-md;
+}
+
+.ctaTitle {
+  font-size: @font-size-3xl;
+  font-weight: bold;
+  color: white;
+  margin-bottom: @spacing-md;
+  
+  @media (min-width: @breakpoint-md) {
+    font-size: @font-size-4xl;
+  }
+}
+
+.ctaDescription {
+  font-size: @font-size-xl;
+  color: fade(#3b82f6, 10%);
+  margin-bottom: @spacing-xl;
+}
+
+.ctaButtons {
+  composes: buttonGroup;
+}
+
+.ctaButtonWhite {
+  .button-base();
+  background: white;
+  color: @primary-color;
+  box-shadow: @shadow-lg;
+  
+  &:hover {
+    background: @gray-50;
+  }
+}
+
+.ctaButtonBorder {
+  .button-base();
+  background: transparent;
+  color: white;
+  border: 2px solid white;
+  
+  &:hover {
+    background: white;
+    color: @primary-color;
+  }
+}
+
+// Footer
+.footer {
+  background: @gray-900;
+  color: white;
+  padding: @spacing-3xl 0;
+  
+  :global(.dark) & {
+    background: black;
+  }
+}
+
+.footerContainer {
+  composes: statsContainer;
+  text-align: center;
+}
+
+.footerTitle {
+  font-size: @font-size-2xl;
+  font-weight: bold;
+  margin-bottom: @spacing-md;
+}
+
+.footerDescription {
+  color: @gray-400;
+  margin-bottom: @spacing-lg;
+}
+
+.footerMeta {
+  display: flex;
+  justify-content: center;
+  gap: @spacing-lg;
+  font-size: @font-size-sm;
+  color: @gray-400;
+}
+
+.footerCopyright {
+  margin-top: @spacing-xl;
+  padding-top: @spacing-xl;
+  border-top: 1px solid @gray-800;
+  font-size: @font-size-sm;
+  color: @gray-500;
+}
