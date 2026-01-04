@@ -88,4 +88,3 @@ echo "   访问: https://github.com/你的用户名/Canary/actions"
 echo "   选择 'Deploy to Production' -> 'Run workflow'"
 echo ""
 echo "================================================"
-
