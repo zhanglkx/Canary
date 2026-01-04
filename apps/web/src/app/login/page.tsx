@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
-import { useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { LOGIN } from '@/lib/graphql/mutations';
+import { authApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NoSSR } from '@/components/ui/no-ssr';
+import styles from './page.module.less';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -16,16 +16,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('admin@admin.com');
   const [password, setPassword] = useState('password');
   const [error, setError] = useState('');
-
-  const [loginMutation, { loading }] = useMutation(LOGIN, {
-    onCompleted: (data) => {
-      login(data.login.accessToken, data.login.user);
-      router.push('/todos');
-    },
-    onError: (error) => {
-      setError(error.message || 'Login failed. Please check your credentials.');
-    },
-  });
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -36,41 +27,42 @@ export default function LoginPage() {
       return;
     }
 
+    setLoading(true);
+
     try {
-      await loginMutation({
-        variables: {
-          email,
-          password,
-        },
-      });
-    } catch (err) {
-      // Error handled by onError callback
+      const response = await authApi.login({ email, password });
+      login(response.accessToken, response.user);
+      router.push('/todos');
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-white">
+    <div className={styles.container}>
+      <div className={styles.wrapper}>
+        <div className={styles.header}>
+          <h2 className={styles.title}>
             Sign in to your account
           </h2>
-          <p className="mt-2 text-center text-sm text-gray-600 dark:text-gray-400">
+          <p className={styles.subtitle}>
             Or{' '}
-            <Link href="/register" className="font-medium text-blue-600 hover:text-blue-500">
+            <Link href="/register">
               create a new account
             </Link>
           </p>
         </div>
-        <NoSSR fallback={<div className="mt-8 space-y-6 animate-pulse">
-          <div className="space-y-4">
-            <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
-            <div className="h-16 bg-gray-200 dark:bg-gray-700 rounded"></div>
+        <NoSSR fallback={<div className={styles.skeleton}>
+          <div>
+            <div className={styles.skeletonItem}></div>
+            <div className={styles.skeletonItem}></div>
           </div>
-          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          <div className={styles.skeletonButton}></div>
         </div>}>
-          <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-            <div className="space-y-4">
+          <form className={styles.form} onSubmit={handleSubmit}>
+            <div className={styles.inputGroup}>
               <Input
                 label="Email address"
                 type="email"
@@ -90,22 +82,19 @@ export default function LoginPage() {
             </div>
 
             {error && (
-              <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-                <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
+              <div className={styles.errorMessage}>
+                <p>{error}</p>
               </div>
             )}
 
-            <Button type="submit" loading={loading} className="w-full">
+            <Button type="submit" loading={loading} className={styles.fullWidth} variant="primary">
               Sign in
             </Button>
 
-            <div className="text-center">
-              <Link
-                href="/"
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-blue-600 dark:hover:text-blue-400"
-              >
-                Back to home
-              </Link>
+            <div className={styles.demoCredentials}>
+              <p>Demo Credentials:</p>
+              <p className={styles.monospace}>Email: admin@admin.com</p>
+              <p className={styles.monospace}>Password: password</p>
             </div>
           </form>
         </NoSSR>

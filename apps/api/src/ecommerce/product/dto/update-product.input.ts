@@ -8,7 +8,6 @@
  * @module Ecommerce/Product
  */
 
-import { InputType, Field, Float } from '@nestjs/graphql';
 import {
   IsString,
   IsOptional,
@@ -24,12 +23,10 @@ import {
  *
  * 支持部分更新，只需提供要修改的字段
  */
-@InputType()
 export class UpdateProductInput {
   /**
    * 产品名称
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @Length(2, 200, { message: '产品名称长度必须在2-200字符之间' })
@@ -38,7 +35,6 @@ export class UpdateProductInput {
   /**
    * 产品描述
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   description?: string;
@@ -46,7 +42,6 @@ export class UpdateProductInput {
   /**
    * 产品分类ID
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsUUID('all', { message: '分类ID必须是有效的UUID' })
   categoryId?: string;
@@ -54,7 +49,6 @@ export class UpdateProductInput {
   /**
    * 基础价格（人民币，单位：元）
    */
-  @Field(() => Float, { nullable: true })
   @IsOptional()
   @IsPositive({ message: '价格必须大于0' })
   basePrice?: number;
@@ -62,7 +56,6 @@ export class UpdateProductInput {
   /**
    * 产品SKU编码
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(100)
@@ -71,7 +64,6 @@ export class UpdateProductInput {
   /**
    * 产品简介
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(500)
@@ -80,7 +72,6 @@ export class UpdateProductInput {
   /**
    * SEO友好的URL名称
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   slug?: string;
@@ -88,7 +79,6 @@ export class UpdateProductInput {
   /**
    * SEO关键词
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsString()
   @MaxLength(500)
@@ -97,7 +87,6 @@ export class UpdateProductInput {
   /**
    * 产品状态
    */
-  @Field({ nullable: true })
   @IsOptional()
   @IsEnum(['active', 'inactive', 'deleted'], {
     message: '产品状态必须是 active, inactive 或 deleted',

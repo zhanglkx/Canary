@@ -561,7 +561,7 @@ export class StripePaymentService {
       `扣款已退款: ${charge.id}, 退款金额=${charge.amount_refunded}`,
     );
 
-    // 注意: 实际的退款处理由应用通过 GraphQL mutation 触发
+    // 注意: 实际的退款处理由应用通过 REST API mutation 触发
     // 这里只是记录 webhook 事件
 
     return {

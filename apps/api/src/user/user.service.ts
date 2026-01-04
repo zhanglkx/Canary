@@ -15,7 +15,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcryptjs';
 import { User } from './user.entity';
 import { CreateUserInput } from './dto/create-user.input';
-import { UpdateUserInput } from './dto/update-user.input';
+import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UserService {
@@ -60,48 +60,48 @@ export class UserService {
    * 更新用户信息
    *
    * @param userId - 用户 ID
-   * @param updateUserInput - 更新数据
+   * @param updateUserDto - 更新数据
    * @returns 更新后的用户
    */
-  async update(userId: string, updateUserInput: UpdateUserInput): Promise<User> {
+  async update(userId: string, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(userId);
 
     // 如果要更新邮箱，检查是否已被使用
-    if (updateUserInput.email && updateUserInput.email !== user.email) {
-      const existingUser = await this.findByEmail(updateUserInput.email);
+    if (updateUserDto.email && updateUserDto.email !== user.email) {
+      const existingUser = await this.findByEmail(updateUserDto.email);
       if (existingUser) {
         throw new BadRequestException('Email already in use');
       }
     }
 
     // 如果要更新用户名，检查是否已被使用
-    if (updateUserInput.username && updateUserInput.username !== user.username) {
-      const existingUser = await this.findByUsername(updateUserInput.username);
+    if (updateUserDto.username && updateUserDto.username !== user.username) {
+      const existingUser = await this.findByUsername(updateUserDto.username);
       if (existingUser) {
         throw new BadRequestException('Username already in use');
       }
     }
 
     // 如果要更新密码
-    if (updateUserInput.newPassword) {
-      if (!updateUserInput.oldPassword) {
+    if (updateUserDto.newPassword) {
+      if (!updateUserDto.oldPassword) {
         throw new BadRequestException('Old password is required to change password');
       }
 
-      const isPasswordValid = await bcrypt.compare(updateUserInput.oldPassword, user.password);
+      const isPasswordValid = await bcrypt.compare(updateUserDto.oldPassword, user.password);
       if (!isPasswordValid) {
         throw new BadRequestException('Old password is incorrect');
       }
 
-      user.password = await bcrypt.hash(updateUserInput.newPassword, 10);
+      user.password = await bcrypt.hash(updateUserDto.newPassword, 10);
     }
 
     // 更新其他字段
-    if (updateUserInput.email) {
-      user.email = updateUserInput.email;
+    if (updateUserDto.email) {
+      user.email = updateUserDto.email;
     }
-    if (updateUserInput.username) {
-      user.username = updateUserInput.username;
+    if (updateUserDto.username) {
+      user.username = updateUserDto.username;
     }
 
     return this.userRepository.save(user);

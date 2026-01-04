@@ -21,7 +21,7 @@ import { Inventory } from './entities/inventory.entity';
 import { InventoryLock } from './entities/inventory-lock.entity';
 import { InventoryService } from './services/inventory.service';
 import { InventoryRepository } from './repositories/inventory.repository';
-import { InventoryResolver } from './resolvers/inventory.resolver';
+import { InventoryController } from './controllers/inventory.controller';
 import { ProductSkuModule } from '../product/modules/product-sku.module';
 
 @Module({
@@ -29,7 +29,8 @@ import { ProductSkuModule } from '../product/modules/product-sku.module';
     TypeOrmModule.forFeature([Inventory, InventoryLock]),
     ProductSkuModule,
   ],
-  providers: [InventoryService, InventoryRepository, InventoryResolver],
+  providers: [InventoryService, InventoryRepository],
+  controllers: [InventoryController],
   exports: [InventoryService, InventoryRepository],
 })
 export class InventoryModule {}

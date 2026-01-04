@@ -1,192 +1,180 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { useQuery } from '@apollo/client';
-import { useRouter } from 'next/navigation';
-import { GET_MY_ORDERS, GET_MY_ORDER_STATS } from '@/lib/graphql/order';
+import React, { useEffect, useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { orderApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
-import { Package, AlertCircle, Loader } from 'lucide-react';
-import Link from 'next/link';
-import type { Order } from '@/types/ecommerce';
+import { Button } from '@/components/ui/button';
+import styles from './page.module.less';
 
-/**
- * Orders Page
- * Displays user's order history and statistics
- */
-export default function OrdersPage() {
+function OrdersContent() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
-  const [skip, setSkip] = useState(0);
-  const [take, setTake] = useState(10);
+  const searchParams = useSearchParams();
+  const { isAuthenticated } = useAuth();
+  const [orders, setOrders] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [expandedOrders, setExpandedOrders] = useState<Set<string>>(new Set());
+  const showSuccess = searchParams.get('success') === 'true';
 
-  const { data: orderData, loading: ordersLoading, error: ordersError } = useQuery(GET_MY_ORDERS, {
-    skip: !isAuthenticated,
-    variables: { skip, take },
-  });
-
-  const { data: statsData, loading: statsLoading } = useQuery(GET_MY_ORDER_STATS, {
-    skip: !isAuthenticated,
-  });
-
-  // Redirect unauthenticated users to login
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!isAuthenticated) {
       router.push('/login?redirect=/orders');
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, router]);
 
-  if (authLoading || ordersLoading || statsLoading) {
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadOrders();
+    }
+  }, [isAuthenticated]);
+
+  const loadOrders = async () => {
+    try {
+      const data = await orderApi.getAll();
+      setOrders(data);
+    } catch (error) {
+      console.error('加载订单失败:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const toggleOrderExpand = (orderId: string) => {
+    const newExpanded = new Set(expandedOrders);
+    if (newExpanded.has(orderId)) {
+      newExpanded.delete(orderId);
+    } else {
+      newExpanded.add(orderId);
+    }
+    setExpandedOrders(newExpanded);
+  };
+
+  const getStatusBadgeClass = (status: string) => {
+    switch (status?.toLowerCase()) {
+      case 'pending':
+        return styles.pending;
+      case 'processing':
+        return styles.processing;
+      case 'completed':
+        return styles.completed;
+      case 'cancelled':
+        return styles.cancelled;
+      default:
+        return styles.pending;
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex justify-center items-center">
-            <Loader className="animate-spin text-blue-600" size={32} />
-          </div>
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <div className={styles.spinner}></div>
         </div>
       </div>
     );
   }
-
-  if (ordersError) {
-    return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 flex gap-4 items-start">
-            <AlertCircle className="text-red-600 flex-shrink-0" size={24} />
-            <div>
-              <h2 className="text-lg font-semibold text-red-900 mb-2">Error Loading Orders</h2>
-              <p className="text-red-700">{ordersError.message}</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  const orders = orderData?.myOrders?.orders || [];
-  const total = orderData?.myOrders?.total || 0;
-  const stats = statsData?.myOrderStats;
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Orders</h1>
-          <p className="text-gray-600">Track and manage your purchases</p>
-        </div>
-
-        {/* Statistics */}
-        {stats && (
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <p className="text-gray-600 text-sm">Total Orders</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalOrders}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <p className="text-gray-600 text-sm">Total Spent</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">¥{(stats.totalSpent / 100).toFixed(2)}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <p className="text-gray-600 text-sm">Pending</p>
-              <p className="text-3xl font-bold text-yellow-600 mt-2">{stats.pendingOrders}</p>
-            </div>
-            <div className="bg-white rounded-lg shadow-sm p-6">
-              <p className="text-gray-600 text-sm">Delivered</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">{stats.deliveredOrders}</p>
-            </div>
-          </div>
-        )}
-
-        {/* Orders Table */}
-        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-          {orders.length === 0 ? (
-            <div className="p-12 text-center">
-              <Package className="mx-auto mb-4 text-gray-400" size={48} />
-              <p className="text-gray-600 text-lg mb-4">No orders yet</p>
-              <Link
-                href="/shop"
-                className="inline-block px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Start Shopping
-              </Link>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50 border-b">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Order Number</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Date</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Status</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Items</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Total</th>
-                    <th className="px-6 py-3 text-left text-sm font-semibold text-gray-900">Action</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {orders.map((order: Order) => (
-                    <tr key={order.id} className="hover:bg-gray-50">
-                      <td className="px-6 py-4 text-sm text-gray-900 font-medium">{order.orderNumber}</td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                          order.status === 'DELIVERED' ? 'bg-green-100 text-green-800' :
-                          order.status === 'SHIPPED' ? 'bg-blue-100 text-blue-800' :
-                          order.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' :
-                          order.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {order.status}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-600">
-                        {order.items.length} item{order.items.length !== 1 ? 's' : ''}
-                      </td>
-                      <td className="px-6 py-4 text-sm font-semibold text-gray-900">
-                        ¥{(order.totalAmount / 100).toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 text-sm">
-                        <Link
-                          href={`/orders/${order.id}`}
-                          className="text-blue-600 hover:text-blue-700 font-medium"
-                        >
-                          View
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+    <div className={styles.container}>
+      <div className={styles.wrapper}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>My Orders</h1>
+          {showSuccess && (
+            <span className={styles.success}>✓ Order placed successfully!</span>
           )}
         </div>
 
-        {/* Pagination */}
-        {total > take && (
-          <div className="mt-6 flex justify-center gap-4">
-            <button
-              onClick={() => setSkip(Math.max(0, skip - take))}
-              disabled={skip === 0}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Previous
-            </button>
-            <span className="px-4 py-2 text-sm text-gray-600">
-              {Math.floor(skip / take) + 1} of {Math.ceil(total / take)}
-            </span>
-            <button
-              onClick={() => setSkip(skip + take)}
-              disabled={skip + take >= total}
-              className="px-4 py-2 border rounded-lg hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              Next
-            </button>
+        {orders.length === 0 ? (
+          <div className={styles.empty}>
+            <p>You haven't placed any orders yet</p>
+            <Button onClick={() => router.push('/shop')} variant="primary">
+              Start Shopping
+            </Button>
+          </div>
+        ) : (
+          <div className={styles.ordersList}>
+            {orders.map((order) => (
+              <div key={order.id} className={styles.orderCard}>
+                <div
+                  className={styles.orderHeader}
+                  onClick={() => toggleOrderExpand(order.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <div className={styles.orderInfo}>
+                    <div className={styles.orderNumber}>
+                      Order #{order.orderNumber}
+                    </div>
+                    <div className={styles.orderDate}>
+                      {new Date(order.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </div>
+                  </div>
+                  <span className={`${styles.statusBadge} ${getStatusBadgeClass(order.status)}`}>
+                    {order.status || 'Pending'}
+                  </span>
+                </div>
+
+                {expandedOrders.has(order.id) && (
+                  <div className={styles.orderContent}>
+                    <div className={styles.itemsList}>
+                      <h4 style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem' }}>
+                        Items:
+                      </h4>
+                      {order.items?.map((item: any, index: number) => (
+                        <div key={index} className={styles.item}>
+                          <div className={styles.itemName}>
+                            {item.productName} x {item.quantity}
+                          </div>
+                          <div className={styles.itemPrice}>
+                            ${((item.itemTotal || 0) / 100).toFixed(2)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className={styles.orderFooter}>
+                  <div className={styles.totalAmount}>
+                    <span className={styles.totalLabel}>Total Amount</span>
+                    <span className={styles.totalPrice}>
+                      ${((order.totalAmount || 0) / 100).toFixed(2)}
+                    </span>
+                  </div>
+
+                  <div className={styles.actions}>
+                    <Button
+                      onClick={() => toggleOrderExpand(order.id)}
+                      variant="secondary"
+                      className={styles.button}
+                    >
+                      {expandedOrders.has(order.id) ? 'Hide Details' : 'View Details'}
+                    </Button>
+                    <Button
+                      onClick={() => router.push(`/orders/${order.id}`)}
+                      variant="primary"
+                      className={styles.button}
+                    >
+                      Track Order
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>
     </div>
+  );
+}
+
+export default function OrdersPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <OrdersContent />
+    </Suspense>
   );
 }

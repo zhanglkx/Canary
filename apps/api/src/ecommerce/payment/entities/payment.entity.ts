@@ -18,8 +18,6 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { ObjectType, Field, Int, Float, registerEnumType } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 import { Order } from '../../order/entities/order.entity';
 import { PaymentTransaction } from './payment-transaction.entity';
 
@@ -57,10 +55,7 @@ export enum PaymentGateway {
   WECHAT_PAY = 'WECHAT_PAY',
 }
 
-// Register enums for GraphQL
-registerEnumType(PaymentStatus, { name: 'PaymentStatus' });
-registerEnumType(PaymentMethodType, { name: 'PaymentMethodType' });
-registerEnumType(PaymentGateway, { name: 'PaymentGateway' });
+// Register enums for REST API
 
 /**
  * 支付实体
@@ -68,7 +63,6 @@ registerEnumType(PaymentGateway, { name: 'PaymentGateway' });
  * 记录订单级别的支付信息，可能包含多个交易记录
  */
 @Entity('payments')
-@ObjectType()
 @Index('IDX_payment_order', ['orderId'])
 @Index('IDX_payment_status', ['status'])
 @Index('IDX_payment_user', ['userId'])
@@ -78,48 +72,41 @@ export class Payment {
    * 支付ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
    * 所属订单ID
    */
   @Column({ type: 'uuid' })
-  @HideField()
   orderId: string;
 
   /**
    * 所属订单
    */
   @ManyToOne(() => Order, { onDelete: 'CASCADE', lazy: false })
-  @HideField()
   order: Order;
 
   /**
    * 用户ID（冗余字段，便于查询）
    */
   @Column({ type: 'uuid' })
-  @HideField()
   userId: string;
 
   /**
    * 支付状态
    */
   @Column({ type: 'enum', enum: PaymentStatus, default: PaymentStatus.PENDING })
-  @Field(() => PaymentStatus)
   status: PaymentStatus;
 
   /**
    * 支付金额（人民币分）
    */
   @Column({ type: 'int' })
-  @HideField()
   amountCents: number;
 
   /**
    * 支付金额（元）
    */
-  @Field(() => Float)
   get amount(): number {
     return this.amountCents / 100;
   }
@@ -128,42 +115,36 @@ export class Payment {
    * 货币代码
    */
   @Column({ type: 'varchar', length: 3, default: 'CNY' })
-  @Field()
   currency: string;
 
   /**
    * 支付方式
    */
   @Column({ type: 'enum', enum: PaymentMethodType })
-  @Field(() => PaymentMethodType)
   methodType: PaymentMethodType;
 
   /**
    * 支付网关
    */
   @Column({ type: 'enum', enum: PaymentGateway })
-  @Field(() => PaymentGateway)
   gateway: PaymentGateway;
 
   /**
    * 支付交易ID（网关返回）
    */
   @Column({ type: 'varchar', length: 255, nullable: true, unique: true })
-  @Field({ nullable: true })
   transactionId?: string;
 
   /**
    * 支付意图ID（Stripe会话等）
    */
   @Column({ type: 'varchar', length: 255, nullable: true })
-  @HideField()
   intentId?: string;
 
   /**
    * 支付方式ID（保存的卡片等）
    */
   @Column({ type: 'varchar', length: 255, nullable: true })
-  @HideField()
   paymentMethodId?: string;
 
   /**
@@ -173,41 +154,35 @@ export class Payment {
     cascade: ['insert', 'remove'],
     eager: true,
   })
-  @Field(() => [PaymentTransaction])
   transactions: PaymentTransaction[];
 
   /**
    * 支付成功时间
    */
   @Column({ type: 'timestamp', nullable: true })
-  @Field({ nullable: true })
   succeededAt?: Date;
 
   /**
    * 最后一次失败时间
    */
   @Column({ type: 'timestamp', nullable: true })
-  @Field({ nullable: true })
   failedAt?: Date;
 
   /**
    * 最后一次失败原因
    */
   @Column({ type: 'text', nullable: true })
-  @Field({ nullable: true })
   failureReason?: string;
 
   /**
    * 退款金额（人民币分）
    */
   @Column({ type: 'int', default: 0 })
-  @HideField()
   refundedAmountCents: number;
 
   /**
    * 退款金额（元）
    */
-  @Field(() => Float)
   get refundedAmount(): number {
     return this.refundedAmountCents / 100;
   }
@@ -215,7 +190,6 @@ export class Payment {
   /**
    * 是否已部分退款
    */
-  @Field()
   get isPartiallyRefunded(): boolean {
     return this.refundedAmountCents > 0 && this.refundedAmountCents < this.amountCents;
   }
@@ -223,7 +197,6 @@ export class Payment {
   /**
    * 是否已全额退款
    */
-  @Field()
   get isFullyRefunded(): boolean {
     return this.refundedAmountCents === this.amountCents;
   }
@@ -232,42 +205,36 @@ export class Payment {
    * 重试次数
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   retryCount: number;
 
   /**
    * 最大重试次数
    */
   @Column({ type: 'int', default: 3 })
-  @HideField()
   maxRetries: number;
 
   /**
    * 元数据（JSON）
    */
   @Column({ type: 'jsonb', nullable: true })
-  @Field(() => String, { nullable: true })
   metadata?: Record<string, any>;
 
   /**
    * 备注
    */
   @Column({ type: 'text', nullable: true })
-  @Field({ nullable: true })
   notes?: string;
 
   /**
    * 创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
    * 更新时间
    */
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 
   /**

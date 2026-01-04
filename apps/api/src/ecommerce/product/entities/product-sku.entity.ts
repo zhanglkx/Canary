@@ -25,8 +25,6 @@ import {
   Index,
   VersionColumn,
 } from 'typeorm';
-import { ObjectType, Field, Float, Int } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 import { Product } from './product.entity';
 
 /**
@@ -38,7 +36,6 @@ import { Product } from './product.entity';
  * - 库存字段：核心业务数据，需要精确管理
  */
 @Entity('product_skus')
-@ObjectType()
 @Index('IDX_sku_product_code', ['productId', 'skuCode'])
 @Index('IDX_sku_code', ['skuCode'])
 @Index('IDX_sku_stock', ['stock'])
@@ -47,14 +44,12 @@ export class ProductSku {
    * SKU ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
    * 所属产品ID
    */
   @Column({ type: 'uuid' })
-  @HideField()
   productId: string;
 
   /**
@@ -64,7 +59,6 @@ export class ProductSku {
     onDelete: 'CASCADE',
     lazy: false,
   })
-  @HideField()
   product: Product;
 
   /**
@@ -72,7 +66,6 @@ export class ProductSku {
    * 唯一标识一个具体的产品变体
    */
   @Column({ type: 'varchar', length: 100, unique: true })
-  @Field()
   skuCode: string;
 
   /**
@@ -80,7 +73,6 @@ export class ProductSku {
    * 例如："T恤-红色-M码"
    */
   @Column({ type: 'varchar', length: 200 })
-  @Field()
   skuName: string;
 
   /**
@@ -88,10 +80,8 @@ export class ProductSku {
    * 存储该SKU的属性组合
    * 例如：{"颜色": "红色", "尺寸": "M", "材质": "纯棉"}
    *
-   * @HideField 不在GraphQL中暴露（供内部使用）
    */
   @Column({ type: 'jsonb', default: {} })
-  @HideField()
   attributeValues: Record<string, string>;
 
   /**
@@ -99,7 +89,6 @@ export class ProductSku {
    * 如果为空，使用产品基础价格
    */
   @Column({ type: 'int', nullable: true })
-  @Field(() => Float, { nullable: true })
   price?: number;
 
   /**
@@ -107,7 +96,6 @@ export class ProductSku {
    * 这是最关键的字段，需要在并发场景下精确管理
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   stock: number;
 
   /**
@@ -115,14 +103,12 @@ export class ProductSku {
    * 库存中的一部分被预留
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   reservedStock: number;
 
   /**
    * 实际可用库存 = stock - reservedStock
    * 这是一个计算字段，不存储到数据库
    */
-  @Field(() => Int)
   get availableStock(): number {
     return this.stock - this.reservedStock;
   }
@@ -133,49 +119,42 @@ export class ProductSku {
    * TypeORM自动管理此字段
    */
   @VersionColumn()
-  @HideField()
   version: number;
 
   /**
    * SKU图片URL（如果这个SKU有特定的图片，可以覆盖产品主图）
    */
   @Column({ type: 'varchar', length: 500, nullable: true })
-  @Field({ nullable: true })
   imageUrl?: string;
 
   /**
    * 重量（克）
    */
   @Column({ type: 'int', nullable: true })
-  @Field(() => Int, { nullable: true })
   weight?: number;
 
   /**
    * 销售数量（用于热度排序）
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   salesCount: number;
 
   /**
    * 是否启用
    */
   @Column({ type: 'boolean', default: true })
-  @Field()
   isActive: boolean;
 
   /**
    * 创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
    * 更新时间
    */
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 
   /**

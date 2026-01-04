@@ -16,29 +16,24 @@ import {
   CreateDateColumn,
   Index,
 } from 'typeorm';
-import { ObjectType, Field, Int } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 import { Product } from './product.entity';
 
 /**
  * 产品图片实体
  */
 @Entity('product_images')
-@ObjectType()
 @Index('IDX_image_product_order', ['productId', 'displayOrder'])
 export class ProductImage {
   /**
    * 图片ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
    * 所属产品ID
    */
   @Column({ type: 'uuid' })
-  @HideField()
   productId: string;
 
   /**
@@ -48,21 +43,18 @@ export class ProductImage {
     onDelete: 'CASCADE',
     lazy: false,
   })
-  @HideField()
   product: Product;
 
   /**
    * 图片URL
    */
   @Column({ type: 'varchar', length: 500 })
-  @Field()
   url: string;
 
   /**
    * 缩略图URL（用于列表显示，通常是压缩版本）
    */
   @Column({ type: 'varchar', length: 500, nullable: true })
-  @Field({ nullable: true })
   thumbnailUrl?: string;
 
   /**
@@ -77,27 +69,23 @@ export class ProductImage {
     enum: ['main', 'gallery', 'detail', 'compare'],
     default: 'gallery',
   })
-  @Field()
   purpose: 'main' | 'gallery' | 'detail' | 'compare';
 
   /**
    * 显示顺序（值越小越靠前）
    */
   @Column({ type: 'int', default: 0 })
-  @Field(() => Int)
   displayOrder: number;
 
   /**
    * 图片标题（用于SEO和无障碍访问）
    */
   @Column({ type: 'varchar', length: 200, nullable: true })
-  @Field({ nullable: true })
   altText?: string;
 
   /**
    * 创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 }

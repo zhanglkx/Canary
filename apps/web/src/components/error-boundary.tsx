@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import styles from './error-boundary.module.less';
 
 interface ErrorBoundaryState {
     hasError: boolean;
@@ -50,18 +51,18 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
             }
 
             return (
-                <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900">
-                    <div className="max-w-md w-full space-y-8 p-8">
-                        <div className="text-center">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+                <div className={styles.container}>
+                    <div className={styles.content}>
+                        <div className={styles.textCenter}>
+                            <h2 className={styles.title}>
                                 出现了一些问题
                             </h2>
-                            <p className="text-gray-600 dark:text-gray-400 mb-6">
+                            <p className={styles.description}>
                                 页面加载时遇到错误，请尝试刷新页面。
                             </p>
                             <button
                                 onClick={this.resetError}
-                                className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                                className={styles.retryButton}
                             >
                                 重试
                             </button>

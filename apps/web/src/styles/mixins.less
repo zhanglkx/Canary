@@ -1,0 +1,131 @@
+@import './variables.less';
+
+// 常用混入
+
+// Flexbox布局
+.flex-center() {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.flex-between() {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.flex-col() {
+  display: flex;
+  flex-direction: column;
+}
+
+// 文本截断
+.text-ellipsis() {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.text-ellipsis-lines(@lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: @lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// 按钮基础样式
+.button-base() {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: @spacing-md @spacing-xl;
+  font-weight: 600;
+  border-radius: @border-radius-lg;
+  cursor: pointer;
+  transition: all @transition-base;
+  border: none;
+  outline: none;
+  
+  &:hover {
+    transform: scale(1.05);
+  }
+  
+  &:active {
+    transform: scale(0.98);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// 卡片样式
+.card() {
+  background: white;
+  border-radius: @border-radius-lg;
+  padding: @spacing-lg;
+  box-shadow: @shadow;
+}
+
+// 渐变背景
+.gradient-primary() {
+  background: linear-gradient(to right, @primary-color, @secondary-color);
+}
+
+.gradient-success() {
+  background: linear-gradient(to right, @success-color, darken(@success-color, 10%));
+}
+
+// 响应式断点
+.responsive(@breakpoint, @rules) when (@breakpoint = sm) {
+  @media (min-width: @breakpoint-sm) {
+    @rules();
+  }
+}
+
+.responsive(@breakpoint, @rules) when (@breakpoint = md) {
+  @media (min-width: @breakpoint-md) {
+    @rules();
+  }
+}
+
+.responsive(@breakpoint, @rules) when (@breakpoint = lg) {
+  @media (min-width: @breakpoint-lg) {
+    @rules();
+  }
+}
+
+.responsive(@breakpoint, @rules) when (@breakpoint = xl) {
+  @media (min-width: @breakpoint-xl) {
+    @rules();
+  }
+}
+
+// 动画
+.animate-fade-in() {
+  animation: fadeIn @transition-base ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// 清除浮动
+.clearfix() {
+  &::after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}

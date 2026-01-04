@@ -8,7 +8,7 @@
  * - 删除评论
  *
  * Service 的作用：
- * 这是一个纯业务逻辑层，与 HTTP/GraphQL 解耦
+ * 这是一个纯业务逻辑层，与 HTTP/REST API 解耦
  * Resolver 调用 Service，Service 调用数据库仓库
  * 这样遵循了 NestJS 的分层架构
  */

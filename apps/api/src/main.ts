@@ -5,7 +5,8 @@
  * 1. 创建 NestJS 应用程序实例
  * 2. 配置 CORS（跨域资源共享）
  * 3. 设置数据验证管道
- * 4. 启动服务器并监听指定端口
+ * 4. 配置全局 API 前缀
+ * 5. 启动服务器并监听指定端口
  */
 
 import { NestFactory } from '@nestjs/core';
@@ -23,7 +24,11 @@ async function bootstrap() {
   // AppModule 是我们的根模块，包含所有的配置和功能模块
   const app = await NestFactory.create(AppModule);
 
-  // 步骤 2: 启用 CORS (跨域资源共享)
+  // 步骤 2: 设置全局 API 前缀
+  // 所有 API 端点都会以 /api 开头，例如: /api/auth/login
+  app.setGlobalPrefix('api');
+
+  // 步骤 3: 启用 CORS (跨域资源共享)
   // 这允许前端应用从不同的端口访问后端 API
   // origin: 允许来自这些地址的请求
   // credentials: true 允许携带认证信息（如 cookies、JWT 令牌）
@@ -37,12 +42,12 @@ async function bootstrap() {
       'http://8.159.144.140', // 阿里云服务器公网 IP
     ],
     credentials: true, // 允许发送凭据（如 JWT Token）
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'], // 允许的 HTTP 方法
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'], // 允许的 HTTP 方法
     // 允许的请求头，包括用于身份认证的 Authorization 头
-    allowedHeaders: ['Content-Type', 'Authorization', 'apollo-require-preflight'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // 步骤 3: 使用全局数据验证管道 (Global Validation Pipe)
+  // 步骤 4: 使用全局数据验证管道 (Global Validation Pipe)
   // 这个管道会自动验证所有进入的 DTO (数据传输对象)
   // 就像对所有请求进行"质量检查"，确保数据格式正确
   app.useGlobalPipes(
@@ -52,14 +57,15 @@ async function bootstrap() {
     }),
   );
 
-  // 步骤 4: 获取服务器端口，从环境变量读取，默认 4000
+  // 步骤 5: 获取服务器端口，从环境变量读取，默认 4000
   const port = process.env.PORT || 4000;
 
-  // 步骤 5: 启动服务器并监听指定端口
+  // 步骤 6: 启动服务器并监听指定端口
   await app.listen(port);
 
   // 打印启动成功信息，帮助开发者知道服务器在哪里运行
-  console.log(`🚀 Server is running on http://localhost:${port}/graphql`);
+  console.log(`🚀 Server is running on http://localhost:${port}/api`);
+  console.log(`📚 API documentation available at http://localhost:${port}/api`);
 }
 
 // 调用 bootstrap 函数启动应用程序

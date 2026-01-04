@@ -18,7 +18,7 @@ import { PaymentTransaction } from './entities/payment-transaction.entity';
 import { PaymentService } from './services/payment.service';
 import { PaymentRepository } from './repositories/payment.repository';
 import { PaymentMethodService } from './services/payment-method.service';
-import { PaymentResolver } from './resolvers/payment.resolver';
+import { PaymentController } from './controllers/payment.controller';
 import { StripePaymentService } from './integrations/stripe-payment.service';
 import { StripeWebhookController } from './integrations/stripe-webhook.controller';
 import { PayPalPaymentService } from './integrations/paypal-payment.service';
@@ -33,11 +33,10 @@ import { Order } from '../order/entities/order.entity';
     PaymentService,
     PaymentRepository,
     PaymentMethodService,
-    PaymentResolver,
     StripePaymentService,
     PayPalPaymentService,
   ],
-  controllers: [StripeWebhookController, PayPalWebhookController],
+  controllers: [PaymentController, StripeWebhookController, PayPalWebhookController],
   exports: [
     PaymentService,
     PaymentRepository,

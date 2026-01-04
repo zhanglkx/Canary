@@ -16,12 +16,13 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Todo } from '../todo/todo.entity';
 import { Tag } from '../tag/tag.entity';
-import { BatchResolver } from './batch.resolver';
+import { BatchController } from './batch.controller';
 import { BatchService } from './batch.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Todo, Tag])],
-  providers: [BatchResolver, BatchService],
+  controllers: [BatchController],
+  providers: [BatchService],
   exports: [BatchService],
 })
 export class BatchModule {}

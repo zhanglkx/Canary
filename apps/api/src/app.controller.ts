@@ -1,8 +1,8 @@
 /**
  * 应用控制器 - AppController
  *
- * 作用：为根路径提供简单的 HTML 首页，方便开发者快速查看服务状态和打开调试工具（Apollo Studio / GraphQL Playground）。
- * 说明：该控制器仅用于开发体验，不承担业务逻辑。页面以静态 HTML 返回，不依赖前端框架。
+ * 作用：为根路径提供简单的 HTML 首页，方便开发者快速查看服务状态和访问API。
+ * 说明：该控制器仅用于开发体验，不承担业务逻辑。
  * 主要导出：AppController
  */
 import { Controller, Get, Res } from '@nestjs/common';
@@ -128,18 +128,15 @@ export class AppController {
       <h1>🚀 待办事项管理系统</h1>
       <p class="description">
         现代化的全栈待办事项管理应用 API<br>
-        基于 NestJS + GraphQL + PostgreSQL 构建
+        基于 NestJS + REST API + PostgreSQL 构建
       </p>
       
       <div class="buttons">
-        <a href="/apollo-studio" class="btn btn-primary">
-          🎯 打开 Apollo Studio
-        </a>
-        <a href="/graphql" class="btn btn-secondary">
-          📊 GraphQL Playground
-        </a>
-        <a href="/api" class="btn btn-secondary">
+        <a href="/api" class="btn btn-primary">
           📋 API 信息
+        </a>
+        <a href="/health" class="btn btn-secondary">
+          🏥 健康检查
         </a>
       </div>
 
@@ -149,10 +146,9 @@ export class AppController {
           <li>用户认证和授权</li>
           <li>待办事项管理</li>
           <li>分类管理</li>
-          <li>GraphQL API</li>
+          <li>REST API</li>
           <li>JWT 认证</li>
           <li>PostgreSQL 数据库</li>
-          <li>Apollo Studio 集成</li>
         </ul>
       </div>
 
@@ -172,26 +168,29 @@ export class AppController {
   getApiInfo() {
     return {
       name: 'Learning NestJS + Next.js API',
-      version: '1.0.0',
-      description: '一个现代化的全栈待办事项管理应用 API',
+      version: '2.0.0',
+      description: '一个现代化的全栈待办事项管理应用 REST API',
       endpoints: {
-        graphql: '/graphql',
-        apolloStudio: '/apollo-studio (现代化的 GraphQL IDE)',
+        auth: '/api/auth/*',
+        users: '/api/users/*',
+        todos: '/api/todos/*',
+        categories: '/api/categories/*',
+        products: '/api/products/*',
+        cart: '/api/cart/*',
+        orders: '/api/orders/*',
       },
       features: [
         '用户认证和授权',
         '待办事项管理',
         '分类管理',
-        'GraphQL API',
+        'REST API',
         'JWT 认证',
         'PostgreSQL 数据库',
-        'Apollo Studio 集成',
+        '电商功能',
       ],
       documentation: {
-        apolloStudio: 'http://localhost:4000/apollo-studio',
-        graphqlPlayground: 'http://localhost:4000/graphql',
         frontend: 'http://localhost:3000',
-        guide: '查看 apollo-studio-examples.md 获取使用指南',
+        api: 'http://localhost:4000/api',
       },
       status: 'running',
       timestamp: new Date().toISOString(),

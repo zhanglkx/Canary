@@ -4,7 +4,7 @@
  * 提供购物车功能的完整模块，包括：
  * - 购物车和购物车项目实体
  * - 购物车服务和仓储库
- * - GraphQL解析器
+ * - REST API解析器
  * - 与库存和产品模块的集成
  *
  * @author Claude
@@ -19,7 +19,7 @@ import { ProductSku } from '../product/entities/product-sku.entity';
 import { Product } from '../product/entities/product.entity';
 import { ShoppingCartService } from './services/shopping-cart.service';
 import { ShoppingCartRepository } from './repositories/shopping-cart.repository';
-import { ShoppingCartResolver } from './resolvers/shopping-cart.resolver';
+import { ShoppingCartController } from './controllers/shopping-cart.controller';
 import { InventoryModule } from '../inventory/inventory.module';
 import { ProductModule } from '../product/product.module';
 
@@ -32,8 +32,8 @@ import { ProductModule } from '../product/product.module';
   providers: [
     ShoppingCartService,
     ShoppingCartRepository,
-    ShoppingCartResolver,
   ],
+  controllers: [ShoppingCartController],
   exports: [ShoppingCartService, ShoppingCartRepository],
 })
 export class ShoppingCartModule {}

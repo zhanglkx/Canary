@@ -1,0 +1,481 @@
+/**
+ * CSS Reset
+ * 重置所有浏览器默认样式，确保跨浏览器一致性
+ */
+
+/* ==================== 基础重置 ==================== */
+
+/* 使用 border-box 盒模型 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* 移除所有元素的默认 margin 和 padding */
+* {
+  margin: 0;
+  padding: 0;
+}
+
+/* ==================== HTML & Body ==================== */
+
+html {
+  /* 设置根字体大小，方便使用 rem */
+  font-size: 16px;
+  /* 平滑滚动 */
+  scroll-behavior: smooth;
+  /* 防止 iOS 字体大小调整 */
+  -webkit-text-size-adjust: 100%;
+  /* 防止文本选择时的蓝色高亮（移动端） */
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  /* 重置字体 */
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  /* 字体渲染优化 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* 防止水平滚动 */
+  overflow-x: hidden;
+  /* 最小高度 */
+  min-height: 100vh;
+  /* 文本渲染优化 */
+  text-rendering: optimizeLegibility;
+  /* 项目特定的颜色变量（会在 globals.less 中被覆盖） */
+  color: var(--foreground, #171717);
+  background: var(--background, #ffffff);
+}
+
+/* ==================== 标题重置 ==================== */
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-size: inherit;
+  font-weight: inherit;
+  line-height: inherit;
+  margin: 0;
+}
+
+/* ==================== 文本元素 ==================== */
+
+p {
+  margin: 0;
+}
+
+blockquote,
+q {
+  quotes: none;
+}
+
+blockquote::before,
+blockquote::after,
+q::before,
+q::after {
+  content: none;
+}
+
+/* ==================== 列表重置 ==================== */
+
+ul,
+ol {
+  list-style: none;
+}
+
+/* ==================== 链接重置 ==================== */
+
+a {
+  color: inherit;
+  text-decoration: none;
+  /* 移除点击时的虚线框 */
+  outline: none;
+}
+
+a:focus {
+  outline: none;
+}
+
+/* ==================== 图片和媒体 ==================== */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+/* 防止图片被拖拽 */
+img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* ==================== 表单元素 ==================== */
+
+input,
+button,
+textarea,
+select {
+  font: inherit;
+  color: inherit;
+  background: transparent;
+  border: none;
+  outline: none;
+}
+
+/* 移除输入框的默认样式 */
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='search'],
+input[type='tel'],
+input[type='url'],
+input[type='date'],
+input[type='time'],
+input[type='datetime-local'],
+textarea {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+/* 移除数字输入框的上下箭头 */
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* 移除搜索框的清除按钮 */
+input[type='search']::-webkit-search-decoration,
+input[type='search']::-webkit-search-cancel-button,
+input[type='search']::-webkit-search-results-button,
+input[type='search']::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+}
+
+/* 移除日期选择器的默认样式 */
+input[type='date']::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+}
+
+/* 文本域 */
+textarea {
+  resize: vertical;
+  overflow: auto;
+}
+
+/* 按钮 */
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  /* 移除按钮的默认样式 */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+/* 选择框 */
+select {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  cursor: pointer;
+}
+
+/* 移除选择框的默认箭头（IE） */
+select::-ms-expand {
+  display: none;
+}
+
+/* 复选框和单选框 */
+input[type='checkbox'],
+input[type='radio'] {
+  cursor: pointer;
+}
+
+/* 文件上传 */
+input[type='file'] {
+  cursor: pointer;
+}
+
+/* ==================== 表格重置 ==================== */
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+th,
+td {
+  padding: 0;
+  text-align: left;
+}
+
+/* ==================== 其他元素 ==================== */
+
+/* 代码 */
+code,
+kbd,
+samp,
+pre {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 1em;
+}
+
+/* 引用 */
+blockquote {
+  margin: 0;
+}
+
+/* 水平线 */
+hr {
+  border: none;
+  border-top: 1px solid currentColor;
+  margin: 0;
+}
+
+/* 摘要 */
+summary {
+  cursor: pointer;
+  list-style: none;
+}
+
+summary::-webkit-details-marker {
+  display: none;
+}
+
+/* ==================== 可访问性 ==================== */
+
+/* 隐藏但保持可访问性 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* 跳过链接 */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  background: #000;
+  color: #fff;
+  padding: 8px;
+  z-index: 100;
+  text-decoration: none;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ==================== 打印样式 ==================== */
+
+@media print {
+  *,
+  *::before,
+  *::after {
+    background: transparent !important;
+    color: #000 !important;
+    box-shadow: none !important;
+    text-shadow: none !important;
+  }
+
+  a,
+  a:visited {
+    text-decoration: underline;
+  }
+
+  a[href]::after {
+    content: ' (' attr(href) ')';
+  }
+
+  abbr[title]::after {
+    content: ' (' attr(title) ')';
+  }
+
+  a[href^='#']::after,
+  a[href^='javascript:']::after {
+    content: '';
+  }
+
+  pre {
+    white-space: pre-wrap !important;
+  }
+
+  pre,
+  blockquote {
+    border: 1px solid #999;
+    page-break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group;
+  }
+
+  tr,
+  img {
+    page-break-inside: avoid;
+  }
+
+  p,
+  h2,
+  h3 {
+    orphans: 3;
+    widows: 3;
+  }
+
+  h2,
+  h3 {
+    page-break-after: avoid;
+  }
+}
+
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html,
+body,
+div,
+span,
+applet,
+object,
+iframe,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote,
+pre,
+a,
+abbr,
+acronym,
+address,
+big,
+cite,
+code,
+del,
+dfn,
+em,
+img,
+ins,
+kbd,
+q,
+s,
+samp,
+small,
+strike,
+strong,
+sub,
+sup,
+tt,
+var,
+b,
+u,
+i,
+center,
+dl,
+dt,
+dd,
+ol,
+ul,
+li,
+fieldset,
+form,
+label,
+legend,
+table,
+caption,
+tbody,
+tfoot,
+thead,
+tr,
+th,
+td,
+article,
+aside,
+canvas,
+details,
+embed,
+figure,
+figcaption,
+footer,
+header,
+hgroup,
+menu,
+nav,
+output,
+ruby,
+section,
+summary,
+time,
+mark,
+audio,
+video {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  font-size: 100%;
+  font: inherit;
+  vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+menu,
+nav,
+section {
+  display: block;
+}
+body {
+  line-height: 1;
+}
+ol,
+ul {
+  list-style: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}

@@ -23,8 +23,6 @@ import {
   UpdateDateColumn,
   Index,
 } from 'typeorm';
-import { ObjectType, Field, Int, Float, registerEnumType } from '@nestjs/graphql';
-import { HideField } from '@nestjs/graphql';
 import { User } from '../../../user/user.entity';
 import { CartItem } from './cart-item.entity';
 
@@ -37,14 +35,12 @@ export enum CartStatus {
   CONVERTED = 'CONVERTED',
 }
 
-// Register enum for GraphQL
-registerEnumType(CartStatus, { name: 'CartStatus' });
+// Register enum for REST API
 
 /**
  * 购物车实体
  */
 @Entity('shopping_carts')
-@ObjectType()
 @Index('IDX_cart_user_status', ['userId', 'status'])
 @Index('IDX_cart_status', ['status'])
 @Index('IDX_cart_updated', ['updatedAt'])
@@ -53,21 +49,18 @@ export class ShoppingCart {
    * 购物车ID
    */
   @PrimaryGeneratedColumn('uuid')
-  @Field()
   id: string;
 
   /**
    * 所属用户ID
    */
   @Column({ type: 'uuid' })
-  @HideField()
   userId: string;
 
   /**
    * 所属用户
    */
   @ManyToOne(() => User, { onDelete: 'CASCADE', lazy: false })
-  @HideField()
   user: User;
 
   /**
@@ -77,7 +70,6 @@ export class ShoppingCart {
     cascade: ['insert', 'update', 'remove'],
     eager: true,
   })
-  @Field(() => [CartItem])
   items: CartItem[];
 
   /**
@@ -88,28 +80,24 @@ export class ShoppingCart {
    * - CONVERTED: 已转换为订单
    */
   @Column({ type: 'enum', enum: CartStatus, default: CartStatus.ACTIVE })
-  @Field(() => CartStatus)
   status: CartStatus;
 
   /**
    * 备注（优惠券、特殊说明等）
    */
   @Column({ type: 'text', nullable: true })
-  @Field({ nullable: true })
   notes?: string;
 
   /**
    * 创建时间
    */
   @CreateDateColumn()
-  @Field()
   createdAt: Date;
 
   /**
    * 最后更新时间
    */
   @UpdateDateColumn()
-  @Field()
   updatedAt: Date;
 
   /**
@@ -119,7 +107,6 @@ export class ShoppingCart {
   /**
    * 商品总数（数量总和）
    */
-  @Field(() => Int)
   get totalItems(): number {
     if (!this.items || this.items.length === 0) {
       return 0;
@@ -130,7 +117,6 @@ export class ShoppingCart {
   /**
    * SKU总数（不同的SKU数量）
    */
-  @Field(() => Int)
   get totalSKUs(): number {
     if (!this.items) {
       return 0;
@@ -141,7 +127,6 @@ export class ShoppingCart {
   /**
    * 商品小计（商品总价，不含税费和优惠）
    */
-  @Field(() => Float)
   get subtotal(): number {
     if (!this.items || this.items.length === 0) {
       return 0;
@@ -157,7 +142,6 @@ export class ShoppingCart {
    * 税率通常为固定百分比，这里假设为8%
    * 实际应用中应从配置或数据库获取
    */
-  @Field(() => Float)
   get taxAmount(): number {
     const TAX_RATE = 0.08; // 8%
     return this.subtotal * TAX_RATE;
@@ -166,7 +150,6 @@ export class ShoppingCart {
   /**
    * 总价（包含税费）
    */
-  @Field(() => Float)
   get total(): number {
     return this.subtotal + this.taxAmount;
   }
@@ -174,7 +157,6 @@ export class ShoppingCart {
   /**
    * 是否为空购物车
    */
-  @Field()
   get isEmpty(): boolean {
     return !this.items || this.items.length === 0;
   }
@@ -182,7 +164,6 @@ export class ShoppingCart {
   /**
    * 是否已废弃（24小时未更新）
    */
-  @Field()
   get isAbandoned(): boolean {
     if (this.status === CartStatus.ABANDONED) {
       return true;

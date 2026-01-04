@@ -1,265 +1,276 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { useQuery, useMutation } from '@apollo/client';
 import { useRouter } from 'next/navigation';
-import { GET_MY_CART } from '@/lib/graphql/cart';
-import { CREATE_ORDER } from '@/lib/graphql/order';
+import { cartApi, orderApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
-import { AlertCircle, Loader, CheckCircle } from 'lucide-react';
-import type { CartItem as CartItemType } from '@/types/ecommerce';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import styles from './page.module.less';
 
-/**
- * Checkout Page
- * Handles order creation and payment setup
- */
 export default function CheckoutPage() {
   const router = useRouter();
-  const { user, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const [cart, setCart] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
+  const [paymentMethod, setPaymentMethod] = useState('credit-card');
   const [formData, setFormData] = useState({
-    shippingAddress: '',
-    recipientName: '',
-    recipientPhone: '',
-    notes: '',
-  });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [orderCreated, setOrderCreated] = useState(false);
-  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
-
-  const { data: cartData, loading: cartLoading } = useQuery(GET_MY_CART, {
-    skip: !isAuthenticated,
+    fullName: '',
+    email: '',
+    phone: '',
+    address: '',
+    city: '',
+    state: '',
+    zipCode: '',
   });
 
-  const [createOrder] = useMutation(CREATE_ORDER, {
-    onCompleted: (data) => {
-      setOrderCreated(true);
-      setCreatedOrderId(data.createOrder.id);
-      setTimeout(() => {
-        router.push(`/orders/${data.createOrder.id}`);
-      }, 2000);
-    },
-    onError: (error) => {
-      setIsSubmitting(false);
-      alert(`Failed to create order: ${error.message}`);
-    },
-  });
-
-  // Redirect unauthenticated users
   useEffect(() => {
-    if (!authLoading && !isAuthenticated) {
+    if (!isAuthenticated) {
       router.push('/login?redirect=/checkout');
     }
-  }, [isAuthenticated, authLoading, router]);
+  }, [isAuthenticated, router]);
 
-  // Redirect if cart is empty
   useEffect(() => {
-    if (!cartLoading && cartData?.myCart?.isEmpty) {
-      router.push('/cart');
+    if (isAuthenticated) {
+      loadCart();
     }
-  }, [cartData, cartLoading, router]);
+  }, [isAuthenticated]);
 
-  if (authLoading || cartLoading) {
+  const loadCart = async () => {
+    try {
+      const data = await cartApi.get();
+      setCart(data);
+    } catch (error) {
+      console.error('加载购物车失败:', error);
+      setError('Failed to load cart');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  const handleCheckout = async () => {
+    // 验证表单
+    if (!formData.fullName || !formData.email || !formData.phone || !formData.address) {
+      setError('Please fill in all required fields');
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+      setError('');
+
+      // 创建订单
+      const order = await orderApi.create({
+        cartId: cart.id,
+        shippingAddress: formData,
+        paymentMethod
+      });
+
+      // 显示成功消息
+      router.push(`/orders/${order.id}?success=true`);
+    } catch (error: any) {
+      setError(error.message || '订单创建失败，请稍后重试');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-2xl mx-auto px-4">
-          <div className="flex justify-center items-center">
-            <Loader className="animate-spin text-blue-600" size={32} />
+      <div className={styles.container}>
+        <div className={styles.loading}>
+          <div className={styles.spinner}></div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!cart || (cart.items && cart.items.length === 0)) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.wrapper}>
+          <div className={styles.header}>
+            <h1 className={styles.title}>Your cart is empty</h1>
+          </div>
+          <div className={styles.empty}>
+            <Button onClick={() => router.push('/shop')} variant="primary">
+              Continue Shopping
+            </Button>
           </div>
         </div>
       </div>
     );
   }
 
-  const cart = cartData?.myCart;
-  if (!cart || cart.isEmpty) {
-    return null;
-  }
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!formData.shippingAddress || !formData.recipientName || !formData.recipientPhone) {
-      alert('Please fill in all required fields');
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    await createOrder({
-      variables: {
-        input: {
-          cartId: cart.id,
-          shippingAddress: formData.shippingAddress,
-          recipientName: formData.recipientName,
-          recipientPhone: formData.recipientPhone,
-          notes: formData.notes || undefined,
-        },
-      },
-    });
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-4xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Checkout</h1>
+    <div className={styles.container}>
+      <div className={styles.wrapper}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>Checkout</h1>
+        </div>
 
-        {/* Success Message */}
-        {orderCreated && (
-          <div className="mb-8 bg-green-50 border border-green-200 rounded-lg p-6 flex gap-4 items-start">
-            <CheckCircle className="text-green-600 flex-shrink-0 mt-0.5" size={24} />
-            <div>
-              <h2 className="text-lg font-semibold text-green-900 mb-2">Order Created Successfully!</h2>
-              <p className="text-green-700">
-                Order ID: {createdOrderId}. Redirecting to order details...
-              </p>
-            </div>
+        {error && (
+          <div className={`${styles.notification} ${styles.error}`}>
+            {error}
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Checkout Form */}
-          <div className="lg:col-span-2">
-            <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-sm p-6 space-y-6">
-              {/* Recipient Information */}
-              <div>
-                <h2 className="text-xl font-semibold text-gray-900 mb-4">Delivery Information</h2>
+        <div className={styles.content}>
+          {/* 左侧：收货信息和支付方式 */}
+          <div>
+            {/* 收货地址 */}
+            <div className={styles.formSection}>
+              <h2 className={styles.sectionTitle}>Shipping Address</h2>
 
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Recipient Name *
-                    </label>
-                    <input
-                      type="text"
-                      name="recipientName"
-                      value={formData.recipientName}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Full name"
-                    />
-                  </div>
+              <div className={styles.formGroup}>
+                <Input
+                  label="Full Name *"
+                  value={formData.fullName}
+                  onChange={(e) => handleInputChange('fullName', e.target.value)}
+                  placeholder="John Doe"
+                />
+              </div>
 
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Phone Number *
-                    </label>
-                    <input
-                      type="tel"
-                      name="recipientPhone"
-                      value={formData.recipientPhone}
-                      onChange={handleChange}
-                      required
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Phone number"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Shipping Address *
-                    </label>
-                    <textarea
-                      name="shippingAddress"
-                      value={formData.shippingAddress}
-                      onChange={handleChange}
-                      required
-                      rows={3}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Street address, city, state, postal code"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Order Notes (Optional)
-                    </label>
-                    <textarea
-                      name="notes"
-                      value={formData.notes}
-                      onChange={handleChange}
-                      rows={2}
-                      className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      placeholder="Any special requests or notes..."
-                    />
-                  </div>
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <Input
+                    label="Email *"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
+                    placeholder="john@example.com"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <Input
+                    label="Phone *"
+                    type="tel"
+                    value={formData.phone}
+                    onChange={(e) => handleInputChange('phone', e.target.value)}
+                    placeholder="+1 (555) 000-0000"
+                  />
                 </div>
               </div>
 
-              {/* Buttons */}
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => router.push('/cart')}
-                  className="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-semibold hover:bg-gray-50"
-                  disabled={isSubmitting}
-                >
-                  Back to Cart
-                </button>
-                <button
-                  type="submit"
-                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
-                  disabled={isSubmitting || orderCreated}
-                >
-                  {isSubmitting ? 'Creating Order...' : 'Create Order'}
-                </button>
+              <div className={styles.formGroup}>
+                <Input
+                  label="Address *"
+                  value={formData.address}
+                  onChange={(e) => handleInputChange('address', e.target.value)}
+                  placeholder="123 Main St"
+                />
               </div>
-            </form>
+
+              <div className={styles.formRow}>
+                <div className={styles.formGroup}>
+                  <Input
+                    label="City *"
+                    value={formData.city}
+                    onChange={(e) => handleInputChange('city', e.target.value)}
+                    placeholder="New York"
+                  />
+                </div>
+                <div className={styles.formGroup}>
+                  <Input
+                    label="State"
+                    value={formData.state}
+                    onChange={(e) => handleInputChange('state', e.target.value)}
+                    placeholder="NY"
+                  />
+                </div>
+              </div>
+
+              <div className={styles.formGroup}>
+                <Input
+                  label="Zip Code"
+                  value={formData.zipCode}
+                  onChange={(e) => handleInputChange('zipCode', e.target.value)}
+                  placeholder="10001"
+                />
+              </div>
+            </div>
+
+            {/* 支付方式 */}
+            <div className={styles.formSection} style={{ marginTop: '1.5rem' }}>
+              <h2 className={styles.sectionTitle}>Payment Method</h2>
+
+              <div className={styles.paymentMethods}>
+                <label className={`${styles.methodLabel} ${paymentMethod === 'credit-card' ? styles.methodActive : ''}`}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="credit-card"
+                    checked={paymentMethod === 'credit-card'}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  />
+                  <span>Credit / Debit Card</span>
+                </label>
+
+                <label className={`${styles.methodLabel} ${paymentMethod === 'paypal' ? styles.methodActive : ''}`}>
+                  <input
+                    type="radio"
+                    name="paymentMethod"
+                    value="paypal"
+                    checked={paymentMethod === 'paypal'}
+                    onChange={(e) => setPaymentMethod(e.target.value)}
+                  />
+                  <span>PayPal</span>
+                </label>
+              </div>
+            </div>
           </div>
 
-          {/* Order Summary Sidebar */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-lg shadow-sm p-6 sticky top-4">
-              <h2 className="text-lg font-bold text-gray-900 mb-4">Order Summary</h2>
+          {/* 右侧：订单总结 */}
+          <div className={styles.summarySection}>
+            <div className={styles.summaryCard}>
+              <h2 className={styles.sectionTitle}>Order Summary</h2>
 
-              {/* Items */}
-              <div className="space-y-3 mb-4 max-h-64 overflow-y-auto">
-                {cart.items.map((item: CartItemType) => (
-                  <div key={item.id} className="flex justify-between text-sm">
-                    <div>
-                      <p className="text-gray-900 font-medium">{item.productName}</p>
-                      <p className="text-gray-600">Qty: {item.quantity}</p>
+              <div className={styles.summaryItemsContainer}>
+                {cart?.items?.map((item: any) => (
+                  <div key={item.id} className={styles.summaryItem}>
+                    <div className={styles.itemName}>
+                      {item.productName} x {item.quantity}
                     </div>
-                    <p className="text-gray-900 font-semibold">
-                      ¥{((item.itemTotal - item.itemDiscount) / 100).toFixed(2)}
-                    </p>
+                    <div className={styles.itemPrice}>
+                      ${((item.itemTotal || 0) / 100).toFixed(2)}
+                    </div>
                   </div>
                 ))}
               </div>
 
-              {/* Totals */}
-              <div className="border-t pt-4 space-y-2 mb-4">
-                <div className="flex justify-between text-gray-600">
-                  <span>Subtotal</span>
-                  <span>¥{(cart.subtotal / 100).toFixed(2)}</span>
-                </div>
-
-                {cart.taxAmount > 0 && (
-                  <div className="flex justify-between text-gray-600">
-                    <span>Tax</span>
-                    <span>¥{(cart.taxAmount / 100).toFixed(2)}</span>
-                  </div>
-                )}
-
-                {/* Cart-level discount not available in GraphQL schema */}
-
-                <div className="flex justify-between items-center border-t pt-2">
-                  <span className="font-semibold text-gray-900">Total</span>
-                  <span className="text-2xl font-bold text-gray-900">
-                    ¥{(cart.total / 100).toFixed(2)}
-                  </span>
-                </div>
+              <div className={styles.totalRow}>
+                <span>Total:</span>
+                <span className={styles.totalPrice}>
+                  ${((cart?.totalAmount || 0) / 100).toFixed(2)}
+                </span>
               </div>
+            </div>
 
-              {/* Info */}
-              <div className="bg-blue-50 border border-blue-200 rounded p-3 text-sm text-blue-800">
-                <p>After placing your order, you'll be able to proceed to payment on the order details page.</p>
-              </div>
+            <div className={styles.actions}>
+              <Button
+                onClick={handleCheckout}
+                disabled={submitting}
+                variant="primary"
+              >
+                {submitting ? 'Processing...' : 'Place Order'}
+              </Button>
+
+              <Button
+                onClick={() => router.push('/cart')}
+                disabled={submitting}
+                variant="secondary"
+              >
+                Back to Cart
+              </Button>
             </div>
           </div>
         </div>

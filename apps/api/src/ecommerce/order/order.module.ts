@@ -4,7 +4,7 @@
  * 提供订单管理的完整模块，包括：
  * - 订单和订单项目实体
  * - 订单服务和仓储库
- * - GraphQL解析器
+ * - REST API解析器
  * - 与库存和购物车模块的集成
  *
  * @author Claude
@@ -19,7 +19,7 @@ import { ShoppingCart } from '../cart/entities/shopping-cart.entity';
 import { CartItem } from '../cart/entities/cart-item.entity';
 import { OrderService } from './services/order.service';
 import { OrderRepository } from './repositories/order.repository';
-import { OrderResolver } from './resolvers/order.resolver';
+import { OrderController } from './controllers/order.controller';
 import { InventoryModule } from '../inventory/inventory.module';
 
 @Module({
@@ -30,8 +30,8 @@ import { InventoryModule } from '../inventory/inventory.module';
   providers: [
     OrderService,
     OrderRepository,
-    OrderResolver,
   ],
+  controllers: [OrderController],
   exports: [OrderService, OrderRepository],
 })
 export class OrderModule {}

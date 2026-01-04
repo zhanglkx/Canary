@@ -26,7 +26,7 @@ services:
   api:
     build:
       context: .
-      dockerfile: apps/api/Dockerfile
+      dockerfile: apps/api/Dockerfile.runtime
     image: canary-api-prod:latest
     container_name: canary-api-prod
     env_file:
@@ -65,9 +65,9 @@ services:
   web:
     build:
       context: .
-      dockerfile: apps/web/Dockerfile
+      dockerfile: apps/web/Dockerfile.runtime
       args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/graphql}
+        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
     image: canary-web-prod:latest
     container_name: canary-web-prod
     env_file:
@@ -75,7 +75,7 @@ services:
     environment:
       NODE_ENV: production
       PORT: 3000
-      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000/graphql}
+      NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
       NEXT_TELEMETRY_DISABLED: '1'
     ports:
       - '3000:3000'
@@ -91,7 +91,7 @@ services:
     ports:
       - '80:80'
     volumes:
-      - ./nginx.prod.conf:/etc/nginx/nginx.conf
+      - ./nginx.simple.conf:/etc/nginx/nginx.conf
     depends_on:
       - web
       - api

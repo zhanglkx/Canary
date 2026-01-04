@@ -2,12 +2,8 @@
 
 import React, { useState } from 'react';
 import { Trash2, AlertCircle } from 'lucide-react';
-import { useMutation } from '@apollo/client';
-import {
-  REMOVE_FROM_CART,
-  UPDATE_CART_ITEM_QUANTITY,
-  GET_MY_CART,
-} from '@/lib/graphql/cart';
+import { cartApi } from '@/lib/api';
+import styles from './cart-item.module.less';
 
 interface CartItemProps {
   id: string;
@@ -21,12 +17,9 @@ interface CartItemProps {
   promoCode?: string;
   stockStatus: string;
   attributeSnapshot?: string;
+  onUpdate?: () => void;
 }
 
-/**
- * CartItem Component
- * Displays a single item in the shopping cart with options to update quantity or remove
- */
 export const CartItem: React.FC<CartItemProps> = ({
   id,
   skuId,
@@ -39,6 +32,7 @@ export const CartItem: React.FC<CartItemProps> = ({
   promoCode,
   stockStatus,
   attributeSnapshot,
+  onUpdate,
 }) => {
   const [localQuantity, setLocalQuantity] = useState(quantity);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -47,136 +41,86 @@ export const CartItem: React.FC<CartItemProps> = ({
   const price = itemTotal / 100;
   const finalPrice = (itemTotal - itemDiscountCents) / 100;
 
-  // Mutation to update quantity
-  const [updateQuantity] = useMutation(UPDATE_CART_ITEM_QUANTITY, {
-    refetchQueries: [{ query: GET_MY_CART }],
-    onCompleted: () => {
-      setIsUpdating(false);
-    },
-    onError: (error) => {
-      setIsUpdating(false);
-      setLocalQuantity(quantity);
-      alert(`Failed to update quantity: ${error.message}`);
-    },
-  });
-
-  // Mutation to remove item
-  const [removeItem] = useMutation(REMOVE_FROM_CART, {
-    refetchQueries: [{ query: GET_MY_CART }],
-    onError: (error) => {
-      alert(`Failed to remove item: ${error.message}`);
-    },
-  });
-
   const handleQuantityChange = async (newQuantity: number) => {
     if (newQuantity < 1) return;
-
-    setLocalQuantity(newQuantity);
-    setIsUpdating(true);
-
-    await updateQuantity({
-      variables: {
-        input: {
-          skuId,
-          quantity: newQuantity,
-        },
-      },
-    });
-  };
-
-  const handleRemove = async () => {
-    if (confirm('Are you sure you want to remove this item from your cart?')) {
-      await removeItem({
-        variables: { skuId },
-      });
+    
+    try {
+      setIsUpdating(true);
+      await cartApi.updateItem(id, newQuantity);
+      setLocalQuantity(newQuantity);
+      onUpdate?.();
+    } catch (error) {
+      console.error('更新数量失败:', error);
+    } finally {
+      setIsUpdating(false);
     }
   };
 
-  const isOutOfStock = stockStatus === 'OUT_OF_STOCK';
-  const isLowStock = stockStatus === 'LOW_STOCK';
+  const handleRemove = async () => {
+    try {
+      setIsUpdating(true);
+      await cartApi.removeItem(id);
+      onUpdate?.();
+    } catch (error) {
+      console.error('删除失败:', error);
+    } finally {
+      setIsUpdating(false);
+    }
+  };
 
   return (
-    <div className="flex gap-4 border-b pb-4 py-4">
-      {/* Product Info */}
-      <div className="flex-1">
-        <h3 className="font-semibold text-gray-900">{productName}</h3>
-        <p className="text-sm text-gray-500">SKU: {skuCode}</p>
-
-        {attributeSnapshot && (
-          <p className="text-sm text-gray-600 mt-1">
-            {JSON.stringify(JSON.parse(attributeSnapshot), null, 2)}
-          </p>
-        )}
-
-        {promoCode && (
-          <p className="text-sm text-green-600 mt-1">Promo: {promoCode}</p>
-        )}
-
-        {/* Stock Status */}
-        <div className="mt-2 flex items-center gap-2">
-          {isOutOfStock && (
-            <div className="flex items-center gap-1 text-red-600 text-sm">
-              <AlertCircle size={16} />
-              Out of Stock
-            </div>
+    <div className={styles.card}>
+      <div className={styles.content}>
+        <div className={styles.leftSection}>
+          <h3 className={styles.productName}>{productName}</h3>
+          <p className={styles.skuCode}>SKU: {skuCode}</p>
+          {attributeSnapshot && (
+            <p className={styles.attributeSnapshot}>{attributeSnapshot}</p>
           )}
-          {isLowStock && (
-            <div className="flex items-center gap-1 text-yellow-600 text-sm">
-              <AlertCircle size={16} />
-              Low Stock
-            </div>
-          )}
+        </div>
+
+        <div className={styles.rightSection}>
+          <div className={styles.quantityControls}>
+            <button
+              onClick={() => handleQuantityChange(localQuantity - 1)}
+              disabled={isUpdating || localQuantity <= 1}
+              className={styles.quantityButton}
+            >
+              -
+            </button>
+            <span className={styles.quantityValue}>{localQuantity}</span>
+            <button
+              onClick={() => handleQuantityChange(localQuantity + 1)}
+              disabled={isUpdating}
+              className={styles.quantityButton}
+            >
+              +
+            </button>
+          </div>
+
+          <div className={styles.priceSection}>
+            <p className={styles.finalPrice}>${finalPrice.toFixed(2)}</p>
+            {discount > 0 && (
+              <p className={styles.discount}>-${discount.toFixed(2)}</p>
+            )}
+          </div>
+
+          <button
+            onClick={handleRemove}
+            disabled={isUpdating}
+            className={styles.removeButton}
+          >
+            <Trash2 size={20} />
+          </button>
         </div>
       </div>
 
-      {/* Quantity Control */}
-      <div className="flex items-center gap-2">
-        <button
-          onClick={() => handleQuantityChange(localQuantity - 1)}
-          disabled={isUpdating || isOutOfStock}
-          className="px-2 py-1 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          −
-        </button>
-        <input
-          type="number"
-          min="1"
-          value={localQuantity}
-          onChange={(e) => handleQuantityChange(parseInt(e.target.value) || 1)}
-          disabled={isUpdating || isOutOfStock}
-          className="w-12 text-center border rounded disabled:bg-gray-50 disabled:opacity-50"
-        />
-        <button
-          onClick={() => handleQuantityChange(localQuantity + 1)}
-          disabled={isUpdating || isOutOfStock}
-          className="px-2 py-1 border rounded hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          +
-        </button>
-      </div>
-
-      {/* Price */}
-      <div className="text-right min-w-24">
-        <p className="font-semibold text-gray-900">¥{finalPrice.toFixed(2)}</p>
-        <p className="text-sm text-gray-500">
-          ¥{(unitPrice / 100).toFixed(2)} × {localQuantity}
-        </p>
-        {discount > 0 && (
-          <p className="text-sm text-green-600">
-            -¥{discount.toFixed(2)}
-          </p>
-        )}
-      </div>
-
-      {/* Remove Button */}
-      <button
-        onClick={handleRemove}
-        className="p-2 text-red-600 hover:bg-red-50 rounded disabled:opacity-50 disabled:cursor-not-allowed"
-        disabled={isUpdating}
-        title="Remove item"
-      >
-        <Trash2 size={20} />
-      </button>
+      {stockStatus !== 'IN_STOCK' && (
+        <div className={styles.stockWarning}>
+          <AlertCircle size={16} />
+          <span className={styles.stockWarningText}>Limited stock</span>
+        </div>
+      )}
     </div>
   );
 };

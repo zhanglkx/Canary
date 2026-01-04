@@ -45,3 +45,13 @@ pnpm-debug.log*
 
 # Docker
 .docker-data
+
+# Deployment
+*.tar.gz
+deploy/
+backup/
+backup.old/
+
+# Local test files
+.env.clean
+docker-compose.local.yml

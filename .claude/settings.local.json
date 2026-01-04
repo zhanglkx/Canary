@@ -22,7 +22,18 @@
       "Bash(then echo \"✅ Both servers are running\" echo \"=== Checking debug.log for errors ===\" cat /tmp/debug.log)",
       "Bash(cat:*)",
       "Bash(break)",
-      "Bash(git commit -m \"$(cat <<''EOF''\n组织项目文档：将所有文档文件移动到 doc 文件夹\n\n- 创建 doc 文件夹用于统一管理项目文档\n- 移动 CLAUDE.md 到 doc 文件夹\n- 移动 ECOMMERCE_IMPLEMENTATION_ROADMAP.md 到 doc 文件夹\n- 移动 IMPLEMENTATION_SUMMARY.md 到 doc 文件夹\n- 移动 PROBLEMS_AND_SOLUTIONS.md 到 doc 文件夹\n- 创建 doc/README.md 作为文档中心入口\n\n改进文档组织结构，便于管理和查找相关资料。\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
+      "Bash(git commit -m \"$(cat <<''EOF''\n组织项目文档：将所有文档文件移动到 doc 文件夹\n\n- 创建 doc 文件夹用于统一管理项目文档\n- 移动 CLAUDE.md 到 doc 文件夹\n- 移动 ECOMMERCE_IMPLEMENTATION_ROADMAP.md 到 doc 文件夹\n- 移动 IMPLEMENTATION_SUMMARY.md 到 doc 文件夹\n- 移动 PROBLEMS_AND_SOLUTIONS.md 到 doc 文件夹\n- 创建 doc/README.md 作为文档中心入口\n\n改进文档组织结构，便于管理和查找相关资料。\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")",
+      "Bash(awk:*)",
+      "Bash(xargs cat:*)",
+      "Bash(npm run build:*)",
+      "Bash(for f in /Users/temptrip/Documents/Code/Canary/apps/web/src/app/*/page.tsx)",
+      "Bash(if grep -q \"styles\\.\" \"$f\")",
+      "Bash(then echo \"  Uses: CSS Modules\")",
+      "Bash(if grep -q \"className=\" \"$f\")",
+      "Bash(then echo \"  Uses: Tailwind\")",
+      "Bash(done)",
+      "Bash(npm run lint:*)",
+      "Bash(xargs:*)"
     ],
     "deny": [],
     "ask": []

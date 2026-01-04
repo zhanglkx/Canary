@@ -8,8 +8,6 @@
 
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config'; // 用于管理环境变量和配置
-import { GraphQLModule } from '@nestjs/graphql'; // GraphQL 模块，用于构建 GraphQL API
-import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo'; // Apollo Server 配置
 import { TypeOrmModule } from '@nestjs/typeorm'; // 数据库 ORM
 import { join } from 'path';
 
@@ -18,15 +16,14 @@ import { UserModule } from './user/user.module'; // 用户管理模块
 import { AuthModule } from './auth/auth.module'; // 认证授权模块
 import { TodoModule } from './todo/todo.module'; // 待办事项模块
 import { CategoryModule } from './category/category.module'; // 分类管理模块
-import { CommentModule } from './comment/comment.module'; // 评论功能模块（新增）
-import { TagModule } from './tag/tag.module'; // 标签功能模块（新增）
-import { StatsModule } from './stats/stats.module'; // 统计功能模块（新增）
-import { SearchModule } from './search/search.module'; // 搜索功能模块（新增）
-import { BatchModule } from './batch/batch.module'; // 批量操作模块（新增）
-import { EcommerceModule } from './ecommerce/ecommerce.module'; // 电商模块（新增）
+import { CommentModule } from './comment/comment.module'; // 评论功能模块
+import { TagModule } from './tag/tag.module'; // 标签功能模块
+import { StatsModule } from './stats/stats.module'; // 统计功能模块
+import { SearchModule } from './search/search.module'; // 搜索功能模块
+import { BatchModule } from './batch/batch.module'; // 批量操作模块
+import { EcommerceModule } from './ecommerce/ecommerce.module'; // 电商模块
 import { CommonModule } from './common/common.module'; // 通用模块
 import { AppController } from './app.controller';
-import { ApolloStudioController } from './apollo-studio.controller';
 
 /**
  * @Module 装饰器定义了应用程序的根模块
@@ -38,33 +35,13 @@ import { ApolloStudioController } from './apollo-studio.controller';
  * - exports: 导出给其他模块使用的提供者
  */
 @Module({
-  controllers: [AppController, ApolloStudioController],
+  controllers: [AppController],
   imports: [
     // 全局配置模块，用于管理环境变量
     ConfigModule.forRoot({
       isGlobal: true, // 使配置在全局可用
     }),
 
-    // GraphQL 模块配置
-    // 这里使用了 Code First 方式，通过装饰器自动生成 schema
-    GraphQLModule.forRoot<ApolloDriverConfig>({
-      driver: ApolloDriver,
-      autoSchemaFile: join(process.cwd(), 'src/schema.gql'), // 自动生成的 schema 文件位置
-      sortSchema: true, // 按字母顺序排序 schema
-      introspection: true, // 允许 schema 内省，用于开发工具
-      playground: false, // 使用自定义的 Apollo Studio 替代默认 playground
-      formatError: (error) => ({
-        message: error.message,
-        locations: error.locations,
-        path: error.path,
-        extensions: {
-          code: error.extensions?.code,
-          timestamp: new Date().toISOString(),
-        },
-      }),
-      context: ({ req, res }) => ({ req, res }),
-      csrfPrevention: false, // 禁用 CSRF 保护以解决前端连接问题
-    }),
     // 数据库连接配置
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
@@ -92,12 +69,12 @@ import { ApolloStudioController } from './apollo-studio.controller';
     AuthModule, // 身份认证功能
     TodoModule, // 待办事项功能
     CategoryModule, // 分类管理功能
-    CommentModule, // 评论功能（新增）
-    TagModule, // 标签功能（新增）
-    StatsModule, // 统计功能（新增）
-    SearchModule, // 搜索功能（新增）
-    BatchModule, // 批量操作功能（新增）
-    EcommerceModule, // 电商功能（新增）
+    CommentModule, // 评论功能
+    TagModule, // 标签功能
+    StatsModule, // 统计功能
+    SearchModule, // 搜索功能
+    BatchModule, // 批量操作功能
+    EcommerceModule, // 电商功能
   ],
 })
 export class AppModule {}

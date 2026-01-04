@@ -1,7 +1,7 @@
 {
   "name": "learning-nest-next",
   "version": "1.0.0",
-  "description": "Learning project with NestJS, Next.js and GraphQL",
+  "description": "Learning project with NestJS, Next.js and REST API",
   "private": true,
   "scripts": {
     "dev:api": "pnpm --filter api dev",

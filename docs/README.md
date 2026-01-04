@@ -1,12 +1,12 @@
-# Learning NestJS + Next.js + GraphQL
+# Learning NestJS + Next.js + REST API
 
-A full-stack monorepo learning project built with modern technologies: NestJS 10, Next.js 15, GraphQL, TypeScript, PostgreSQL, and Docker.
+A full-stack monorepo learning project built with modern technologies: NestJS 10, Next.js 15, REST API, TypeScript, PostgreSQL, and Docker.
 
 ## Tech Stack
 
 ### Backend (NestJS 10)
 - **Framework**: NestJS 10
-- **API Layer**: GraphQL with Apollo Server
+- **API Layer**: REST API with Express
 - **Database**: PostgreSQL with TypeORM
 - **Authentication**: JWT with Passport
 - **Validation**: class-validator & class-transformer
@@ -14,8 +14,7 @@ A full-stack monorepo learning project built with modern technologies: NestJS 10
 ### Frontend (Next.js 15)
 - **Framework**: Next.js 15 (App Router)
 - **Styling**: Tailwind CSS
-- **GraphQL Client**: Apollo Client
-- **Code Generation**: GraphQL Code Generator
+- **HTTP Client**: Axios
 - **UI**: React 19
 
 ### DevOps
@@ -107,7 +106,7 @@ docker-compose -f docker-compose.dev.yml up -d
 pnpm dev:api
 ```
 
-The API will be available at http://localhost:4000/graphql
+The API will be available at http://localhost:4000/api
 
 3. In a new terminal, run the frontend:
 ```bash
@@ -145,74 +144,101 @@ API:
 Web:
 - `pnpm --filter web dev` - Run web in dev mode
 - `pnpm --filter web build` - Build web for production
-- `pnpm --filter web codegen` - Generate GraphQL types
+- `pnpm --filter web build` - Build web application
 
 ## Features
 
 ### Backend Features
 - User registration and login with JWT authentication
-- GraphQL API with type-safe schema
+- REST API with type-safe endpoints
 - Todo CRUD operations with user isolation
 - Password hashing with bcrypt
 - Database relationships with TypeORM
 - Input validation with decorators
-- GraphQL Playground for API testing
+- REST API endpoints for testing
 
 ### Frontend Features
 - Modern Next.js 15 App Router
-- Apollo Client for GraphQL queries/mutations
-- Type-safe GraphQL operations with code generation
+- Axios for HTTP requests
+- Type-safe API operations with TypeScript
 - JWT token management
 - Responsive design with Tailwind CSS
 - Dark mode support
 
 ## API Endpoints
 
-### GraphQL Endpoint
-- **URL**: http://localhost:4000/graphql
+### REST API Endpoints
+- **Base URL**: http://localhost:4000/api
 - **Playground**: Available in development mode
 
-### Main Queries
-```graphql
-query {
-  me {
-    id
-    email
-    username
-  }
+### Main Endpoints
 
-  todos {
-    id
-    title
-    completed
+#### Authentication
+```bash
+# Get current user
+GET /api/auth/me
+
+# Response
+{
+  "id": 1,
+  "email": "user@example.com",
+  "username": "username"
+}
+```
+
+#### Todos
+```bash
+# Get all todos
+GET /api/todo
+
+# Response
+[
+  {
+    "id": 1,
+    "title": "Todo title",
+    "completed": false
+  }
+]
+```
+
+### Main Operations
+
+#### Register User
+```bash
+POST /api/auth/register
+Content-Type: application/json
+
+{
+  "email": "user@example.com",
+  "username": "username",
+  "password": "password123"
+}
+
+# Response
+{
+  "accessToken": "jwt-token-here",
+  "user": {
+    "id": 1,
+    "email": "user@example.com"
   }
 }
 ```
 
-### Main Mutations
-```graphql
-mutation Register {
-  register(registerInput: {
-    email: "user@example.com"
-    username: "username"
-    password: "password123"
-  }) {
-    accessToken
-    user {
-      id
-      email
-    }
-  }
+#### Create Todo
+```bash
+POST /api/todo
+Content-Type: application/json
+Authorization: Bearer jwt-token-here
+
+{
+  "title": "My first todo",
+  "description": "Description here"
 }
 
-mutation CreateTodo {
-  createTodo(createTodoInput: {
-    title: "My first todo"
-    description: "Description here"
-  }) {
-    id
-    title
-  }
+# Response
+{
+  "id": 1,
+  "title": "My first todo"
 }
 ```
 
@@ -227,20 +253,20 @@ This project is designed for learning. Here's a suggested path:
 
 2. **Backend (NestJS)**
    - Study module architecture (User, Auth, Todo)
-   - Learn GraphQL schema-first vs code-first approach
+   - Learn REST API design patterns
    - Understand decorators and dependency injection
    - Explore JWT authentication with Passport
    - Study TypeORM entities and relationships
 
 3. **Frontend (Next.js)**
    - Learn Next.js 15 App Router patterns
-   - Understand Apollo Client setup and usage
-   - Study GraphQL Code Generator workflow
+   - Understand Axios HTTP client setup and usage
+   - Study TypeScript API integration patterns
    - Explore React 19 features
    - Practice Tailwind CSS utilities
 
 4. **Full-Stack Integration**
-   - Connect frontend to GraphQL API
+   - Connect frontend to REST API
    - Implement authentication flow
    - Build CRUD operations
    - Handle errors and loading states
