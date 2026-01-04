@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { productApi, cartApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
+import { Product } from '@/types/ecommerce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import styles from './page.module.less';
@@ -12,7 +13,7 @@ export default function ProductDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { isAuthenticated } = useAuth();
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [addingToCart, setAddingToCart] = useState(false);
   const [quantity, setQuantity] = useState(1);
@@ -57,10 +58,7 @@ export default function ProductDetailPage() {
       setError('');
       setSuccess('');
 
-      await cartApi.addItem({
-        skuId: selectedSku,
-        quantity
-      });
+      await cartApi.addItem(selectedSku, quantity);
 
       setSuccess('Added to cart successfully!');
       setQuantity(1);
@@ -228,10 +226,10 @@ export default function ProductDetailPage() {
             </div>
 
             {/* 产品属性 */}
-            {product.attributes && product.attributes.length > 0 && (
+            {(product as any).attributes && (product as any).attributes.length > 0 && (
               <div className={styles.attributes}>
                 <h3 className={styles.attributesTitle}>Specifications:</h3>
-                {product.attributes.map((attr: any) => (
+                {(product as any).attributes.map((attr: any) => (
                   <div key={attr.id} className={styles.attribute}>
                     <span className={styles.attributeName}>{attr.name}:</span>
                     <span className={styles.attributeValue}>{attr.value}</span>

@@ -1,0 +1,19 @@
+FROM node:20-alpine
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
+WORKDIR /app
+
+# 复制package文件
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY apps/web/package.json ./apps/web/
+COPY libs/shared/package.json ./libs/shared/
+
+# 安装生产依赖
+RUN pnpm install --frozen-lockfile --prod --no-optional
+
+# 复制构建结果
+COPY apps/web/.next ./apps/web/.next
+COPY libs/shared ./libs/shared
+
+WORKDIR /app/apps/web
+EXPOSE 3000
+CMD ["pnpm", "start"]
