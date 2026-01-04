@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
+import styles from './cart-summary.module.less';
 
 interface CartSummaryProps {
   cart: any;
@@ -15,21 +16,21 @@ export const CartSummary: React.FC<CartSummaryProps> = ({ cart }) => {
   const total = subtotal - discount;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 sticky top-8">
-      <h2 className="text-lg font-semibold text-gray-900 mb-4">Order Summary</h2>
+    <div className={styles.summary}>
+      <h2 className={styles.title}>Order Summary</h2>
 
-      <div className="space-y-3 mb-6">
-        <div className="flex justify-between text-gray-600">
+      <div className={styles.details}>
+        <div className={styles.detailRow}>
           <span>Subtotal</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
         {discount > 0 && (
-          <div className="flex justify-between text-green-600">
+          <div className={styles.discountRow}>
             <span>Discount</span>
             <span>-${discount.toFixed(2)}</span>
           </div>
         )}
-        <div className="border-t pt-3 flex justify-between font-semibold text-gray-900 text-lg">
+        <div className={styles.totalRow}>
           <span>Total</span>
           <span>${total.toFixed(2)}</span>
         </div>
@@ -37,7 +38,7 @@ export const CartSummary: React.FC<CartSummaryProps> = ({ cart }) => {
 
       <button
         onClick={() => router.push('/checkout')}
-        className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+        className={styles.checkoutButton}
       >
         Proceed to Checkout
       </button>

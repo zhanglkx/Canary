@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { CartItem } from '@/components/features/cart-item';
 import { CartSummary } from '@/components/features/cart-summary';
 import { ShoppingCart as CartIcon, AlertCircle } from 'lucide-react';
+import styles from './page.module.less';
 
 export default function CartPage() {
   const router = useRouter();
@@ -41,10 +42,10 @@ export default function CartPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="flex justify-center items-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.loadingContainer}>
+            <div className={styles.spinner}></div>
           </div>
         </div>
       </div>
@@ -53,16 +54,16 @@ export default function CartPage() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="bg-red-50 border border-red-200 rounded-lg p-6 flex gap-4 items-start">
-            <AlertCircle className="text-red-600 flex-shrink-0" size={24} />
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.errorContainer}>
+            <AlertCircle className="flex-shrink-0" size={24} style={{ color: '@error-color' }} />
             <div>
-              <h2 className="text-lg font-semibold text-red-900 mb-2">Error Loading Cart</h2>
-              <p className="text-red-700 mb-4">{error}</p>
+              <h2 className={styles.errorTitle}>Error Loading Cart</h2>
+              <p className={styles.errorMessage}>{error}</p>
               <button
                 onClick={() => loadCart()}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                className={styles.retryButton}
               >
                 Try Again
               </button>
@@ -75,17 +76,17 @@ export default function CartPage() {
 
   if (!cart || !cart.items || cart.items.length === 0) {
     return (
-      <div className="min-h-screen bg-gray-50 py-12">
-        <div className="max-w-6xl mx-auto px-4">
-          <div className="text-center py-16">
-            <CartIcon className="mx-auto mb-4 text-gray-400" size={48} />
-            <h1 className="text-3xl font-bold text-gray-900 mb-2">Your Cart is Empty</h1>
-            <p className="text-gray-600 mb-8">
+      <div className={styles.page}>
+        <div className={styles.container}>
+          <div className={styles.emptyContainer}>
+            <CartIcon className={styles.emptyIcon} size={48} />
+            <h1 className={styles.emptyTitle}>Your Cart is Empty</h1>
+            <p className={styles.emptyDescription}>
               You haven't added any items to your cart yet.
             </p>
             <a
               href="/shop"
-              className="inline-block px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700"
+              className={styles.shopButton}
             >
               Continue Shopping
             </a>
@@ -96,12 +97,12 @@ export default function CartPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-6xl mx-auto px-4">
-        <h1 className="text-3xl font-bold text-gray-900 mb-8">Shopping Cart</h1>
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <h1 className={styles.title}>Shopping Cart</h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2 space-y-4">
+        <div className={styles.content}>
+          <div className={styles.itemsContainer}>
             {cart.items.map((item: any) => (
               <CartItem key={item.id} {...item} onUpdate={loadCart} />
             ))}

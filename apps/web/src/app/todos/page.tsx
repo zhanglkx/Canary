@@ -13,12 +13,13 @@ import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NoSSR } from '@/components/ui/no-ssr';
+import styles from './page.module.less';
 
-const priorityColors = {
-  LOW: 'bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300',
-  MEDIUM: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300',
-  HIGH: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300',
-  URGENT: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300',
+const priorityClasses = {
+  LOW: styles.priorityLow,
+  MEDIUM: styles.priorityMedium,
+  HIGH: styles.priorityHigh,
+  URGENT: styles.priorityUrgent,
 };
 
 const priorityLabels = {
@@ -225,34 +226,34 @@ export default function TodosPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600 dark:text-gray-400">正在跳转到登录页面...</p>
+      <div className={styles.loadingContainer}>
+        <div className={styles.loadingContent}>
+          <div className={styles.spinner}></div>
+          <p className={styles.loadingText}>正在跳转到登录页面...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">我的待办事项</h1>
-          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+    <div className={styles.page}>
+      <div className={styles.container}>
+        <div className={styles.header}>
+          <h1 className={styles.title}>我的待办事项</h1>
+          <p className={styles.subtitle}>
             管理你的任务，保持高效
           </p>
         </div>
 
-        <NoSSR fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-96"></div>}>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <NoSSR fallback={<div className={styles.skeleton}></div>}>
+          <div className={styles.content}>
             {/* 左侧：创建/编辑表单 */}
-            <div className="lg:col-span-1">
-              <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 sticky top-8">
-                <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+            <div>
+              <div className={styles.formCard}>
+                <h2 className={styles.formTitle}>
                   {editingTodo ? '编辑待办事项' : '创建新待办事项'}
                 </h2>
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className={styles.form}>
                   <Input
                     label="标题"
                     type="text"
@@ -263,7 +264,7 @@ export default function TodosPage() {
                   />
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className={styles.label}>
                       描述
                     </label>
                     <textarea
@@ -271,18 +272,18 @@ export default function TodosPage() {
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder="输入描述（可选）"
                       rows={3}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      className={styles.textarea}
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className={styles.label}>
                       分类
                     </label>
                     <select
                       value={categoryId}
                       onChange={(e) => setCategoryId(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      className={styles.select}
                     >
                       <option value="">无分类</option>
                       {categories.map((category) => (
@@ -294,13 +295,13 @@ export default function TodosPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className={styles.label}>
                       优先级
                     </label>
                     <select
                       value={priority}
                       onChange={(e) => setPriority(e.target.value as any)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      className={styles.select}
                     >
                       <option value="LOW">低</option>
                       <option value="MEDIUM">中</option>
@@ -310,24 +311,24 @@ export default function TodosPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className={styles.label}>
                       截止日期
                     </label>
                     <input
                       type="date"
                       value={dueDate}
                       onChange={(e) => setDueDate(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      className={styles.select}
                     />
                   </div>
 
                   {error && (
-                    <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-                      <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
+                    <div className={styles.error}>
+                      <p className={styles.errorText}>{error}</p>
                     </div>
                   )}
 
-                  <div className="flex gap-2">
+                  <div className={styles.buttonGroup}>
                     <Button type="submit" loading={creating || updating} className="flex-1">
                       {editingTodo ? '更新' : '创建'}
                     </Button>
@@ -342,10 +343,11 @@ export default function TodosPage() {
             </div>
 
             {/* 右侧：搜索、过滤和待办事项列表 */}
-            <div className="lg:col-span-2">
+            <div className={styles.listSection}>
               {/* 搜索和过滤栏 */}
-              <div className="bg-white dark:bg-gray-800 shadow rounded-lg p-6 mb-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className={styles.filterCard}>
+                <h3 className={styles.filterTitle}>搜索和过滤</h3>
+                <div className={styles.filterGrid}>
                   <div>
                     <Input
                       label="搜索"
@@ -357,13 +359,13 @@ export default function TodosPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className={styles.label}>
                       状态
                     </label>
                     <select
                       value={filterStatus}
                       onChange={(e) => setFilterStatus(e.target.value as any)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      className={styles.select}
                     >
                       <option value="all">全部</option>
                       <option value="pending">待完成</option>
@@ -372,13 +374,13 @@ export default function TodosPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className={styles.label}>
                       优先级
                     </label>
                     <select
                       value={filterPriority}
                       onChange={(e) => setFilterPriority(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      className={styles.select}
                     >
                       <option value="all">全部</option>
                       <option value="URGENT">紧急</option>
@@ -389,13 +391,13 @@ export default function TodosPage() {
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                    <label className={styles.label}>
                       排序
                     </label>
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value as any)}
-                      className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+                      className={styles.select}
                     >
                       <option value="createdAt">创建时间</option>
                       <option value="dueDate">截止日期</option>
@@ -404,11 +406,11 @@ export default function TodosPage() {
                   </div>
                 </div>
 
-                <div className="mt-4">
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                <div style={{ marginTop: '@spacing-md' }}>
+                  <label className={styles.label}>
                     分类
                   </label>
-                  <div className="flex flex-wrap gap-2">
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '@spacing-sm' }}>
                     <button
                       onClick={() => setFilterCategory('all')}
                       className={`px-3 py-1 rounded-full text-sm font-medium ${filterCategory === 'all'
@@ -447,45 +449,47 @@ export default function TodosPage() {
               </div>
 
               {/* 待办事项列表 */}
-              <div className="bg-white dark:bg-gray-800 shadow rounded-lg">
-                <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+              <div className={styles.todosCard}>
+                <div style={{ padding: '@spacing-md @spacing-xl', borderBottom: '1px solid @gray-200' }}>
+                  <h2 className={styles.filterTitle}>
                     待办事项 ({filteredAndSortedTodos.length})
                   </h2>
                 </div>
-                <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                <div className={styles.todosList}>
                   {todosLoading ? (
-                    <div className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                    <div style={{ padding: '@spacing-2xl', textAlign: 'center', color: '@gray-500' }}>
                       加载中...
                     </div>
                   ) : filteredAndSortedTodos.length === 0 ? (
-                    <div className="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                    <div style={{ padding: '@spacing-2xl', textAlign: 'center', color: '@gray-500' }}>
                       {searchTerm || filterStatus !== 'all' || filterPriority !== 'all' || filterCategory !== 'all'
                         ? '没有找到匹配的待办事项'
                         : '还没有待办事项，创建第一个吧！'}
                     </div>
                   ) : (
                     filteredAndSortedTodos.map((todo: Todo) => (
-                      <div key={todo.id} className="px-6 py-4 hover:bg-gray-50 dark:hover:bg-gray-700">
-                        <div className="flex items-start justify-between">
-                          <div className="flex items-start space-x-3 flex-1">
+                      <div key={todo.id} className={styles.todoItem}>
+                        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
+                          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '@spacing-lg', flex: 1 }}>
                             <input
                               type="checkbox"
                               checked={todo.completed}
                               onChange={() => handleToggleComplete(todo)}
-                              className="mt-1 h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                              style={{ marginTop: '@spacing-xs', width: '16px', height: '16px' }}
                             />
-                            <div className="flex-1 min-w-0">
-                              <div className="flex items-center gap-2 mb-1">
+                            <div style={{ flex: 1, minWidth: 0 }}>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '@spacing-sm', marginBottom: '@spacing-xs' }}>
                                 <h3
-                                  className={`text-sm font-medium ${todo.completed
-                                    ? 'line-through text-gray-500 dark:text-gray-500'
-                                    : 'text-gray-900 dark:text-white'
-                                    }`}
+                                  style={{
+                                    fontSize: '@font-size-sm',
+                                    fontWeight: 500,
+                                    textDecoration: todo.completed ? 'line-through' : 'none',
+                                    color: todo.completed ? '@gray-500' : '@gray-900',
+                                  }}
                                 >
                                   {todo.title}
                                 </h3>
-                                <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${priorityColors[todo.priority]}`}>
+                                <span className={priorityClasses[todo.priority]}>
                                   {priorityLabels[todo.priority]}
                                 </span>
                                 {todo.category && (

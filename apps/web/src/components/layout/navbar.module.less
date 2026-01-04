@@ -1,0 +1,137 @@
+@import '../../styles/variables.less';
+@import '../../styles/mixins.less';
+
+.navbar {
+  background-color: white;
+  border-bottom: 1px solid @gray-200;
+
+  :global(.dark) & {
+    background-color: @gray-900;
+    border-color: @gray-800;
+  }
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 0 @spacing-md;
+
+  @media (min-width: @breakpoint-sm) {
+    padding: 0 @spacing-lg;
+  }
+
+  @media (min-width: @breakpoint-lg) {
+    padding: 0 @spacing-xl;
+  }
+}
+
+.content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+}
+
+.leftSection {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  font-size: @font-size-xl;
+  font-weight: bold;
+  color: @primary-color;
+  text-decoration: none;
+}
+
+.navLinks {
+  margin-left: @spacing-xl;
+  display: flex;
+  gap: @spacing-lg;
+
+  @media (max-width: @breakpoint-md) {
+    display: none;
+  }
+}
+
+.navLink {
+  color: @gray-700;
+  padding: @spacing-md @spacing-lg;
+  border-radius: @border-radius;
+  font-size: @font-size-sm;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all @transition-base;
+
+  :global(.dark) & {
+    color: @gray-300;
+  }
+
+  &:hover {
+    color: @primary-color;
+    background-color: fade(@primary-color, 10%);
+
+    :global(.dark) & {
+      color: lighten(@primary-color, 10%);
+      background-color: fade(@primary-color, 20%);
+    }
+  }
+}
+
+.ecommerceMenu {
+  display: flex;
+  gap: @spacing-lg;
+  border-left: 1px solid @gray-300;
+  padding-left: @spacing-md;
+
+  :global(.dark) & {
+    border-color: @gray-600;
+  }
+}
+
+.navLinkWithIcon {
+  composes: navLink;
+  display: flex;
+  align-items: center;
+  gap: @spacing-xs;
+}
+
+.rightSection {
+  display: flex;
+  align-items: center;
+  gap: @spacing-lg;
+}
+
+.userLink {
+  font-size: @font-size-sm;
+  color: @gray-700;
+  text-decoration: none;
+  transition: all @transition-base;
+
+  :global(.dark) & {
+    color: @gray-300;
+  }
+
+  &:hover {
+    color: @primary-color;
+
+    :global(.dark) & {
+      color: lighten(@primary-color, 10%);
+    }
+  }
+}
+
+.registerButton {
+  background-color: @primary-color;
+  color: white;
+  padding: @spacing-md @spacing-lg;
+  border-radius: @border-radius;
+  font-size: @font-size-sm;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all @transition-base;
+
+  &:hover {
+    background-color: darken(@primary-color, 10%);
+  }
+}

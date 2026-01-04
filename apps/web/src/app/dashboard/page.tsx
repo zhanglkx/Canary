@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { todoApi, categoryApi, type Todo, type Category } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { NoSSR } from '@/components/ui/no-ssr';
+import styles from './page.module.less';
 
 export default function DashboardPage() {
     const router = useRouter();
@@ -42,8 +43,8 @@ export default function DashboardPage() {
 
     if (!isAuthenticated) {
         return (
-            <div className="min-h-screen bg-gray-50 dark:bg-gray-900 flex items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+            <div className={styles.loadingContainer}>
+                <div className={styles.spinner}></div>
             </div>
         );
     }
@@ -61,96 +62,96 @@ export default function DashboardPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-            <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-                <div className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 dark:text-white">仪表板</h1>
-                    <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
+        <div className={styles.page}>
+            <div className={styles.container}>
+                <div className={styles.header}>
+                    <h1 className={styles.title}>仪表板</h1>
+                    <p className={styles.subtitle}>
                         查看你的任务统计和概览
                     </p>
                 </div>
 
-                <NoSSR fallback={<div className="animate-pulse bg-gray-200 dark:bg-gray-700 rounded-lg h-96"></div>}>
+                <NoSSR fallback={<div className={styles.skeleton}></div>}>
                     {loading ? (
-                        <div className="text-center py-12">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                        <div className={styles.loadingSpinner}>
+                            <div className={styles.loadingSpinnerIcon}></div>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">总任务数</h3>
-                                <p className="text-3xl font-bold text-gray-900 dark:text-white mt-2">{totalTodos}</p>
+                        <div className={styles.statsGrid}>
+                            <div className={styles.statCard}>
+                                <h3 className={styles.statLabel}>总任务数</h3>
+                                <p className={styles.statValue}>{totalTodos}</p>
                             </div>
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">已完成</h3>
-                                <p className="text-3xl font-bold text-green-600 mt-2">{completedTodos}</p>
+                            <div className={styles.statCard}>
+                                <h3 className={styles.statLabel}>已完成</h3>
+                                <p className={styles.statValueGreen}>{completedTodos}</p>
                             </div>
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">待完成</h3>
-                                <p className="text-3xl font-bold text-yellow-600 mt-2">{pendingTodos}</p>
+                            <div className={styles.statCard}>
+                                <h3 className={styles.statLabel}>待完成</h3>
+                                <p className={styles.statValueYellow}>{pendingTodos}</p>
                             </div>
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                                <h3 className="text-sm font-medium text-gray-500 dark:text-gray-400">完成率</h3>
-                                <p className="text-3xl font-bold text-blue-600 mt-2">{completionRate}%</p>
+                            <div className={styles.statCard}>
+                                <h3 className={styles.statLabel}>完成率</h3>
+                                <p className={styles.statValueBlue}>{completionRate}%</p>
                             </div>
 
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 md:col-span-2">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">优先级分布</h3>
-                                <div className="space-y-3">
-                                    <div>
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-red-600">紧急</span>
-                                            <span className="text-gray-600 dark:text-gray-400">{priorityCounts.URGENT}</span>
+                            <div className={styles.statCardWide}>
+                                <h3 className={styles.sectionTitle}>优先级分布</h3>
+                                <div className={styles.priorityList}>
+                                    <div className={styles.priorityItem}>
+                                        <div className={styles.priorityHeader}>
+                                            <span className={styles.priorityLabel}>紧急</span>
+                                            <span className={styles.priorityCount}>{priorityCounts.URGENT}</span>
                                         </div>
-                                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                            <div className="bg-red-600 h-2 rounded-full" style={{ width: `${(priorityCounts.URGENT / totalTodos) * 100 || 0}%` }}></div>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-yellow-600">高</span>
-                                            <span className="text-gray-600 dark:text-gray-400">{priorityCounts.HIGH}</span>
-                                        </div>
-                                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                            <div className="bg-yellow-600 h-2 rounded-full" style={{ width: `${(priorityCounts.HIGH / totalTodos) * 100 || 0}%` }}></div>
+                                        <div className={styles.progressBar}>
+                                            <div className={styles.progressFillRed} style={{ width: `${(priorityCounts.URGENT / totalTodos) * 100 || 0}%` }}></div>
                                         </div>
                                     </div>
-                                    <div>
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-blue-600">中</span>
-                                            <span className="text-gray-600 dark:text-gray-400">{priorityCounts.MEDIUM}</span>
+                                    <div className={styles.priorityItem}>
+                                        <div className={styles.priorityHeader}>
+                                            <span className={styles.priorityLabelHigh}>高</span>
+                                            <span className={styles.priorityCount}>{priorityCounts.HIGH}</span>
                                         </div>
-                                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                            <div className="bg-blue-600 h-2 rounded-full" style={{ width: `${(priorityCounts.MEDIUM / totalTodos) * 100 || 0}%` }}></div>
+                                        <div className={styles.progressBar}>
+                                            <div className={styles.progressFillYellow} style={{ width: `${(priorityCounts.HIGH / totalTodos) * 100 || 0}%` }}></div>
                                         </div>
                                     </div>
-                                    <div>
-                                        <div className="flex justify-between text-sm mb-1">
-                                            <span className="text-gray-600">低</span>
-                                            <span className="text-gray-600 dark:text-gray-400">{priorityCounts.LOW}</span>
+                                    <div className={styles.priorityItem}>
+                                        <div className={styles.priorityHeader}>
+                                            <span className={styles.priorityLabelMedium}>中</span>
+                                            <span className={styles.priorityCount}>{priorityCounts.MEDIUM}</span>
                                         </div>
-                                        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                                            <div className="bg-gray-600 h-2 rounded-full" style={{ width: `${(priorityCounts.LOW / totalTodos) * 100 || 0}%` }}></div>
+                                        <div className={styles.progressBar}>
+                                            <div className={styles.progressFillBlue} style={{ width: `${(priorityCounts.MEDIUM / totalTodos) * 100 || 0}%` }}></div>
+                                        </div>
+                                    </div>
+                                    <div className={styles.priorityItem}>
+                                        <div className={styles.priorityHeader}>
+                                            <span className={styles.priorityLabelLow}>低</span>
+                                            <span className={styles.priorityCount}>{priorityCounts.LOW}</span>
+                                        </div>
+                                        <div className={styles.progressBar}>
+                                            <div className={styles.progressFillGray} style={{ width: `${(priorityCounts.LOW / totalTodos) * 100 || 0}%` }}></div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <div className="bg-white dark:bg-gray-800 rounded-lg shadow p-6 md:col-span-2">
-                                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">分类统计</h3>
-                                <div className="space-y-2">
+                            <div className={styles.statCardWide}>
+                                <h3 className={styles.sectionTitle}>分类统计</h3>
+                                <div className={styles.categoryList}>
                                     {categories.length > 0 ? categories.map(cat => (
-                                        <div key={cat.id} className="flex items-center justify-between p-2 rounded hover:bg-gray-50 dark:hover:bg-gray-700">
-                                            <div className="flex items-center gap-2">
+                                        <div key={cat.id} className={styles.categoryItem}>
+                                            <div className={styles.categoryInfo}>
                                                 <span style={{ color: cat.color }}>{cat.icon}</span>
-                                                <span className="text-sm text-gray-900 dark:text-white">{cat.name}</span>
+                                                <span className={styles.categoryName}>{cat.name}</span>
                                             </div>
-                                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                                            <span className={styles.categoryCount}>
                                                 {todos.filter(t => t.category?.id === cat.id).length} 个任务
                                             </span>
                                         </div>
                                     )) : (
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 text-center py-4">暂无分类</p>
+                                        <p className={styles.emptyCategory}>暂无分类</p>
                                     )}
                                 </div>
                             </div>

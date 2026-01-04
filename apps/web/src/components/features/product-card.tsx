@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { cartApi } from '@/lib/api';
 import { ShoppingCart } from 'lucide-react';
+import styles from './product-card.module.less';
 
 interface ProductCardProps {
   product: any;
@@ -29,23 +30,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const image = product.images?.[0]?.url || '/placeholder.png';
 
   return (
-    <div className="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+    <div className={styles.card}>
       <img
         src={image}
         alt={product.name}
-        className="w-full h-48 object-cover"
+        className={styles.image}
       />
-      <div className="p-4">
-        <h3 className="font-semibold text-lg text-gray-900 mb-2">{product.name}</h3>
+      <div className={styles.content}>
+        <h3 className={styles.productName}>{product.name}</h3>
         {product.description && (
-          <p className="text-sm text-gray-600 mb-3 line-clamp-2">{product.description}</p>
+          <p className={styles.description}>{product.description}</p>
         )}
-        <div className="flex items-center justify-between">
-          <span className="text-xl font-bold text-gray-900">${price.toFixed(2)}</span>
+        <div className={styles.footer}>
+          <span className={styles.price}>${price.toFixed(2)}</span>
           <button
             onClick={handleAddToCart}
             disabled={adding || !product.isAvailable}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={styles.addButton}
           >
             <ShoppingCart size={18} />
             {adding ? 'Adding...' : 'Add to Cart'}

@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { ShoppingCart } from 'lucide-react';
+import styles from './navbar.module.less';
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();
@@ -16,53 +17,35 @@ export function Navbar() {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-blue-600">
+    <nav className={styles.navbar}>
+      <div className={styles.container}>
+        <div className={styles.content}>
+          <div className={styles.leftSection}>
+            <Link href="/" className={styles.logo}>
               Learning App
             </Link>
             {isAuthenticated && (
-              <div className="ml-10 flex space-x-4">
-                <Link
-                  href="/dashboard"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
-                >
+              <div className={styles.navLinks}>
+                <Link href="/dashboard" className={styles.navLink}>
                   仪表板
                 </Link>
-                <Link
-                  href="/todos"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
-                >
+                <Link href="/todos" className={styles.navLink}>
                   待办事项
                 </Link>
-                <Link
-                  href="/categories"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
-                >
+                <Link href="/categories" className={styles.navLink}>
                   分类管理
                 </Link>
 
                 {/* E-Commerce Menu */}
-                <div className="flex space-x-4 border-l border-gray-300 dark:border-gray-600 pl-4">
-                  <Link
-                    href="/shop"
-                    className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
-                  >
+                <div className={styles.ecommerceMenu}>
+                  <Link href="/shop" className={styles.navLink}>
                     🛍️ Shop
                   </Link>
-                  <Link
-                    href="/cart"
-                    className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium flex items-center gap-1"
-                  >
+                  <Link href="/cart" className={styles.navLinkWithIcon}>
                     <ShoppingCart size={18} />
                     Cart
                   </Link>
-                  <Link
-                    href="/orders"
-                    className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
-                  >
+                  <Link href="/orders" className={styles.navLink}>
                     📦 Orders
                   </Link>
                 </div>
@@ -71,7 +54,7 @@ export function Navbar() {
                   href="http://localhost:4000/api"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
+                  className={styles.navLink}
                   title="API Documentation"
                 >
                   🔧 API
@@ -80,35 +63,23 @@ export function Navbar() {
             )}
           </div>
 
-          <div className="flex items-center space-x-4">
+          <div className={styles.rightSection}>
             <ThemeToggle />
             {isAuthenticated ? (
               <>
-                <Link
-                  href="/profile"
-                  className="text-sm text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400"
-                >
+                <Link href="/profile" className={styles.userLink}>
                   👤 {user?.username}
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
-                >
+                <button onClick={handleLogout} className={styles.navLink}>
                   退出
                 </button>
               </>
             ) : (
               <>
-                <Link
-                  href="/login"
-                  className="text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 px-3 py-2 rounded-md text-sm font-medium"
-                >
+                <Link href="/login" className={styles.navLink}>
                   登录
                 </Link>
-                <Link
-                  href="/register"
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium"
-                >
+                <Link href="/register" className={styles.registerButton}>
                   注册
                 </Link>
               </>

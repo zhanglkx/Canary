@@ -1,5 +1,4 @@
 import type { NextConfig } from 'next';
-import MiniCssExtractPlugin from 'mini-css-extract-plugin';
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
@@ -18,71 +17,31 @@ const nextConfig: NextConfig = {
     optimizePackageImports: ['axios'],
   },
 
-  // 使用 webpack 配置支持 Less 和 CSS Modules
-  webpack: (config, { isServer }) => {
-    // 添加 Less 支持
-    const lessRule = {
-      test: /\.less$/,
-      use: isServer
-        ? [
-            // 服务端渲染时只需要生成类名映射
-            {
-              loader: 'css-loader',
-              options: {
-                modules: {
-                  auto: true,
-                  localIdentName: '[name]__[local]--[hash:base64:5]',
-                  exportOnlyLocals: true, // 关键：服务端只导出类名
-                },
-                importLoaders: 1,
-                esModule: false, // 使用CommonJS导出
-              },
+  // 使用 webpack 配置支持 Less CSS Modules
+  webpack: (config) => {
+    // 只添加 Less CSS Modules 支持，全局样式使用 CSS
+    config.module.rules.push({
+      test: /\.module\.less$/,
+      use: [
+        'style-loader',
+        {
+          loader: 'css-loader',
+          options: {
+            modules: {
+              localIdentName: '[name]__[local]--[hash:base64:5]',
             },
-            {
-              loader: 'less-loader',
-              options: {
-                lessOptions: {
-                  javascriptEnabled: true,
-                },
-              },
+          },
+        },
+        {
+          loader: 'less-loader',
+          options: {
+            lessOptions: {
+              javascriptEnabled: true,
             },
-          ]
-        : [
-            // 客户端需要提取CSS
-            MiniCssExtractPlugin.loader,
-            {
-              loader: 'css-loader',
-              options: {
-                modules: {
-                  auto: true,
-                  localIdentName: '[name]__[local]--[hash:base64:5]',
-                },
-                importLoaders: 1,
-                esModule: false, // 使用CommonJS导出
-              },
-            },
-            {
-              loader: 'less-loader',
-              options: {
-                lessOptions: {
-                  javascriptEnabled: true,
-                },
-              },
-            },
-          ],
-    };
-
-    config.module.rules.push(lessRule);
-
-    // 添加插件
-    if (!isServer) {
-      config.plugins.push(
-        new MiniCssExtractPlugin({
-          filename: 'static/css/[name].[contenthash].css',
-          chunkFilename: 'static/css/[name].[contenthash].css',
-        }),
-      );
-    }
+          },
+        },
+      ],
+    });
 
     return config;
   },

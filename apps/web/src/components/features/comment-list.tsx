@@ -8,6 +8,7 @@ import { useState, useEffect } from 'react';
 import { commentApi, type Comment } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
+import styles from './comment-list.module.less';
 
 interface CommentListProps {
   todoId: string;
@@ -46,36 +47,36 @@ export function CommentList({ todoId }: CommentListProps) {
   };
 
   if (loading) {
-    return <div className="text-center py-4 text-gray-500">加载中...</div>;
+    return <div className={styles.loading}>加载中...</div>;
   }
 
   if (comments.length === 0) {
-    return <div className="text-center py-4 text-gray-500">还没有评论</div>;
+    return <div className={styles.empty}>还没有评论</div>;
   }
 
   return (
-    <div className="space-y-4">
+    <div className={styles.container}>
       {comments.map((comment) => (
-        <div key={comment.id} className="bg-gray-50 dark:bg-gray-800 rounded-lg p-4">
-          <div className="flex justify-between items-start mb-2">
-            <div>
-              <span className="font-medium text-gray-900 dark:text-white">
+        <div key={comment.id} className={styles.comment}>
+          <div className={styles.header}>
+            <div className={styles.authorInfo}>
+              <span className={styles.authorName}>
                 {comment.author.username}
               </span>
-              <span className="text-sm text-gray-500 ml-2">
+              <span className={styles.date}>
                 {new Date(comment.createdAt).toLocaleDateString()}
               </span>
             </div>
             {user?.id === comment.authorId && (
               <button
                 onClick={() => handleDelete(comment.id)}
-                className="text-sm text-red-600 hover:text-red-700"
+                className={styles.deleteButton}
               >
                 删除
               </button>
             )}
           </div>
-          <p className="text-gray-700 dark:text-gray-300">{comment.content}</p>
+          <p className={styles.content}>{comment.content}</p>
         </div>
       ))}
     </div>

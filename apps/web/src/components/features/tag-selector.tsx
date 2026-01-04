@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { tagApi, type Tag } from '@/lib/api';
+import styles from './tag-selector.module.less';
 
 interface TagSelectorProps {
   selectedTags?: string[];
@@ -35,21 +36,17 @@ export function TagSelector({ selectedTags = [], onChange }: TagSelectorProps) {
   };
 
   if (loading) {
-    return <div className="text-sm text-gray-500">加载中...</div>;
+    return <div className={styles.loading}>加载中...</div>;
   }
 
   return (
-    <div className="flex flex-wrap gap-2">
+    <div className={styles.container}>
       {tags.map((tag) => (
         <button
           key={tag.id}
           type="button"
           onClick={() => toggleTag(tag.id)}
-          className={`px-3 py-1 rounded-full text-sm font-medium ${
-            selectedTags.includes(tag.id)
-              ? 'bg-blue-600 text-white'
-              : 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
-          }`}
+          className={selectedTags.includes(tag.id) ? styles.tagSelected : styles.tagUnselected}
           style={selectedTags.includes(tag.id) && tag.color ? { backgroundColor: tag.color } : {}}
         >
           {tag.name}

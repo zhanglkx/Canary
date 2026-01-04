@@ -7,6 +7,7 @@
 import { useState, FormEvent } from 'react';
 import { commentApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
+import styles from './comment-form.module.less';
 
 interface CommentFormProps {
   todoId: string;
@@ -40,20 +41,20 @@ export function CommentForm({ todoId, onCommentAdded }: CommentFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className={styles.form}>
       <div>
         <textarea
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="写下你的评论..."
           rows={3}
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
+          className={styles.textarea}
         />
       </div>
 
       {error && (
-        <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4">
-          <p className="text-sm text-red-800 dark:text-red-400">{error}</p>
+        <div className={styles.error}>
+          <p className={styles.errorText}>{error}</p>
         </div>
       )}
 

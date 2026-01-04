@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import { Trash2, AlertCircle } from 'lucide-react';
 import { cartApi } from '@/lib/api';
+import styles from './cart-item.module.less';
 
 interface CartItemProps {
   id: string;
@@ -68,46 +69,46 @@ export const CartItem: React.FC<CartItemProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6">
-      <div className="flex gap-4">
-        <div className="flex-1">
-          <h3 className="font-semibold text-lg text-gray-900">{productName}</h3>
-          <p className="text-sm text-gray-600">SKU: {skuCode}</p>
+    <div className={styles.card}>
+      <div className={styles.content}>
+        <div className={styles.leftSection}>
+          <h3 className={styles.productName}>{productName}</h3>
+          <p className={styles.skuCode}>SKU: {skuCode}</p>
           {attributeSnapshot && (
-            <p className="text-sm text-gray-600">{attributeSnapshot}</p>
+            <p className={styles.attributeSnapshot}>{attributeSnapshot}</p>
           )}
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
+        <div className={styles.rightSection}>
+          <div className={styles.quantityControls}>
             <button
               onClick={() => handleQuantityChange(localQuantity - 1)}
               disabled={isUpdating || localQuantity <= 1}
-              className="px-2 py-1 border rounded disabled:opacity-50"
+              className={styles.quantityButton}
             >
               -
             </button>
-            <span className="w-12 text-center">{localQuantity}</span>
+            <span className={styles.quantityValue}>{localQuantity}</span>
             <button
               onClick={() => handleQuantityChange(localQuantity + 1)}
               disabled={isUpdating}
-              className="px-2 py-1 border rounded disabled:opacity-50"
+              className={styles.quantityButton}
             >
               +
             </button>
           </div>
 
-          <div className="text-right min-w-[100px]">
-            <p className="font-semibold text-gray-900">${finalPrice.toFixed(2)}</p>
+          <div className={styles.priceSection}>
+            <p className={styles.finalPrice}>${finalPrice.toFixed(2)}</p>
             {discount > 0 && (
-              <p className="text-sm text-green-600">-${discount.toFixed(2)}</p>
+              <p className={styles.discount}>-${discount.toFixed(2)}</p>
             )}
           </div>
 
           <button
             onClick={handleRemove}
             disabled={isUpdating}
-            className="text-red-600 hover:text-red-700 disabled:opacity-50"
+            className={styles.removeButton}
           >
             <Trash2 size={20} />
           </button>
@@ -115,9 +116,9 @@ export const CartItem: React.FC<CartItemProps> = ({
       </div>
 
       {stockStatus !== 'IN_STOCK' && (
-        <div className="mt-4 flex items-center gap-2 text-yellow-600">
+        <div className={styles.stockWarning}>
           <AlertCircle size={16} />
-          <span className="text-sm">Limited stock</span>
+          <span className={styles.stockWarningText}>Limited stock</span>
         </div>
       )}
     </div>
