@@ -15,16 +15,24 @@ export class ShoppingCartController {
 
   @Get()
   async getCart(@CurrentUser() user: User) {
-    return this.cartService.getCart(user.id);
+    console.log('🚀 [CartController] getCart 被调用, user:', user);
+    return this.cartService.getUserCart(user.id);
   }
 
   @Post('items')
   async addItem(@Body() addItemDto: any, @CurrentUser() user: User) {
-    return this.cartService.addToCart(user.id, { skuId: addItemDto.skuId, quantity: addItemDto.quantity });
+    return this.cartService.addToCart(user.id, {
+      skuId: addItemDto.skuId,
+      quantity: addItemDto.quantity,
+    });
   }
 
   @Put('items/:itemId')
-  async updateItem(@Param('itemId') itemId: string, @Body() body: { quantity: number }, @CurrentUser() user: User) {
+  async updateItem(
+    @Param('itemId') itemId: string,
+    @Body() body: { quantity: number },
+    @CurrentUser() user: User,
+  ) {
     return this.cartService.updateItemQuantity(user.id, itemId, body.quantity);
   }
 

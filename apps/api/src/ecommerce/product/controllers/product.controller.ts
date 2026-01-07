@@ -5,8 +5,6 @@
 import { Controller, Get, Post, Put, Delete, Param, Body, Query, UseGuards } from '@nestjs/common';
 import { ProductService } from '../services/product.service';
 import { JwtAuthGuard } from '../../../common/guards/jwt-auth.guard';
-import { CurrentUser } from '../../../common/decorators/current-user.decorator';
-import { User } from '../../../user/user.entity';
 
 @Controller('products')
 export class ProductController {

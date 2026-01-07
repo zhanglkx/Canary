@@ -40,6 +40,14 @@ import { AppController } from './app.controller';
     // 全局配置模块，用于管理环境变量
     ConfigModule.forRoot({
       isGlobal: true, // 使配置在全局可用
+      // 从 apps/api 目录查找 .env 文件（编译后从 dist 目录向上查找）
+      envFilePath: [
+        join(__dirname, '..', '.env'),
+        join(__dirname, '..', '.env.local'),
+        '.env',
+        '.env.local',
+      ],
+      cache: true, // 缓存环境变量以提高性能
     }),
 
     // 数据库连接配置

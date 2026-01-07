@@ -25,12 +25,20 @@ import { RefreshToken } from './entities/refresh-token.entity';
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService): Promise<JwtModuleOptions> => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: {
-          expiresIn: (configService.get<string>('JWT_EXPIRATION', '1d') || '1d') as any,
-        },
-      }),
+      useFactory: async (configService: ConfigService): Promise<JwtModuleOptions> => {
+        const jwtSecret = configService.get<string>('JWT_SECRET');
+        if (!jwtSecret) {
+          throw new Error(
+            'JWT_SECRET is not defined. Please set JWT_SECRET in your .env file.',
+          );
+        }
+        return {
+          secret: jwtSecret,
+          signOptions: {
+            expiresIn: (configService.get<string>('JWT_EXPIRATION', '1d') || '1d') as any,
+          },
+        };
+      },
       inject: [ConfigService],
     }),
   ],

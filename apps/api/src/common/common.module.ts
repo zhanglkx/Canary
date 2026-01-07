@@ -18,7 +18,10 @@ import { ProductSku } from '../ecommerce/product/entities/product-sku.entity';
 import { ProductAttribute } from '../ecommerce/product/entities/product-attribute.entity';
 import { ProductAttributeValue } from '../ecommerce/product/entities/product-attribute-value.entity';
 import { ProductImage } from '../ecommerce/product/entities/product-image.entity';
+import { User } from '../user/user.entity';
 import { ProductSeederService } from './seeders/product-seeder.service';
+import { UserSeederService } from './seeders/user-seeder.service';
+import { UserModule } from '../user/user.module';
 
 /**
  * 通用模块
@@ -32,9 +35,11 @@ import { ProductSeederService } from './seeders/product-seeder.service';
       ProductAttribute,
       ProductAttributeValue,
       ProductImage,
+      User,
     ]),
+    UserModule,
   ],
-  providers: [ProductSeederService],
-  exports: [ProductSeederService],
+  providers: [ProductSeederService, UserSeederService],
+  exports: [ProductSeederService, UserSeederService],
 })
 export class CommonModule {}

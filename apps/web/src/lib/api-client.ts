@@ -1,12 +1,12 @@
 /**
  * API Client - 优秀的封装设计
- * 
+ *
  * 设计模式参考：
  * - 单例模式：axios实例复用
  * - 拦截器模式：请求/响应统一处理
  * - 错误处理：统一的错误拦截和处理
  * - 类型安全：完整的TypeScript支持
- * 
+ *
  * 特性：
  * 1. 自动添加JWT Token
  * 2. 统一错误处理
@@ -38,6 +38,15 @@ const API_CONFIG = {
   withCredentials: true,
 };
 
+// 开发环境：打印实际使用的 API URL
+if (typeof window !== 'undefined' && process.env.NODE_ENV === 'development') {
+  console.log('[API Client] Base URL:', API_CONFIG.baseURL);
+  console.log(
+    '[API Client] NEXT_PUBLIC_API_URL:',
+    process.env.NEXT_PUBLIC_API_URL || '未设置（使用默认值）',
+  );
+}
+
 // ============ Axios 实例 ============
 class ApiClient {
   private instance: AxiosInstance;
@@ -60,12 +69,14 @@ class ApiClient {
           const token = localStorage.getItem('token');
           if (token) {
             config.headers.Authorization = `Bearer ${token}`;
+          } else if (process.env.NODE_ENV === 'development') {
+            console.warn('[API Client] 未找到 token，请求可能被拒绝');
           }
         }
 
         // 2. 生成请求唯一标识
         const requestKey = this.getRequestKey(config);
-        
+
         // 3. 取消重复请求
         if (this.pendingRequests.has(requestKey)) {
           const controller = this.pendingRequests.get(requestKey);
@@ -79,7 +90,18 @@ class ApiClient {
 
         // 5. 开发环境日志
         if (process.env.NODE_ENV === 'development') {
-          console.log(`[API Request] ${config.method?.toUpperCase()} ${config.url}`, config.data);
+          const fullUrl = config.baseURL ? `${config.baseURL}${config.url}` : config.url;
+          const hasToken = !!config.headers.Authorization;
+          console.log(`[API Request] ${config.method?.toUpperCase()} ${fullUrl}`, {
+            baseURL: config.baseURL,
+            url: config.url,
+            fullUrl,
+            hasToken,
+            headers: {
+              Authorization: hasToken ? 'Bearer ***' : '未设置',
+            },
+            data: config.data,
+          });
         }
 
         return config;
@@ -87,7 +109,7 @@ class ApiClient {
       (error) => {
         console.error('[API Request Error]', error);
         return Promise.reject(error);
-      }
+      },
     );
 
     // 响应拦截器
@@ -99,7 +121,10 @@ class ApiClient {
 
         // 开发环境日志
         if (process.env.NODE_ENV === 'development') {
-          console.log(`[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`, response.data);
+          console.log(
+            `[API Response] ${response.config.method?.toUpperCase()} ${response.config.url}`,
+            response.data,
+          );
         }
 
         return response;
@@ -113,7 +138,7 @@ class ApiClient {
 
         // 处理各种错误
         return this.handleError(error);
-      }
+      },
     );
   }
 
@@ -137,6 +162,10 @@ class ApiClient {
     // 网络错误
     if (!error.response) {
       console.error('[Network Error]', error.message);
+      const requestUrl = error.config?.url
+        ? `${error.config.baseURL || ''}${error.config.url}`
+        : '未知 URL';
+      console.error('[Network Error] 请求 URL:', requestUrl);
       return Promise.reject({
         message: '网络连接失败，请检查您的网络设置',
         status: 0,
@@ -144,6 +173,23 @@ class ApiClient {
     }
 
     const { status, data } = error.response;
+
+    // 开发环境：打印详细错误信息
+    if (process.env.NODE_ENV === 'development') {
+      const requestUrl = error.config?.url
+        ? `${error.config.baseURL || ''}${error.config.url}`
+        : '未知 URL';
+      console.error(`[API Error] ${status} ${requestUrl}`, {
+        status,
+        statusText: error.response.statusText,
+        data,
+        config: {
+          method: error.config?.method,
+          url: error.config?.url,
+          baseURL: error.config?.baseURL,
+        },
+      });
+    }
 
     // 根据状态码处理
     switch (status) {
@@ -235,7 +281,11 @@ class ApiClient {
   /**
    * 上传文件
    */
-  async upload<T = any>(url: string, formData: FormData, onProgress?: (percent: number) => void): Promise<T> {
+  async upload<T = any>(
+    url: string,
+    formData: FormData,
+    onProgress?: (percent: number) => void,
+  ): Promise<T> {
     const response = await this.instance.post<T>(url, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
@@ -257,7 +307,7 @@ class ApiClient {
     const response = await this.instance.get(url, {
       responseType: 'blob',
     });
-    
+
     const blob = new Blob([response.data]);
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
