@@ -20,14 +20,17 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } f
 
 // ============ 类型定义 ============
 export interface ApiResponse<T = any> {
+  code: number;
+  message: string;
   data: T;
-  message?: string;
-  status: number;
+  timestamp: string;
 }
 
 export interface ApiError {
+  code: number;
   message: string;
-  status?: number;
+  data?: null;
+  timestamp: string;
   errors?: Record<string, string[]>;
 }
 
@@ -78,10 +81,10 @@ class ApiClient {
         const requestKey = this.getRequestKey(config);
 
         // 3. 取消重复请求
-        if (this.pendingRequests.has(requestKey)) {
-          const controller = this.pendingRequests.get(requestKey);
-          controller?.abort();
-        }
+        // if (this.pendingRequests.has(requestKey)) {
+        //   const controller = this.pendingRequests.get(requestKey);
+        //   controller?.abort();
+        // }
 
         // 4. 创建新的取消令牌
         const controller = new AbortController();
@@ -119,6 +122,18 @@ class ApiClient {
         const requestKey = this.getRequestKey(response.config);
         this.pendingRequests.delete(requestKey);
 
+        // 统一响应格式处理：从 {code, message, data} 中提取 data
+        if (
+          response.data &&
+          typeof response.data === 'object' &&
+          'code' in response.data &&
+          'data' in response.data
+        ) {
+          // 如果已经是统一格式，提取 data 字段
+          const unifiedResponse = response.data as ApiResponse;
+          response.data = unifiedResponse.data;
+        }
+
         // 开发环境日志
         if (process.env.NODE_ENV === 'development') {
           console.log(
@@ -153,10 +168,23 @@ class ApiClient {
    * 统一错误处理
    */
   private async handleError(error: AxiosError): Promise<never> {
-    // 请求被取消
-    if (axios.isCancel(error)) {
-      console.log('[Request Canceled]', error.message);
-      return Promise.reject({ message: 'Request canceled', canceled: true });
+    // 请求被取消 - 检查多种取消情况
+    if (
+      axios.isCancel(error) ||
+      error.code === 'ERR_CANCELED' ||
+      error.message === 'canceled' ||
+      (error as any).name === 'CanceledError'
+    ) {
+      // 静默处理取消的请求，不显示错误
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Request Canceled]', error.message || 'Request was canceled');
+      }
+      // 返回一个特殊的错误对象，让调用方可以判断是否是取消
+      return Promise.reject({
+        message: 'Request canceled',
+        canceled: true,
+        isCanceled: true,
+      });
     }
 
     // 网络错误
@@ -173,6 +201,21 @@ class ApiClient {
     }
 
     const { status, data } = error.response;
+
+    // 统一错误响应格式处理
+    let errorMessage = '请求失败';
+    let errorErrors: Record<string, string[]> | undefined = undefined;
+
+    if (data && typeof data === 'object' && 'code' in data && 'message' in data) {
+      // 统一格式的错误响应 {code, message, data, timestamp}
+      const errorData = data as ApiError;
+      errorMessage = errorData.message || '请求失败';
+      errorErrors = errorData.errors;
+    } else if (data && typeof data === 'object' && 'message' in data) {
+      // 旧格式或非统一格式的错误响应
+      errorMessage = (data as any).message || '请求失败';
+      errorErrors = (data as any).errors;
+    }
 
     // 开发环境：打印详细错误信息
     if (process.env.NODE_ENV === 'development') {
@@ -201,39 +244,44 @@ class ApiClient {
           window.location.href = '/login';
         }
         return Promise.reject({
-          message: '登录已过期，请重新登录',
-          status,
+          code: status,
+          message: errorMessage || '登录已过期，请重新登录',
+          errors: errorErrors,
         });
 
       case 403:
         return Promise.reject({
-          message: '没有权限访问此资源',
-          status,
+          code: status,
+          message: errorMessage || '没有权限访问此资源',
+          errors: errorErrors,
         });
 
       case 404:
         return Promise.reject({
-          message: '请求的资源不存在',
-          status,
+          code: status,
+          message: errorMessage || '请求的资源不存在',
+          errors: errorErrors,
         });
 
       case 422:
         return Promise.reject({
-          message: '请求参数验证失败',
-          status,
-          errors: (data as any)?.errors,
+          code: status,
+          message: errorMessage || '请求参数验证失败',
+          errors: errorErrors,
         });
 
       case 500:
         return Promise.reject({
-          message: '服务器内部错误，请稍后重试',
-          status,
+          code: status,
+          message: errorMessage || '服务器内部错误，请稍后重试',
+          errors: errorErrors,
         });
 
       default:
         return Promise.reject({
-          message: (data as any)?.message || '请求失败',
-          status,
+          code: status,
+          message: errorMessage,
+          errors: errorErrors,
         });
     }
   }

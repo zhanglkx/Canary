@@ -42,9 +42,16 @@ export default function CheckoutPage() {
     try {
       const data = await cartApi.get();
       setCart(data);
-    } catch (error) {
+    } catch (error: any) {
+      // 忽略被取消的请求（组件卸载或路由切换时）
+      if (error?.canceled || error?.isCanceled || error?.code === 'ERR_CANCELED') {
+        if (process.env.NODE_ENV === 'development') {
+          console.log('[Checkout] 请求被取消，忽略错误');
+        }
+        return;
+      }
       console.error('加载购物车失败:', error);
-      setError('Failed to load cart');
+      setError(error?.message || 'Failed to load cart');
     } finally {
       setLoading(false);
     }

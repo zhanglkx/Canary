@@ -1,8 +1,8 @@
 /**
  * HTTP 异常过滤器
- * 
+ *
  * 捕获并记录所有 HTTP 异常，提供统一的错误响应格式
- * 
+ *
  * 功能：
  * 1. 记录异常详情（类型、消息、堆栈）
  * 2. 统一错误响应格式
@@ -72,12 +72,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       this.logger.debug(`ℹ️  [${request.method}] ${request.url}`, errorLog);
     }
 
-    // 构建响应
+    // 构建统一格式的错误响应
     const errorResponse: any = {
-      statusCode: status,
-      timestamp: new Date().toISOString(),
-      path: request.url,
+      code: status,
       message,
+      data: null,
+      timestamp: new Date().toISOString(),
     };
 
     // 添加错误详情（如果有）

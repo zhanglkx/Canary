@@ -13,6 +13,7 @@ import { NestFactory } from '@nestjs/core';
 import { ValidationPipe, Logger } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+import { TransformInterceptor } from './common/interceptors/transform.interceptor';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 
 /**
@@ -27,9 +28,10 @@ async function bootstrap() {
   // 步骤 1: 使用 NestFactory 创建 NestJS 应用程序实例
   // AppModule 是我们的根模块，包含所有的配置和功能模块
   const app = await NestFactory.create(AppModule, {
-    logger: process.env.NODE_ENV === 'development' 
-      ? ['log', 'error', 'warn', 'debug', 'verbose']
-      : ['log', 'error', 'warn'],
+    logger:
+      process.env.NODE_ENV === 'development'
+        ? ['log', 'error', 'warn', 'debug', 'verbose']
+        : ['log', 'error', 'warn'],
   });
 
   // 步骤 2: 设置全局 API 前缀
@@ -56,11 +58,16 @@ async function bootstrap() {
     allowedHeaders: ['Content-Type', 'Authorization'],
   });
 
-  // 步骤 4: 注册全局拦截器 - 记录所有请求和响应
-  const loggingInterceptor = new LoggingInterceptor();
-  app.useGlobalInterceptors(loggingInterceptor);
-  console.log('✅ [Bootstrap] 全局日志拦截器已注册 (console.log)');
-  logger.log('✅ 全局日志拦截器已注册');
+  // 步骤 4: 注册全局拦截器
+  // 注意：拦截器的执行顺序是从后往前，所以先注册的会最后执行
+  // 1. TransformInterceptor - 转换响应格式（最后执行，包装响应）
+  // 2. LoggingInterceptor - 记录日志（先执行，记录原始响应）
+  app.useGlobalInterceptors(
+    new TransformInterceptor(), // 响应格式转换
+    new LoggingInterceptor(), // 日志记录
+  );
+  console.log('✅ [Bootstrap] 全局拦截器已注册 (console.log)');
+  logger.log('✅ 全局拦截器已注册（响应转换 + 日志记录）');
 
   // 步骤 5: 注册全局异常过滤器 - 统一处理异常
   app.useGlobalFilters(new HttpExceptionFilter());
@@ -92,7 +99,9 @@ async function bootstrap() {
   logger.log(`🚀 Server is running on http://localhost:${port}/api`);
   logger.log(`📚 API documentation available at http://localhost:${port}/api`);
   logger.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-  logger.log(`📝 Logging level: ${process.env.NODE_ENV === 'development' ? 'DEBUG' : 'PRODUCTION'}`);
+  logger.log(
+    `📝 Logging level: ${process.env.NODE_ENV === 'development' ? 'DEBUG' : 'PRODUCTION'}`,
+  );
 }
 
 // 调用 bootstrap 函数启动应用程序
