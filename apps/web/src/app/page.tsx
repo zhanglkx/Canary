@@ -70,7 +70,7 @@ export default function HomePage() {
         <div className={styles.heroBackground}></div>
         <div className={styles.heroContent}>
           <h1 className={styles.title}>
-            让效率
+            让效率1
             <span className={styles.gradient}>触手可及</span>
           </h1>
           <p className={styles.description}>
