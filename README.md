@@ -1,10 +1,29 @@
-# 🚀 快速部署参考
+# 🚀 Canary - 全栈电商平台
 
-## 一键部署1
+一个使用 NestJS + Next.js + TypeScript 构建的现代化电商平台，支持自动化部署。
+
+## ⚡ 快速开始
+
+### 📦 自动部署（推荐）
+
+配置好 GitHub Secrets 后，推送代码即可自动部署：
+
+```bash
+git push origin main  # 自动触发部署！
+```
+
+详细配置步骤：查看 [QUICK_SETUP.md](./QUICK_SETUP.md)
+
+### 🔧 手动部署
 
 ```bash
 ./deploy.sh
 ```
+
+## 🎯 访问地址
+
+- **生产环境**: http://8.159.144.140
+- **API 文档**: http://8.159.144.140/api
 
 ## 常用命令
 
@@ -31,8 +50,18 @@ cat docs/DEBUG_SETUP.md         # 详细调试指南
 
 ### 部署相关
 ```bash
-./deploy.sh                    # 部署到阿里云
-curl http://8.159.144.140      # 检查网站
+# 自动部署（推荐）
+git push origin main              # 推送到 main 分支自动部署
+
+# 手动部署
+./deploy.sh                       # 一键部署脚本
+
+# 检查部署状态
+curl http://8.159.144.140         # 检查网站
+curl http://8.159.144.140/api     # 检查 API
+
+# 查看部署日志
+# 访问: https://github.com/你的用户名/Canary/actions
 ```
 
 ### 服务器管理
@@ -67,9 +96,13 @@ docker compose -f docker-compose.prod.yml --env-file .env.production up -d
 ## 文档索引
 
 ### 部署相关
-- `HOW_TO_DEPLOY.md` - 详细部署指南（必读）
+- `QUICK_SETUP.md` - **快速配置指南（5分钟搞定）⭐ 新手首选**
+- `DEPLOYMENT.md` - 完整自动化部署指南（GitHub Actions）
+- `CI_CD_STRATEGY.md` - CI/CD 策略和架构说明
+- `HOW_TO_DEPLOY.md` - 手动部署指南（传统方式）
 - `DEPLOYMENT_ISSUES_RESOLUTION.md` - 问题排查指南
-- `deploy.sh` - 一键部署脚本
+- `setup-github-secrets.sh` - GitHub Secrets 配置助手
+- `deploy.sh` - 一键部署脚本（备用）
 
 ### 调试开发
 - `DEBUG_QUICKSTART.md` - 调试快速启动（3 步开始）⭐
@@ -105,4 +138,7 @@ docker logs canary-db-prod --tail 50
 
 ---
 
-💡 **提示**: 修改代码后直接运行 `./deploy.sh` 即可部署！
+💡 **新用户提示**: 
+1. 首次部署？查看 [QUICK_SETUP.md](./QUICK_SETUP.md) 5分钟配置自动部署
+2. 需要手动部署？直接运行 `./deploy.sh`
+3. 遇到问题？查看 [CI_CD_STRATEGY.md](./CI_CD_STRATEGY.md) 了解部署策略
