@@ -1,4 +1,5 @@
 @use '../../styles/variables' as *;
+@use 'sass:color';
 @use '../../styles/mixins' as *;
 
 .page {
@@ -222,10 +223,10 @@
 
 .errorText {
   font-size: $font-size-sm;
-  color: darken($error-color, 20%);
+  color: color.adjust($error-color, $lightness: -20%);
 
   :global(.dark) & {
-    color: lighten($error-color, 20%);
+    color: color.adjust($error-color, $lightness: 20%);
   }
 }
 
@@ -329,32 +330,32 @@
 .priorityMedium {
   @extend .priorityBadge;
   background-color: rgba($primary-color, 0.1);
-  color: darken($primary-color, 20%);
+  color: color.adjust($primary-color, $lightness: -20%);
 
   :global(.dark) & {
     background-color: rgba($primary-color, 0.2);
-    color: lighten($primary-color, 20%);
+    color: color.adjust($primary-color, $lightness: 20%);
   }
 }
 
 .priorityHigh {
   @extend .priorityBadge;
   background-color: rgba($warning-color, 0.1);
-  color: darken($warning-color, 20%);
+  color: color.adjust($warning-color, $lightness: -20%);
 
   :global(.dark) & {
     background-color: rgba($warning-color, 0.2);
-    color: lighten($warning-color, 20%);
+    color: color.adjust($warning-color, $lightness: 20%);
   }
 }
 
 .priorityUrgent {
   @extend .priorityBadge;
   background-color: rgba($error-color, 0.1);
-  color: darken($error-color, 20%);
+  color: color.adjust($error-color, $lightness: -20%);
 
   :global(.dark) & {
     background-color: rgba($error-color, 0.2);
-    color: lighten($error-color, 20%);
+    color: color.adjust($error-color, $lightness: 20%);
   }
 }

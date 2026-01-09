@@ -1,4 +1,5 @@
 @use './variables' as *;
+@use 'sass:color';
 
 // 常用混入
 
@@ -79,7 +80,7 @@
 }
 
 @mixin gradient-success {
-  background: linear-gradient(to right, $success-color, darken($success-color, 10%));
+  background: linear-gradient(to right, $success-color, color.adjust($success-color, $lightness: -10%));
 }
 
 // 响应式断点

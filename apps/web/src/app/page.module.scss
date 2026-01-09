@@ -1,4 +1,5 @@
 @use '../styles/variables' as *;
+@use 'sass:color';
 @use '../styles/mixins' as *;
 
 .container {
@@ -123,12 +124,12 @@
   background: rgba(#3b82f6, 0.05);
   border-radius: $border-radius-xl;
   border: 1px solid rgba(#3b82f6, 0.2);
-  color: darken(#3b82f6, 20%);
+  color: color.adjust(#3b82f6, $lightness: -20%);
 
   :global(.dark) & {
     background: rgba(#3b82f6, 0.2);
     border-color: rgba(#3b82f6, 0.8);
-    color: lighten(#3b82f6, 20%);
+    color: color.adjust(#3b82f6, $lightness: 20%);
   }
 }
 

@@ -1,4 +1,5 @@
 @use '@/styles/variables' as *;
+@use 'sass:color';
 @use '@/styles/mixins' as *;
 
 .container {
@@ -28,11 +29,11 @@
   transition: all $transition-base;
 
   :global(.dark) & {
-    color: lighten($primary-color, 20%);
+    color: color.adjust($primary-color, $lightness: 20%);
   }
 
   &:hover {
-    color: darken($primary-color, 10%);
+    color: color.adjust($primary-color, $lightness: -10%);
   }
 }
 
@@ -295,14 +296,14 @@
   &.error {
     background-color: rgba($error-color, 0.1);
     border: 1px solid $error-color;
-    color: darken($error-color, 20%);
+    color: color.adjust($error-color, $lightness: -20%);
     border-left: 4px solid $error-color;
   }
 
   &.success {
     background-color: rgba($success-color, 0.1);
     border: 1px solid $success-color;
-    color: darken($success-color, 20%);
+    color: color.adjust($success-color, $lightness: -20%);
     border-left: 4px solid $success-color;
   }
 }
@@ -331,7 +332,7 @@
   transition: all $transition-base;
 
   &:hover:not(:disabled) {
-    background-color: darken($primary-color, 10%);
+    background-color: color.adjust($primary-color, $lightness: -10%);
     transform: translateY(-2px);
   }
 

@@ -44,8 +44,33 @@ export default function RootLayout({
   const buildInfoJson = JSON.stringify(buildInfo).replace(/</g, '\\u003c');
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* 防止暗色模式闪烁：在 HTML 渲染前设置主题类 */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  // 在页面渲染前检测并应用主题，防止 FOUC（闪烁）
+                  const stored = localStorage.getItem('theme');
+                  const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+                  const prefersDark = mediaQuery.matches;
+                  
+                  // 如果用户已保存主题偏好，使用保存的值；否则使用系统偏好
+                  if (stored === 'dark' || (!stored && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                  } else {
+                    document.documentElement.classList.remove('dark');
+                  }
+                } catch (e) {
+                  // 如果出错，默认使用浅色模式
+                  console.error('Failed to set theme:', e);
+                }
+              })();
+            `,
+          }}
+        />
         {/* 将构建信息注入到 window 对象，供客户端使用 */}
         <script
           dangerouslySetInnerHTML={{

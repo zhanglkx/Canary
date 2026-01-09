@@ -14,7 +14,7 @@
 }
 
 /* 全局暗色模式支持 */
-:global(.dark) {
+.dark {
   --background: #0a0a0a;
   --foreground: #ededed;
 }

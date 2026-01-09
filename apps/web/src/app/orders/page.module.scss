@@ -1,4 +1,5 @@
 @use '@/styles/variables' as *;
+@use 'sass:color';
 @use '@/styles/mixins' as *;
 
 .container {
@@ -139,22 +140,22 @@
 
   &.pending {
     background-color: rgba($warning-color, 0.2);
-    color: darken($warning-color, 20%);
+    color: color.adjust($warning-color, $lightness: -20%);
   }
 
   &.processing {
     background-color: rgba($info-color, 0.2);
-    color: darken($info-color, 20%);
+    color: color.adjust($info-color, $lightness: -20%);
   }
 
   &.completed {
     background-color: rgba($success-color, 0.2);
-    color: darken($success-color, 20%);
+    color: color.adjust($success-color, $lightness: -20%);
   }
 
   &.cancelled {
     background-color: rgba($error-color, 0.2);
-    color: darken($error-color, 20%);
+    color: color.adjust($error-color, $lightness: -20%);
   }
 }
 
@@ -271,7 +272,7 @@
     color: white;
 
     &:hover {
-      background-color: darken($primary-color, 10%);
+      background-color: color.adjust($primary-color, $lightness: -10%);
     }
   }
 

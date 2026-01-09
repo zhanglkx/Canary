@@ -1,4 +1,5 @@
 @use '@/styles/variables' as *;
+@use 'sass:color';
 @use '@/styles/mixins' as *;
 
 .container {
@@ -222,7 +223,7 @@
     color: white;
 
     &:hover:not(:disabled) {
-      background-color: darken($primary-color, 10%);
+      background-color: color.adjust($primary-color, $lightness: -10%);
     }
 
     &:disabled {
@@ -291,12 +292,12 @@
   &.error {
     background-color: rgba($error-color, 0.1);
     border-left: 4px solid $error-color;
-    color: darken($error-color, 20%);
+    color: color.adjust($error-color, $lightness: -20%);
   }
 
   &.success {
     background-color: rgba($success-color, 0.1);
     border-left: 4px solid $success-color;
-    color: darken($success-color, 20%);
+    color: color.adjust($success-color, $lightness: -20%);
   }
 }

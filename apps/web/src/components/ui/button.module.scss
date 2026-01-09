@@ -1,4 +1,5 @@
 @use '../../styles/variables' as *;
+@use 'sass:color';
 @use '../../styles/mixins' as *;
 
 .button {
@@ -32,7 +33,7 @@
   color: white;
 
   &:hover:not(:disabled) {
-    background-color: darken($primary-color, 10%);
+    background-color: color.adjust($primary-color, $lightness: -10%);
   }
 
   &:focus {
@@ -69,7 +70,7 @@
   color: white;
 
   &:hover:not(:disabled) {
-    background-color: darken($error-color, 10%);
+    background-color: color.adjust($error-color, $lightness: -10%);
   }
 
   &:focus {

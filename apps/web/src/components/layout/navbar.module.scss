@@ -1,4 +1,5 @@
 @use '../../styles/variables' as *;
+@use 'sass:color';
 @use '../../styles/mixins' as *;
 
 .navbar {
@@ -72,7 +73,7 @@
     background-color: rgba($primary-color, 0.1);
 
     :global(.dark) & {
-      color: lighten($primary-color, 10%);
+      color: color.adjust($primary-color, $lightness: 10%);
       background-color: rgba($primary-color, 0.2);
     }
   }
@@ -116,7 +117,7 @@
     color: $primary-color;
 
     :global(.dark) & {
-      color: lighten($primary-color, 10%);
+      color: color.adjust($primary-color, $lightness: 10%);
     }
   }
 }
@@ -132,6 +133,6 @@
   transition: all $transition-base;
 
   &:hover {
-    background-color: darken($primary-color, 10%);
+    background-color: color.adjust($primary-color, $lightness: -10%);
   }
 }
