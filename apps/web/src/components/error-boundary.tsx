@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import styles from './error-boundary.module.less';
+import styles from './error-boundary.module.scss';
 
 interface ErrorBoundaryState {
     hasError: boolean;

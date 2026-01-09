@@ -44,7 +44,7 @@ body {
   min-height: 100vh;
   /* 文本渲染优化 */
   text-rendering: optimizeLegibility;
-  /* 项目特定的颜色变量（会在 globals.less 中被覆盖） */
+  /* 项目特定的颜色变量（会在 globals.scss 中被覆盖） */
   color: var(--foreground, #171717);
   background: var(--background, #ffffff);
 }

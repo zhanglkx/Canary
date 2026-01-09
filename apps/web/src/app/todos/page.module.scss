@@ -1,0 +1,360 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.page {
+  min-height: 100vh;
+  background-color: $gray-50;
+
+  :global(.dark) & {
+    background-color: $gray-900;
+  }
+}
+
+.loadingContainer {
+  min-height: 100vh;
+  background-color: $gray-50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  :global(.dark) & {
+    background-color: $gray-900;
+  }
+}
+
+.loadingContent {
+  text-align: center;
+}
+
+.spinner {
+  animation: spin 0.6s linear infinite;
+  width: 48px;
+  height: 48px;
+  border: 2px solid $gray-200;
+  border-top-color: $primary-color;
+  border-radius: 50%;
+  margin: 0 auto;
+}
+
+$keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.loadingText {
+  margin-top: $spacing-md;
+  color: $gray-600;
+
+  :global(.dark) & {
+    color: $gray-400;
+  }
+}
+
+.container {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: $spacing-2xl $spacing-md;
+
+  @media (min-width: $breakpoint-sm) {
+    padding: $spacing-2xl $spacing-lg;
+  }
+
+  @media (min-width: $breakpoint-lg) {
+    padding: $spacing-2xl $spacing-xl;
+  }
+}
+
+.header {
+  margin-bottom: $spacing-2xl;
+}
+
+.title {
+  font-size: $font-size-3xl;
+  font-weight: bold;
+  color: $gray-900;
+
+  :global(.dark) & {
+    color: white;
+  }
+}
+
+.subtitle {
+  margin-top: $spacing-sm;
+  font-size: $font-size-sm;
+  color: $gray-600;
+
+  :global(.dark) & {
+    color: $gray-400;
+  }
+}
+
+.skeleton {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  background-color: $gray-200;
+  border-radius: $border-radius-lg;
+  height: 384px;
+
+  :global(.dark) & {
+    background-color: $gray-700;
+  }
+}
+
+$keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.content {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-2xl;
+
+  @media (min-width: $breakpoint-lg) {
+    grid-template-columns: 1fr 2fr;
+  }
+}
+
+.formCard {
+  background-color: white;
+  box-shadow: $shadow;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xl;
+  position: sticky;
+  top: $spacing-xl;
+
+  :global(.dark) & {
+    background-color: $gray-800;
+  }
+}
+
+.formTitle {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $gray-900;
+  margin-bottom: $spacing-md;
+
+  :global(.dark) & {
+    color: white;
+  }
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.label {
+  display: block;
+  font-size: $font-size-sm;
+  font-weight: 500;
+  color: $gray-700;
+  margin-bottom: $spacing-xs;
+
+  :global(.dark) & {
+    color: $gray-300;
+  }
+}
+
+.textarea {
+  width: 100%;
+  padding: $spacing-md $spacing-lg;
+  border: 1px solid $gray-300;
+  border-radius: $border-radius-lg;
+  font-family: inherit;
+  font-size: $font-size-base;
+  resize: vertical;
+  transition: all $transition-base;
+  background-color: white;
+  color: $gray-900;
+
+  :global(.dark) & {
+    background-color: $gray-800;
+    border-color: $gray-600;
+    color: white;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+  }
+}
+
+.select {
+  width: 100%;
+  padding: $spacing-md $spacing-lg;
+  border: 1px solid $gray-300;
+  border-radius: $border-radius-lg;
+  font-family: inherit;
+  font-size: $font-size-base;
+  transition: all $transition-base;
+  background-color: white;
+  color: $gray-900;
+
+  :global(.dark) & {
+    background-color: $gray-800;
+    border-color: $gray-600;
+    color: white;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+  }
+}
+
+.error {
+  border-radius: $border-radius;
+  background-color: rgba($error-color, 0.1);
+  padding: $spacing-md;
+
+  :global(.dark) & {
+    background-color: rgba($error-color, 0.2);
+  }
+}
+
+.errorText {
+  font-size: $font-size-sm;
+  color: darken($error-color, 20%);
+
+  :global(.dark) & {
+    color: lighten($error-color, 20%);
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  gap: $spacing-sm;
+}
+
+.listSection {
+  // 列表区域
+}
+
+.filterCard {
+  background-color: white;
+  box-shadow: $shadow;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xl;
+  margin-bottom: $spacing-xl;
+
+  :global(.dark) & {
+    background-color: $gray-800;
+  }
+}
+
+.filterTitle {
+  font-size: $font-size-lg;
+  font-weight: 600;
+  color: $gray-900;
+  margin-bottom: $spacing-md;
+
+  :global(.dark) & {
+    color: white;
+  }
+}
+
+.filterGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: $spacing-md;
+
+  @media (min-width: $breakpoint-sm) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: $breakpoint-md) {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.todosCard {
+  background-color: white;
+  box-shadow: $shadow;
+  border-radius: $border-radius-lg;
+  padding: $spacing-xl;
+
+  :global(.dark) & {
+    background-color: $gray-800;
+  }
+}
+
+.todosList {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.todoItem {
+  padding: $spacing-lg;
+  border: 1px solid $gray-200;
+  border-radius: $border-radius-lg;
+  transition: all $transition-base;
+
+  :global(.dark) & {
+    border-color: $gray-700;
+  }
+
+  &:hover {
+    box-shadow: $shadow-md;
+  }
+}
+
+.priorityBadge {
+  display: inline-block;
+  padding: $spacing-xs $spacing-sm;
+  border-radius: $border-radius;
+  font-size: $font-size-xs;
+  font-weight: 600;
+}
+
+.priorityLow {
+  @extend priorityBadge;
+  background-color: $gray-100;
+  color: $gray-800;
+
+  :global(.dark) & {
+    background-color: $gray-800;
+    color: $gray-300;
+  }
+}
+
+.priorityMedium {
+  @extend priorityBadge;
+  background-color: rgba($primary-color, 0.1);
+  color: darken($primary-color, 20%);
+
+  :global(.dark) & {
+    background-color: rgba($primary-color, 0.2);
+    color: lighten($primary-color, 20%);
+  }
+}
+
+.priorityHigh {
+  @extend priorityBadge;
+  background-color: rgba($warning-color, 0.1);
+  color: darken($warning-color, 20%);
+
+  :global(.dark) & {
+    background-color: rgba($warning-color, 0.2);
+    color: lighten($warning-color, 20%);
+  }
+}
+
+.priorityUrgent {
+  @extend priorityBadge;
+  background-color: rgba($error-color, 0.1);
+  color: darken($error-color, 20%);
+
+  :global(.dark) & {
+    background-color: rgba($error-color, 0.2);
+    color: lighten($error-color, 20%);
+  }
+}

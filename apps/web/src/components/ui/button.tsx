@@ -1,5 +1,5 @@
 import { ButtonHTMLAttributes, ReactNode } from 'react';
-import styles from './button.module.less';
+import styles from './button.module.scss';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: 'primary' | 'secondary' | 'danger';

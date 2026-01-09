@@ -6,7 +6,7 @@ import { cartApi, orderApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import styles from './page.module.less';
+import styles from './page.module.scss';
 
 export default function CheckoutPage() {
   const router = useRouter();

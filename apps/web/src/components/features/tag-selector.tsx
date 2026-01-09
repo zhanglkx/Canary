@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { tagApi, type Tag } from '@/lib/api';
-import styles from './tag-selector.module.less';
+import styles from './tag-selector.module.scss';
 
 interface TagSelectorProps {
   selectedTags?: string[];

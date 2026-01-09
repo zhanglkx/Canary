@@ -8,7 +8,7 @@ import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { NoSSR } from '@/components/ui/no-ssr';
-import styles from './page.module.less';
+import styles from './page.module.scss';
 
 export default function LoginPage() {
   const router = useRouter();

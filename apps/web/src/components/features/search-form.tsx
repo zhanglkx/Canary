@@ -3,7 +3,7 @@
 import { useState, FormEvent } from 'react';
 import { searchApi } from '@/lib/api';
 import { Search } from 'lucide-react';
-import styles from './search-form.module.less';
+import styles from './search-form.module.scss';
 
 export function SearchForm() {
   const [query, setQuery] = useState('');

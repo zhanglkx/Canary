@@ -1,0 +1,105 @@
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
+
+.container {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: $gray-50;
+  padding: $spacing-lg $spacing-md;
+
+  :global(.dark) & {
+    background-color: $gray-900;
+  }
+}
+
+.wrapper {
+  width: 100%;
+  max-width: 28rem;
+}
+
+.header {
+  margin-bottom: $spacing-2xl;
+}
+
+.title {
+  margin-top: $spacing-lg;
+  text-align: center;
+  font-size: $font-size-4xl;
+  font-weight: 700;
+  color: $gray-900;
+
+  :global(.dark) & {
+    color: white;
+  }
+}
+
+.subtitle {
+  margin-top: $spacing-md;
+  text-align: center;
+  font-size: $font-size-sm;
+  color: $gray-600;
+
+  :global(.dark) & {
+    color: $gray-400;
+  }
+
+  a {
+    font-weight: 500;
+    color: $primary-color;
+
+    &:hover {
+      color: darken($primary-color, 10%);
+    }
+  }
+}
+
+.form {
+  margin-top: $spacing-2xl;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.inputGroup {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.errorMessage {
+  margin-top: $spacing-md;
+  padding: $spacing-md;
+  background-color: rgba($error-color, 0.1);
+  border-radius: $border-radius;
+  border-left: 4px solid $error-color;
+
+  :global(.dark) & {
+    background-color: rgba($error-color, 0.2);
+  }
+
+  p {
+    font-size: $font-size-sm;
+    color: darken($error-color, 20%);
+  }
+}
+
+.footer {
+  margin-top: $spacing-lg;
+  text-align: center;
+
+  a {
+    font-size: $font-size-sm;
+    color: $gray-600;
+    transition: color $transition-base;
+
+    :global(.dark) & {
+      color: $gray-400;
+    }
+
+    &:hover {
+      color: $primary-color;
+    }
+  }
+}

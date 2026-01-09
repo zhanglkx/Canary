@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import styles from './error.module.less';
+import styles from './error.module.scss';
 
 export default function ErrorPage() {
   return (

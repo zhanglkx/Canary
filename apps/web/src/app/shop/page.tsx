@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { productApi } from '@/lib/api';
 import { ProductCard } from '@/components/features/product-card';
 import { AlertCircle, Search, Loader } from 'lucide-react';
-import styles from './page.module.less';
+import styles from './page.module.scss';
 
 export default function ShopPage() {
   const [page, setPage] = useState(1);

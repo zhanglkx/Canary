@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { Product } from '@/types/ecommerce';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import styles from './page.module.less';
+import styles from './page.module.scss';
 
 export default function ProductDetailPage() {
   const params = useParams();

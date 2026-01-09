@@ -1,0 +1,127 @@
+@use './variables' as *;
+
+// 常用混入
+
+// Flexbox布局
+@mixin flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@mixin flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+@mixin flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+// 文本截断
+@mixin text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@mixin text-ellipsis-lines($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// 按钮基础样式
+@mixin button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: $spacing-md $spacing-xl;
+  font-weight: 600;
+  border-radius: $border-radius-lg;
+  cursor: pointer;
+  transition: all $transition-base;
+  border: none;
+  outline: none;
+
+  &:hover {
+    transform: scale(1.05);
+  }
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+
+    &:hover {
+      transform: none;
+    }
+  }
+}
+
+// 卡片样式
+@mixin card {
+  background: white;
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow;
+}
+
+// 渐变背景
+@mixin gradient-primary {
+  background: linear-gradient(to right, $primary-color, $secondary-color);
+}
+
+@mixin gradient-success {
+  background: linear-gradient(to right, $success-color, darken($success-color, 10%));
+}
+
+// 响应式断点
+@mixin responsive($breakpoint) {
+  @if $breakpoint == sm {
+    @media (min-width: $breakpoint-sm) {
+      @content;
+    }
+  } @else if $breakpoint == md {
+    @media (min-width: $breakpoint-md) {
+      @content;
+    }
+  } @else if $breakpoint == lg {
+    @media (min-width: $breakpoint-lg) {
+      @content;
+    }
+  } @else if $breakpoint == xl {
+    @media (min-width: $breakpoint-xl) {
+      @content;
+    }
+  }
+}
+
+// 动画
+@mixin animate-fade-in {
+  animation: fadeIn $transition-base ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// 清除浮动
+@mixin clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}

@@ -7,7 +7,7 @@ import { useAuth } from '@/lib/auth-context';
 import { CartItem } from '@/components/features/cart-item';
 import { CartSummary } from '@/components/features/cart-summary';
 import { ShoppingCart as CartIcon, AlertCircle } from 'lucide-react';
-import styles from './page.module.less';
+import styles from './page.module.scss';
 
 export default function CartPage() {
   const router = useRouter();

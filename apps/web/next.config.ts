@@ -23,11 +23,12 @@ const generateBuildInfo = () => {
   }
 
   try {
-    gitTag = execSync('git describe --tags --exact-match 2>/dev/null || echo "no-tag"', {
+    const result = execSync('git describe --tags --exact-match HEAD', {
       encoding: 'utf-8',
+      stdio: ['pipe', 'pipe', 'ignore'],
     }).trim();
+    gitTag = result || 'no-tag';
   } catch (error) {
-    // 如果没有 tag，使用 no-tag
     gitTag = 'no-tag';
   }
 
@@ -40,27 +41,18 @@ const generateBuildInfo = () => {
   };
 };
 
-// 只在构建时生成一次构建信息
 const buildInfo = generateBuildInfo();
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   transpilePackages: ['@shared'],
 
-  // 生成构建 ID（用于 Next.js 内部）
+  // 生成构建 ID
   generateBuildId: async () => {
     return buildInfo.buildId;
   },
 
-  // 静态导出配置（可选 - 用于生成 dist 目录）
-  // output: 'export',
-  // distDir: 'dist',
-  // trailingSlash: true,
-  // images: {
-  //   unoptimized: true,
-  // },
-
-  // 将构建信息暴露为环境变量（服务端可用）
+  // 将构建信息暴露为环境变量
   env: {
     BUILD_INFO: JSON.stringify(buildInfo),
     BUILD_ID: buildInfo.buildId,
@@ -71,37 +63,22 @@ const nextConfig: NextConfig = {
   },
 
   experimental: {
-    // 优化水合过程
     optimizePackageImports: ['axios'],
   },
 
-  // 使用 webpack 配置支持 Less CSS Modules
-  webpack: (config) => {
-    // 只添加 Less CSS Modules 支持，全局样式使用 CSS
-    config.module.rules.push({
-      test: /\.module\.less$/,
-      use: [
-        'style-loader',
-        {
-          loader: 'css-loader',
-          options: {
-            modules: {
-              localIdentName: '[name]__[local]--[hash:base64:5]',
-            },
-          },
-        },
-        {
-          loader: 'less-loader',
-          options: {
-            lessOptions: {
-              javascriptEnabled: true,
-            },
-          },
-        },
-      ],
-    });
+  // ✅ SCSS 原生支持，无需 webpack 配置！
+  // Next.js 会自动处理 .scss 和 .module.scss 文件
+  // 路径别名 @/ 自动支持
+  // CSS Modules 自动支持
+  // HMR 自动支持
 
-    return config;
+  // 如果需要自定义 Sass 选项（可选）
+  sassOptions: {
+    // 添加额外的 include paths（如果需要）
+    includePaths: ['./src/styles'],
+
+    // Sass 编译选项
+    silenceDeprecations: ['legacy-js-api'], // 静默旧 API 警告
   },
 };
 

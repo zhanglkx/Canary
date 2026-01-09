@@ -1,16 +1,16 @@
-@import '@/styles/variables.less';
-@import '@/styles/mixins.less';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
 
 .container {
   min-height: 100vh;
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: @gray-50;
-  padding: @spacing-lg;
+  background-color: $gray-50;
+  padding: $spacing-lg;
 
   :global(.dark) & {
-    background-color: @gray-900;
+    background-color: $gray-900;
   }
 }
 
@@ -21,15 +21,15 @@
 
 .icon {
   font-size: 4rem;
-  margin-bottom: @spacing-lg;
+  margin-bottom: $spacing-lg;
   animation: float 3s ease-in-out infinite;
 }
 
 .title {
-  font-size: @font-size-3xl;
+  font-size: $font-size-3xl;
   font-weight: 700;
-  color: @gray-900;
-  margin-bottom: @spacing-md;
+  color: $gray-900;
+  margin-bottom: $spacing-md;
 
   :global(.dark) & {
     color: white;
@@ -37,66 +37,66 @@
 }
 
 .description {
-  font-size: @font-size-base;
-  color: @gray-600;
-  margin-bottom: @spacing-2xl;
+  font-size: $font-size-base;
+  color: $gray-600;
+  margin-bottom: $spacing-2xl;
 
   :global(.dark) & {
-    color: @gray-400;
+    color: $gray-400;
   }
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: @spacing-md;
+  gap: $spacing-md;
 }
 
 .primaryButton,
 .secondaryButton {
   display: inline-block;
-  padding: @spacing-md @spacing-xl;
-  border-radius: @border-radius-lg;
+  padding: $spacing-md $spacing-xl;
+  border-radius: $border-radius-lg;
   font-weight: 600;
-  font-size: @font-size-base;
+  font-size: $font-size-base;
   cursor: pointer;
-  transition: all @transition-base;
+  transition: all $transition-base;
   text-decoration: none;
   border: none;
   font-family: inherit;
 }
 
 .primaryButton {
-  background-color: @primary-color;
+  background-color: $primary-color;
   color: white;
 
   &:hover {
-    background-color: darken(@primary-color, 10%);
+    background-color: darken($primary-color, 10%);
     transform: translateY(-2px);
   }
 }
 
 .secondaryButton {
-  background-color: @gray-200;
-  color: @gray-900;
+  background-color: $gray-200;
+  color: $gray-900;
 
   :global(.dark) & {
-    background-color: @gray-700;
+    background-color: $gray-700;
     color: white;
   }
 
   &:hover {
-    background-color: @gray-300;
+    background-color: $gray-300;
 
     :global(.dark) & {
-      background-color: @gray-600;
+      background-color: $gray-600;
     }
 
     transform: translateY(-2px);
   }
 }
 
-@keyframes float {
+$keyframes float {
   0%, 100% {
     transform: translateY(0px);
   }

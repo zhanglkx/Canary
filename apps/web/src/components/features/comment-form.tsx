@@ -7,7 +7,7 @@
 import { useState, FormEvent } from 'react';
 import { commentApi } from '@/lib/api';
 import { Button } from '@/components/ui/button';
-import styles from './comment-form.module.less';
+import styles from './comment-form.module.scss';
 
 interface CommentFormProps {
   todoId: string;

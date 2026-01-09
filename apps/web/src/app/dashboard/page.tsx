@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 import { todoApi, categoryApi, type Todo, type Category } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { NoSSR } from '@/components/ui/no-ssr';
-import styles from './page.module.less';
+import styles from './page.module.scss';
 
 export default function DashboardPage() {
     const router = useRouter();

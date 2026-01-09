@@ -1,13 +1,13 @@
-@import '@/styles/variables.less';
-@import '@/styles/mixins.less';
+@use '@/styles/variables' as *;
+@use '@/styles/mixins' as *;
 
 .container {
   min-height: 100vh;
-  background-color: @gray-50;
-  padding: @spacing-lg;
+  background-color: $gray-50;
+  padding: $spacing-lg;
 
   :global(.dark) & {
-    background-color: @gray-900;
+    background-color: $gray-900;
   }
 }
 
@@ -17,13 +17,13 @@
 }
 
 .header {
-  margin-bottom: @spacing-2xl;
+  margin-bottom: $spacing-2xl;
 }
 
 .title {
-  font-size: @font-size-4xl;
+  font-size: $font-size-4xl;
   font-weight: 700;
-  color: @gray-900;
+  color: $gray-900;
 
   :global(.dark) & {
     color: white;
@@ -33,29 +33,29 @@
 .content {
   display: grid;
   grid-template-columns: 2fr 1fr;
-  gap: @spacing-lg;
+  gap: $spacing-lg;
 
-  @media (max-width: @breakpoint-lg) {
+  @media (max-width: $breakpoint-lg) {
     grid-template-columns: 1fr;
   }
 }
 
 .formSection {
   background-color: white;
-  border-radius: @border-radius-lg;
-  padding: @spacing-lg;
-  box-shadow: @shadow;
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow;
 
   :global(.dark) & {
-    background-color: @gray-800;
+    background-color: $gray-800;
   }
 }
 
 .sectionTitle {
-  font-size: @font-size-lg;
+  font-size: $font-size-lg;
   font-weight: 600;
-  margin-bottom: @spacing-md;
-  color: @gray-900;
+  margin-bottom: $spacing-md;
+  color: $gray-900;
 
   :global(.dark) & {
     color: white;
@@ -63,7 +63,7 @@
 }
 
 .formGroup {
-  margin-bottom: @spacing-md;
+  margin-bottom: $spacing-md;
 
   &:last-child {
     margin-bottom: 0;
@@ -73,9 +73,9 @@
 .formRow {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: @spacing-md;
+  gap: $spacing-md;
 
-  @media (max-width: @breakpoint-md) {
+  @media (max-width: $breakpoint-md) {
     grid-template-columns: 1fr;
   }
 }
@@ -83,29 +83,29 @@
 .summarySection {
   display: flex;
   flex-direction: column;
-  gap: @spacing-lg;
+  gap: $spacing-lg;
 }
 
 .summaryCard {
   background-color: white;
-  border-radius: @border-radius-lg;
-  padding: @spacing-lg;
-  box-shadow: @shadow;
+  border-radius: $border-radius-lg;
+  padding: $spacing-lg;
+  box-shadow: $shadow;
 
   :global(.dark) & {
-    background-color: @gray-800;
+    background-color: $gray-800;
   }
 }
 
 .summaryItemsContainer {
   max-height: 400px;
   overflow-y: auto;
-  margin-bottom: @spacing-md;
-  padding-bottom: @spacing-md;
-  border-bottom: 1px solid @gray-200;
+  margin-bottom: $spacing-md;
+  padding-bottom: $spacing-md;
+  border-bottom: 1px solid $gray-200;
 
   :global(.dark) & {
-    border-bottom-color: @gray-700;
+    border-bottom-color: $gray-700;
   }
 }
 
@@ -113,11 +113,11 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: @spacing-md 0;
-  border-bottom: 1px solid @gray-100;
+  padding: $spacing-md 0;
+  border-bottom: 1px solid $gray-100;
 
   :global(.dark) & {
-    border-bottom-color: @gray-700;
+    border-bottom-color: $gray-700;
   }
 
   &:last-child {
@@ -127,16 +127,16 @@
 
 .itemName {
   flex: 1;
-  color: @gray-700;
+  color: $gray-700;
 
   :global(.dark) & {
-    color: @gray-300;
+    color: $gray-300;
   }
 }
 
 .itemPrice {
   font-weight: 600;
-  color: @gray-900;
+  color: $gray-900;
 
   :global(.dark) & {
     color: white;
@@ -147,10 +147,10 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: @spacing-md 0;
-  font-size: @font-size-lg;
+  padding: $spacing-md 0;
+  font-size: $font-size-lg;
   font-weight: 700;
-  color: @gray-900;
+  color: $gray-900;
 
   :global(.dark) & {
     color: white;
@@ -158,36 +158,36 @@
 }
 
 .totalPrice {
-  color: @primary-color;
+  color: $primary-color;
 }
 
 .paymentMethods {
   display: flex;
   flex-direction: column;
-  gap: @spacing-md;
-  margin-bottom: @spacing-lg;
+  gap: $spacing-md;
+  margin-bottom: $spacing-lg;
 }
 
 .methodLabel {
   display: flex;
   align-items: center;
-  gap: @spacing-md;
-  padding: @spacing-md;
-  border: 2px solid @gray-200;
-  border-radius: @border-radius;
+  gap: $spacing-md;
+  padding: $spacing-md;
+  border: 2px solid $gray-200;
+  border-radius: $border-radius;
   cursor: pointer;
-  transition: all @transition-base;
+  transition: all $transition-base;
 
   :global(.dark) & {
-    border-color: @gray-700;
+    border-color: $gray-700;
   }
 
   &:hover {
-    background-color: @gray-50;
-    border-color: @primary-color;
+    background-color: $gray-50;
+    border-color: $primary-color;
 
     :global(.dark) & {
-      background-color: @gray-700;
+      background-color: $gray-700;
     }
   }
 
@@ -197,32 +197,32 @@
 }
 
 .methodActive {
-  background-color: rgba(@primary-color, 0.1);
-  border-color: @primary-color;
+  background-color: rgba($primary-color, 0.1);
+  border-color: $primary-color;
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: @spacing-md;
+  gap: $spacing-md;
 }
 
 .button {
   width: 100%;
-  padding: @spacing-md;
+  padding: $spacing-md;
   border: none;
-  border-radius: @border-radius;
-  font-size: @font-size-base;
+  border-radius: $border-radius;
+  font-size: $font-size-base;
   font-weight: 600;
   cursor: pointer;
-  transition: all @transition-base;
+  transition: all $transition-base;
 
   &.primary {
-    background-color: @primary-color;
+    background-color: $primary-color;
     color: white;
 
     &:hover:not(:disabled) {
-      background-color: darken(@primary-color, 10%);
+      background-color: darken($primary-color, 10%);
     }
 
     &:disabled {
@@ -232,19 +232,19 @@
   }
 
   &.secondary {
-    background-color: @gray-200;
-    color: @gray-900;
+    background-color: $gray-200;
+    color: $gray-900;
 
     :global(.dark) & {
-      background-color: @gray-700;
+      background-color: $gray-700;
       color: white;
     }
 
     &:hover:not(:disabled) {
-      background-color: @gray-300;
+      background-color: $gray-300;
 
       :global(.dark) & {
-        background-color: @gray-600;
+        background-color: $gray-600;
       }
     }
   }
@@ -261,13 +261,13 @@
   display: inline-block;
   width: 3rem;
   height: 3rem;
-  border: 2px solid @gray-300;
-  border-top-color: @primary-color;
+  border: 2px solid $gray-300;
+  border-top-color: $primary-color;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
 
-@keyframes spin {
+$keyframes spin {
   to {
     transform: rotate(360deg);
   }
@@ -275,28 +275,28 @@
 
 .empty {
   text-align: center;
-  padding: @spacing-2xl;
-  color: @gray-500;
+  padding: $spacing-2xl;
+  color: $gray-500;
 
   :global(.dark) & {
-    color: @gray-400;
+    color: $gray-400;
   }
 }
 
 .notification {
-  padding: @spacing-md;
-  border-radius: @border-radius;
-  margin-bottom: @spacing-md;
+  padding: $spacing-md;
+  border-radius: $border-radius;
+  margin-bottom: $spacing-md;
 
   &.error {
-    background-color: rgba(@error-color, 0.1);
-    border-left: 4px solid @error-color;
-    color: darken(@error-color, 20%);
+    background-color: rgba($error-color, 0.1);
+    border-left: 4px solid $error-color;
+    color: darken($error-color, 20%);
   }
 
   &.success {
-    background-color: rgba(@success-color, 0.1);
-    border-left: 4px solid @success-color;
-    color: darken(@success-color, 20%);
+    background-color: rgba($success-color, 0.1);
+    border-left: 4px solid $success-color;
+    color: darken($success-color, 20%);
   }
 }

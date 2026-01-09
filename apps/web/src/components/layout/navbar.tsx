@@ -5,7 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import { useRouter } from 'next/navigation';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import { ShoppingCart } from 'lucide-react';
-import styles from './navbar.module.less';
+import styles from './navbar.module.scss';
 
 export function Navbar() {
   const { isAuthenticated, user, logout } = useAuth();

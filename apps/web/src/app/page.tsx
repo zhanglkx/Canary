@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
 import { NoSSR } from '@/components/ui/no-ssr';
-import styles from './page.module.less';
+import styles from './page.module.scss';
 
 const features = [
   {

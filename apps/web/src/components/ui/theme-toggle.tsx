@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import styles from './theme-toggle.module.less';
+import styles from './theme-toggle.module.scss';
 
 export function ThemeToggle() {
     const [isDark, setIsDark] = useState(false);

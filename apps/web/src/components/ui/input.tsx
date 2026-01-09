@@ -1,7 +1,7 @@
 'use client';
 
 import { InputHTMLAttributes, useEffect, useState } from 'react';
-import styles from './input.module.less';
+import styles from './input.module.scss';
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import styles from './cart-summary.module.less';
+import styles from './cart-summary.module.scss';
 
 interface CartSummaryProps {
   cart: any;

@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { Trash2, AlertCircle } from 'lucide-react';
 import { cartApi } from '@/lib/api';
-import styles from './cart-item.module.less';
+import styles from './cart-item.module.scss';
 
 interface CartItemProps {
   id: string;

@@ -8,7 +8,7 @@ import { useState, useEffect } from 'react';
 import { commentApi, type Comment } from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/lib/auth-context';
-import styles from './comment-list.module.less';
+import styles from './comment-list.module.scss';
 
 interface CommentListProps {
   todoId: string;

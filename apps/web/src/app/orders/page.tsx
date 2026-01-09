@@ -5,7 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { orderApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth-context';
 import { Button } from '@/components/ui/button';
-import styles from './page.module.less';
+import styles from './page.module.scss';
 
 function OrdersContent() {
   const router = useRouter();

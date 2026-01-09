@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { cartApi } from '@/lib/api';
 import { ShoppingCart } from 'lucide-react';
-import styles from './product-card.module.less';
+import styles from './product-card.module.scss';
 
 interface ProductCardProps {
   product: any;

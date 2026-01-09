@@ -1,0 +1,56 @@
+@use '../../styles/variables' as *;
+@use '../../styles/mixins' as *;
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+.textarea {
+  width: 100%;
+  padding: $spacing-md $spacing-lg;
+  border: 1px solid $gray-300;
+  border-radius: $border-radius-lg;
+  font-family: inherit;
+  font-size: $font-size-base;
+  resize: vertical;
+  transition: all $transition-base;
+  background-color: white;
+  color: $gray-900;
+
+  :global(.dark) & {
+    background-color: $gray-800;
+    border-color: $gray-600;
+    color: white;
+  }
+
+  &:focus {
+    outline: none;
+    border-color: $primary-color;
+    box-shadow: 0 0 0 2px rgba($primary-color, 0.2);
+  }
+
+  &::placeholder {
+    color: $gray-400;
+  }
+}
+
+.error {
+  border-radius: $border-radius;
+  background-color: rgba($error-color, 0.1);
+  padding: $spacing-md;
+
+  :global(.dark) & {
+    background-color: rgba($error-color, 0.2);
+  }
+}
+
+.errorText {
+  font-size: $font-size-sm;
+  color: darken($error-color, 20%);
+
+  :global(.dark) & {
+    color: lighten($error-color, 20%);
+  }
+}
