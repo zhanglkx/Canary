@@ -5,7 +5,7 @@ import { Navbar } from '@/components/layout/navbar';
 import { ErrorBoundary } from '@/components/error-boundary';
 
 export const metadata: Metadata = {
-  title: 'Learning NestJS + Next.js + REST API',
+  title: '牛逼之路',
   description: 'A learning project with NestJS, Next.js, and REST API',
 };
 
