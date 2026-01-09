@@ -23,7 +23,7 @@
 }
 
 .tagUnselected {
-  @extend tag;
+  @extend .tag;
   background-color: $gray-100;
   color: $gray-800;
 
@@ -42,7 +42,7 @@
 }
 
 .tagSelected {
-  @extend tag;
+  @extend .tag;
   background-color: $primary-color;
   color: white;
 

@@ -69,7 +69,7 @@
   border-radius: 50%;
 }
 
-$keyframes spin {
+@keyframes spin {
   to {
     transform: rotate(360deg);
   }
@@ -86,7 +86,7 @@ $keyframes spin {
   }
 }
 
-$keyframes pulse {
+@keyframes pulse {
   0%, 100% {
     opacity: 1;
   }
@@ -136,7 +136,7 @@ $keyframes pulse {
 }
 
 .statCardWide {
-  @extend statCard;
+  @extend .statCard;
 
   @media (min-width: $breakpoint-md) {
     grid-column: span 2;
@@ -165,17 +165,17 @@ $keyframes pulse {
 }
 
 .statValueGreen {
-  @extend statValue;
+  @extend .statValue;
   color: $success-color;
 }
 
 .statValueYellow {
-  @extend statValue;
+  @extend .statValue;
   color: $warning-color;
 }
 
 .statValueBlue {
-  @extend statValue;
+  @extend .statValue;
   color: $primary-color;
 }
 
@@ -248,22 +248,22 @@ $keyframes pulse {
 }
 
 .progressFillRed {
-  @extend progressFill;
+  @extend .progressFill;
   background-color: $error-color;
 }
 
 .progressFillYellow {
-  @extend progressFill;
+  @extend .progressFill;
   background-color: $warning-color;
 }
 
 .progressFillBlue {
-  @extend progressFill;
+  @extend .progressFill;
   background-color: $primary-color;
 }
 
 .progressFillGray {
-  @extend progressFill;
+  @extend .progressFill;
   background-color: $gray-600;
 }
 

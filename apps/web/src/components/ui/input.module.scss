@@ -52,7 +52,7 @@
 }
 
 .inputError {
-  @extend input;
+  @extend .input;
   border-color: $error-color;
 
   &:focus {

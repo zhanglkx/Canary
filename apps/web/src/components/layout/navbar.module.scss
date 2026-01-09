@@ -90,7 +90,7 @@
 }
 
 .navLinkWithIcon {
-  @extend navLink;
+  @extend .navLink;
   display: flex;
   align-items: center;
   gap: $spacing-xs;

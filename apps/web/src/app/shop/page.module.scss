@@ -114,7 +114,7 @@
   color: $primary-color;
 }
 
-$keyframes spin {
+@keyframes spin {
   to {
     transform: rotate(360deg);
   }

@@ -36,7 +36,7 @@
   margin: 0 auto;
 }
 
-$keyframes spin {
+@keyframes spin {
   to {
     transform: rotate(360deg);
   }
@@ -100,7 +100,7 @@ $keyframes spin {
   }
 }
 
-$keyframes pulse {
+@keyframes pulse {
   0%, 100% {
     opacity: 1;
   }
@@ -316,7 +316,7 @@ $keyframes pulse {
 }
 
 .priorityLow {
-  @extend priorityBadge;
+  @extend .priorityBadge;
   background-color: $gray-100;
   color: $gray-800;
 
@@ -327,7 +327,7 @@ $keyframes pulse {
 }
 
 .priorityMedium {
-  @extend priorityBadge;
+  @extend .priorityBadge;
   background-color: rgba($primary-color, 0.1);
   color: darken($primary-color, 20%);
 
@@ -338,7 +338,7 @@ $keyframes pulse {
 }
 
 .priorityHigh {
-  @extend priorityBadge;
+  @extend .priorityBadge;
   background-color: rgba($warning-color, 0.1);
   color: darken($warning-color, 20%);
 
@@ -349,7 +349,7 @@ $keyframes pulse {
 }
 
 .priorityUrgent {
-  @extend priorityBadge;
+  @extend .priorityBadge;
   background-color: rgba($error-color, 0.1);
   color: darken($error-color, 20%);
 

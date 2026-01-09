@@ -28,7 +28,7 @@
   border-radius: 50%;
 }
 
-$keyframes spin {
+@keyframes spin {
   to {
     transform: rotate(360deg);
   }

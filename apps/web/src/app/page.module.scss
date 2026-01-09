@@ -279,32 +279,32 @@
 }
 
 .featureIconBlue {
-  @extend featureIcon;
+  @extend .featureIcon;
   background: linear-gradient(to right, #3b82f6, #2563eb);
 }
 
 .featureIconPurple {
-  @extend featureIcon;
+  @extend .featureIcon;
   background: linear-gradient(to right, #8b5cf6, #7c3aed);
 }
 
 .featureIconGreen {
-  @extend featureIcon;
+  @extend .featureIcon;
   background: linear-gradient(to right, #10b981, #059669);
 }
 
 .featureIconYellow {
-  @extend featureIcon;
+  @extend .featureIcon;
   background: linear-gradient(to right, #f59e0b, #d97706);
 }
 
 .featureIconPink {
-  @extend featureIcon;
+  @extend .featureIcon;
   background: linear-gradient(to right, #ec4899, #db2777);
 }
 
 .featureIconIndigo {
-  @extend featureIcon;
+  @extend .featureIcon;
   background: linear-gradient(to right, #6366f1, #4f46e5);
 }
 
@@ -330,7 +330,7 @@
 
 // Quick Access
 .quickAccessSection {
-  @extend statsSection;
+  @extend .statsSection;
 }
 
 .quickAccessGrid {
@@ -355,7 +355,7 @@
 }
 
 .quickAccessCardBlue {
-  @extend quickAccessCard;
+  @extend .quickAccessCard;
   background: linear-gradient(to bottom right, rgba(#3b82f6, 0.05), rgba(#3b82f6, 0.1));
   border-color: rgba(#3b82f6, 0.2);
 
@@ -374,7 +374,7 @@
 }
 
 .quickAccessCardGreen {
-  @extend quickAccessCard;
+  @extend .quickAccessCard;
   background: linear-gradient(to bottom right, rgba(#10b981, 0.05), rgba(#10b981, 0.1));
   border-color: rgba(#10b981, 0.2);
 
@@ -393,7 +393,7 @@
 }
 
 .quickAccessCardPurple {
-  @extend quickAccessCard;
+  @extend .quickAccessCard;
   background: linear-gradient(to bottom right, rgba(#8b5cf6, 0.05), rgba(#8b5cf6, 0.1));
   border-color: rgba(#8b5cf6, 0.2);
 
@@ -412,7 +412,7 @@
 }
 
 .quickAccessCardYellow {
-  @extend quickAccessCard;
+  @extend .quickAccessCard;
   background: linear-gradient(to bottom right, rgba(#f59e0b, 0.05), rgba(#f59e0b, 0.1));
   border-color: rgba(#f59e0b, 0.2);
 
@@ -456,7 +456,7 @@
 
 // Technology Stack
 .techSection {
-  @extend featuresSection;
+  @extend .featuresSection;
 }
 
 .techGrid {
@@ -529,7 +529,7 @@
 }
 
 .devToolButtonBlue {
-  @extend devToolButton;
+  @extend .devToolButton;
   background: #3b82f6;
 
   &:hover {
@@ -538,7 +538,7 @@
 }
 
 .devToolButtonGreen {
-  @extend devToolButton;
+  @extend .devToolButton;
   background: #10b981;
 
   &:hover {
@@ -615,7 +615,7 @@
 }
 
 .footerContainer {
-  @extend statsContainer;
+  @extend .statsContainer;
   text-align: center;
 }
 
