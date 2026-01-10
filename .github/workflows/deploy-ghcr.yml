@@ -1,0 +1,214 @@
+name: Deploy via GHCR
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  API_IMAGE_NAME: ${{ github.repository_owner }}/canary-api
+  WEB_IMAGE_NAME: ${{ github.repository_owner }}/canary-web
+
+jobs:
+  build-and-push:
+    name: 构建并推送镜像
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    outputs:
+      api_image: ${{ steps.meta-api.outputs.tags }}
+      web_image: ${{ steps.meta-web.outputs.tags }}
+
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v4
+
+      - name: 设置 Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: 登录 GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # API 镜像构建
+      - name: 提取 API 镜像元数据
+        id: meta-api
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.API_IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: 构建并推送 API 镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/api/Dockerfile.local
+          push: true
+          tags: ${{ steps.meta-api.outputs.tags }}
+          labels: ${{ steps.meta-api.outputs.labels }}
+          cache-from: type=gha,scope=api
+          cache-to: type=gha,mode=max,scope=api
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+
+      # Web 镜像构建
+      - name: 提取 Web 镜像元数据
+        id: meta-web
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.WEB_IMAGE_NAME }}
+          tags: |
+            type=sha,prefix=
+            type=raw,value=latest
+
+      - name: 构建并推送 Web 镜像
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./apps/web/Dockerfile.local
+          push: true
+          tags: ${{ steps.meta-web.outputs.tags }}
+          labels: ${{ steps.meta-web.outputs.labels }}
+          cache-from: type=gha,scope=web
+          cache-to: type=gha,mode=max,scope=web
+          build-args: |
+            BUILDKIT_INLINE_CACHE=1
+            NEXT_PUBLIC_API_URL=${{ secrets.NEXT_PUBLIC_API_URL }}
+
+  deploy:
+    name: 部署到服务器
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    timeout-minutes: 15
+
+    steps:
+      - name: 检出代码（用于 docker-compose 文件）
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            docker-compose.prod.yml
+            nginx.simple.conf
+
+      - name: 上传 docker-compose 配置
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          source: "docker-compose.prod.yml,nginx.simple.conf"
+          target: "/opt/canary/"
+          overwrite: true
+
+      - name: 部署到服务器
+        uses: appleboy/ssh-action@v1.0.3
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_ACTOR: ${{ github.actor }}
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          timeout: 10m
+          command_timeout: 10m
+          envs: GITHUB_TOKEN,GITHUB_ACTOR
+          script: |
+            set -e
+            echo "🚀 开始部署..."
+            
+            cd /opt/canary
+            
+            # 登录 GHCR
+            echo "🔐 登录 GitHub Container Registry..."
+            echo "$GITHUB_TOKEN" | docker login ghcr.io -u "$GITHUB_ACTOR" --password-stdin
+            
+            # 拉取最新镜像
+            echo "📥 拉取最新镜像..."
+            docker pull ghcr.io/${{ github.repository_owner }}/canary-api:latest
+            docker pull ghcr.io/${{ github.repository_owner }}/canary-web:latest
+            
+            # 加载环境变量
+            export $(cat .env.production | grep -v '^#' | xargs) 2>/dev/null || true
+            
+            # 停止旧服务
+            echo "🛑 停止旧服务..."
+            docker-compose -f docker-compose.prod.yml down || true
+            
+            # 启动新服务
+            echo "🚀 启动新服务..."
+            docker-compose -f docker-compose.prod.yml up -d
+            
+            # 等待服务启动
+            echo "⏳ 等待服务启动..."
+            sleep 15
+            
+            # 检查服务状态
+            echo "🔍 检查服务状态..."
+            docker-compose -f docker-compose.prod.yml ps
+            
+            # 清理旧镜像
+            echo "🧹 清理旧镜像..."
+            docker image prune -f
+            
+            echo "✅ 部署完成！"
+
+      - name: 健康检查
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          timeout: 5m
+          command_timeout: 5m
+          script: |
+            echo "🔍 执行健康检查..."
+            
+            # 检查 API 健康
+            for i in {1..10}; do
+              if curl -sf http://localhost:4000/health > /dev/null 2>&1; then
+                echo "✅ API 服务健康"
+                break
+              fi
+              echo "⏳ 等待 API 服务就绪... ($i/10)"
+              sleep 5
+            done
+            
+            # 检查 Web 服务
+            for i in {1..10}; do
+              if curl -sf http://localhost:3000 > /dev/null 2>&1; then
+                echo "✅ Web 服务健康"
+                break
+              fi
+              echo "⏳ 等待 Web 服务就绪... ($i/10)"
+              sleep 5
+            done
+            
+            echo "🎉 所有服务已就绪！"
+
+  notify:
+    name: 部署结果通知
+    runs-on: ubuntu-latest
+    needs: [build-and-push, deploy]
+    if: always()
+
+    steps:
+      - name: 输出部署结果
+        run: |
+          if [ "${{ needs.deploy.result }}" == "success" ]; then
+            echo "🎉 部署成功！"
+            echo "API 镜像: ghcr.io/${{ github.repository_owner }}/canary-api:latest"
+            echo "Web 镜像: ghcr.io/${{ github.repository_owner }}/canary-web:latest"
+          else
+            echo "❌ 部署失败，请检查日志"
+            exit 1
+          fi

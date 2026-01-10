@@ -1,5 +1,9 @@
 version: '3.8'
 
+# GHCR 镜像配置 - 通过环境变量 GHCR_OWNER 配置
+# 默认使用 zhanglkx，可在 .env.production 中覆盖
+# 例如: GHCR_OWNER=your-github-username
+
 services:
   postgres:
     image: postgres:16-alpine
@@ -24,10 +28,8 @@ services:
       - canary-network
 
   api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile.runtime
-    image: canary-api-prod:latest
+    # 使用 GHCR 预构建镜像（推荐）
+    image: ghcr.io/${GHCR_OWNER:-zhanglkx}/canary-api:${IMAGE_TAG:-latest}
     container_name: canary-api-prod
     env_file:
       - .env.production
@@ -63,12 +65,8 @@ services:
       retries: 3
 
   web:
-    build:
-      context: .
-      dockerfile: apps/web/Dockerfile.runtime
-      args:
-        NEXT_PUBLIC_API_URL: ${NEXT_PUBLIC_API_URL:-http://localhost:4000}
-    image: canary-web-prod:latest
+    # 使用 GHCR 预构建镜像（推荐）
+    image: ghcr.io/${GHCR_OWNER:-zhanglkx}/canary-web:${IMAGE_TAG:-latest}
     container_name: canary-web-prod
     env_file:
       - .env.production

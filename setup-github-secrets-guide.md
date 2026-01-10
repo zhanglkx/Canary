@@ -1,29 +1,40 @@
 # GitHub Actions 部署配置指南
 
-## 🔧 错误原因分析
+## 🎯 推荐方案：使用 GHCR 部署
 
-GitHub Actions 部署失败的原因是缺少必要的 SSH 连接配置。错误信息：
-- `Error: missing server host` - 缺少服务器地址
-- `Error: can't connect without a private SSH key or password` - 缺少 SSH 密钥
+新的部署流程使用 GitHub Container Registry (GHCR) 预构建镜像，大大提高了部署可靠性。
+
+### 新部署流程优势
+
+- **构建在 GitHub 高性能机器上进行**：避免服务器资源不足
+- **SSH 连接时间短**：只需拉取镜像和重启服务（2-3 分钟）
+- **自动镜像缓存**：后续部署更快
+- **不再依赖远程构建**：避免 "remote command exited without exit status" 错误
 
 ## 📋 需要配置的 GitHub Secrets
 
 在 GitHub 仓库的 Settings → Secrets and variables → Actions 中添加以下 secrets：
 
-### 必需的 Secrets
+### 必需的 Secrets（SSH 连接）
 
 | Secret 名称 | 描述 | 示例值 |
 |------------|------|--------|
-| `DEPLOY_HOST` | 服务器 IP 地址 | `8.159.144.140` |
-| `DEPLOY_USER` | SSH 用户名 | `root` |
-| `DEPLOY_KEY` | SSH 私钥内容 | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
-| `DEPLOY_PORT` | SSH 端口（可选） | `22` |
+| `SERVER_HOST` | 服务器 IP 地址 | `8.159.144.140` |
+| `SERVER_USER` | SSH 用户名 | `root` |
+| `SSH_PRIVATE_KEY` | SSH 私钥内容 | `-----BEGIN OPENSSH PRIVATE KEY-----...` |
 
 ### 可选的 Secrets
 
 | Secret 名称 | 描述 | 默认值 |
 |------------|------|--------|
-| `DEPLOY_PASSPHRASE` | SSH 密钥密码（如果有） | - |
+| `NEXT_PUBLIC_API_URL` | 前端 API 地址 | `http://localhost:4000` |
+
+### GHCR 说明
+
+**无需配置 GHCR Token！** 新的工作流使用自动的 `GITHUB_TOKEN`，具有以下特性：
+- 自动获得 `packages:write` 权限
+- 自动传递到服务器用于拉取镜像
+- 无需手动创建 Personal Access Token
 
 ## 🔑 SSH 密钥获取方法
 
