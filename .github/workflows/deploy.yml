@@ -37,13 +37,24 @@ jobs:
           apps/ libs/ docker-compose.prod.yml nginx.simple.conf
         echo "✅ Package created: $(ls -lh deploy.tar.gz | awk '{print $5}')"
         
+    - name: Upload deployment package
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        source: "deploy.tar.gz"
+        target: "/tmp/"
+        timeout: 10m
+        
     - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USER }}
-        key: ${{ secrets.DEPLOY_KEY }}
-        port: ${{ secrets.DEPLOY_PORT || '22' }}
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
         timeout: 60m
         command_timeout: 60m
         script_stop: true
@@ -162,16 +173,18 @@ jobs:
           
           echo "🎉 Deployment completed successfully!"
           
-    - name: Upload deployment package
+    - name: Cleanup on failure
       if: failure()
-      uses: appleboy/scp-action@v0.1.7
+      uses: appleboy/ssh-action@v1.0.3
       with:
-        host: ${{ secrets.DEPLOY_HOST }}
-        username: ${{ secrets.DEPLOY_USER }}
-        key: ${{ secrets.DEPLOY_KEY }}
-        port: ${{ secrets.DEPLOY_PORT || '22' }}
-        source: "deploy.tar.gz"
-        target: "/tmp/"
+        host: ${{ secrets.SERVER_HOST }}
+        username: ${{ secrets.SERVER_USER }}
+        key: ${{ secrets.SSH_PRIVATE_KEY }}
+        port: 22
+        script: |
+          echo "🧹 Cleaning up failed deployment..."
+          rm -f /tmp/deploy.tar.gz
+          echo "✅ Cleanup completed"
         
     - name: Notify deployment result
       if: always()
