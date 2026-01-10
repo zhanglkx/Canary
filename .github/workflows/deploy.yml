@@ -47,6 +47,8 @@ jobs:
         source: "deploy.tar.gz"
         target: "/tmp/"
         timeout: 10m
+        overwrite: true
+        debug: false
         
     - name: Deploy to server
       uses: appleboy/ssh-action@v1.0.3
@@ -83,6 +85,16 @@ jobs:
           mkdir -p backup
           cp -r apps backup/ 2>/dev/null || true
           echo "✅ Backup completed"
+          
+          # 检查部署包是否存在
+          echo "🔍 Checking deployment package..."
+          if [ ! -f "/tmp/deploy.tar.gz" ]; then
+            echo "❌ Deployment package not found at /tmp/deploy.tar.gz"
+            echo "📋 Files in /tmp/:"
+            ls -la /tmp/ | grep deploy || echo "No deploy files found"
+            exit 1
+          fi
+          echo "✅ Deployment package found: $(ls -lh /tmp/deploy.tar.gz | awk '{print $5}')"
           
           # 解压新版本
           echo "📦 Extracting new version..."
