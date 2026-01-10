@@ -55,9 +55,11 @@ jobs:
         username: ${{ secrets.SERVER_USER }}
         key: ${{ secrets.SSH_PRIVATE_KEY }}
         port: 22
-        timeout: 60m
-        command_timeout: 60m
+        timeout: 90m
+        command_timeout: 90m
         script_stop: true
+        request_pty: true
+        use_insecure_cipher: false
         script: |
           set -e
           echo "🚀 Starting deployment process..."
@@ -126,32 +128,65 @@ jobs:
           echo "📥 Pulling base images for cache..."
           docker pull node:22.15.0-alpine || true
           
-          # 构建API（使用缓存优化）
+          # 设置 SSH 保活，防止长时间构建时连接断开
+          echo "🔗 Configuring SSH keep-alive..."
+          echo "ServerAliveInterval 60" >> ~/.ssh/config
+          echo "ServerAliveCountMax 10" >> ~/.ssh/config || true
+          
+          # 构建API（使用缓存优化，增加保活输出）
           echo "🔨 Building API Docker image with cache optimization..."
-          timeout 1800 docker build \
+          echo "⏱️  This may take 15-20 minutes, please be patient..."
+          
+          # 使用后台构建并定期输出保活信息
+          timeout 2700 docker build \
             --progress=plain \
             --network=host \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             --cache-from=canary-api-prod:latest \
             --cache-from=node:22.15.0-alpine \
             -f apps/api/Dockerfile.runtime \
-            -t canary-api-prod:latest . || {
+            -t canary-api-prod:latest . &
+          
+          BUILD_PID=$!
+          
+          # 每分钟输出一次保活信息
+          while kill -0 $BUILD_PID 2>/dev/null; do
+            echo "⏳ API build in progress... ($(date))"
+            sleep 60
+          done
+          
+          # 等待构建完成并检查结果
+          wait $BUILD_PID || {
             echo "❌ API build failed or timed out"
             docker system prune -f
             exit 1
           }
           echo "✅ API image built successfully"
           
-          # 构建Web（使用缓存优化）
+          # 构建Web（使用缓存优化，增加保活输出）
           echo "🔨 Building Web Docker image with cache optimization..."
-          timeout 1800 docker build \
+          echo "⏱️  This may take 10-15 minutes, please be patient..."
+          
+          # 使用后台构建并定期输出保活信息
+          timeout 2700 docker build \
             --progress=plain \
             --network=host \
             --build-arg BUILDKIT_INLINE_CACHE=1 \
             --cache-from=canary-web-prod:latest \
             --cache-from=node:22.15.0-alpine \
             -f apps/web/Dockerfile.runtime \
-            -t canary-web-prod:latest . || {
+            -t canary-web-prod:latest . &
+          
+          BUILD_PID=$!
+          
+          # 每分钟输出一次保活信息
+          while kill -0 $BUILD_PID 2>/dev/null; do
+            echo "⏳ Web build in progress... ($(date))"
+            sleep 60
+          done
+          
+          # 等待构建完成并检查结果
+          wait $BUILD_PID || {
             echo "❌ Web build failed or timed out"
             docker system prune -f
             exit 1
