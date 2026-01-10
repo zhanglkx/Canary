@@ -139,6 +139,10 @@ jobs:
             # 加载环境变量
             export $(cat .env.production | grep -v '^#' | xargs) 2>/dev/null || true
             
+            # 设置 GHCR 镜像变量（覆盖 .env.production 中的配置）
+            export GHCR_OWNER=${{ github.repository_owner }}
+            export IMAGE_TAG=latest
+            
             # 停止旧服务
             echo "🛑 停止旧服务..."
             docker-compose -f docker-compose.prod.yml down || true
