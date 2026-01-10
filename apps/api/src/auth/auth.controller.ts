@@ -50,14 +50,17 @@ export class AuthController {
   /**
    * POST /api/auth/refresh
    * 刷新访问令牌
-   * 需要认证
+   * 不需要JWT认证，因为token可能已过期，从refreshToken中提取用户信息
    */
   @Post('refresh')
-  @UseGuards(JwtAuthGuard)
   async refreshToken(
     @Body() refreshTokenDto: RefreshTokenDto,
-    @CurrentUser() user: User,
   ): Promise<TokenResponse> {
+    // 从refreshToken中提取用户信息
+    const user = await this.authService.getUserFromRefreshToken(
+      refreshTokenDto.refreshToken,
+    );
+
     const accessToken = await this.tokenService.refreshAccessToken(
       refreshTokenDto.refreshToken,
       user,

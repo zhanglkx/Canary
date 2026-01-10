@@ -51,7 +51,9 @@ interface User {
 interface AuthContextType {
   user: User | null;
   token: string | null;
-  login: (token: string, user: User) => void;
+  refreshToken: string | null;
+  login: (token: string, refreshToken: string, user: User) => void;
+  updateToken: (token: string) => void;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
@@ -88,6 +90,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Token 状态：存储 JWT 认证 token
   const [token, setToken] = useState<string | null>(null);
 
+  // RefreshToken 状态：存储刷新令牌
+  const [refreshToken, setRefreshToken] = useState<string | null>(null);
+
   // 加载状态：用于处理从 localStorage 初始化的异步过程
   // 这是解决 SSR/CSR hydration 问题的关键
   // 初始值为 true，因为需要从 localStorage 读取数据
@@ -115,6 +120,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // 从浏览器 localStorage 读取之前保存的 token
     const storedToken = localStorage.getItem('token');
 
+    // 从浏览器 localStorage 读取之前保存的 refreshToken
+    const storedRefreshToken = localStorage.getItem('refreshToken');
+
     // 从浏览器 localStorage 读取之前保存的用户信息（JSON 字符串格式）
     const storedUser = localStorage.getItem('user');
 
@@ -123,6 +131,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setToken(storedToken);
       // JSON.parse 将存储的 JSON 字符串转换回 User 对象
       setUser(JSON.parse(storedUser));
+    }
+
+    // 恢复 refreshToken
+    if (storedRefreshToken) {
+      setRefreshToken(storedRefreshToken);
     }
 
     // 初始化完成，设置加载状态为 false
@@ -144,24 +157,40 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * ```tsx
    * const { login } = useAuth();
    * const token = "jwt.token.here";
+   * const refreshToken = "refresh.token.here";
    * const user = { id: "123", email: "user@example.com", username: "john" };
-   * login(token, user);
+   * login(token, refreshToken, user);
    * ```
    *
    * @param newToken - 从后端返回的 JWT 认证 token
+   * @param newRefreshToken - 从后端返回的刷新令牌
    * @param newUser - 用户对象，包含 id、email、username 等信息
    */
-  const login = (newToken: string, newUser: User) => {
+  const login = (newToken: string, newRefreshToken: string, newUser: User) => {
     // 更新 React state，立即触发组件重新渲染
     setToken(newToken);
+    setRefreshToken(newRefreshToken);
     setUser(newUser);
 
     // 将 token 字符串直接存储到 localStorage
     localStorage.setItem('token', newToken);
 
+    // 将 refreshToken 存储到 localStorage
+    localStorage.setItem('refreshToken', newRefreshToken);
+
     // 将用户对象转换为 JSON 字符串后存储到 localStorage
     // JSON.stringify 将对象转换为字符串格式
     localStorage.setItem('user', JSON.stringify(newUser));
+  };
+
+  /**
+   * 更新访问令牌（用于token刷新）
+   *
+   * @param newToken - 新的访问令牌
+   */
+  const updateToken = (newToken: string) => {
+    setToken(newToken);
+    localStorage.setItem('token', newToken);
   };
 
   /**
@@ -184,10 +213,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = () => {
     // 清除 React state，触发重新渲染
     setToken(null);
+    setRefreshToken(null);
     setUser(null);
 
     // 删除浏览器 localStorage 中的认证信息
     localStorage.removeItem('token');
+    localStorage.removeItem('refreshToken');
     localStorage.removeItem('user');
   };
 
@@ -209,7 +240,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       value={{
         user,
         token,
+        refreshToken,
         login,
+        updateToken,
         logout,
         // 只有当 token 和 user 都存在时，才认为用户已认证
         isAuthenticated: !!token && !!user,

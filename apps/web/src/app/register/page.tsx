@@ -43,7 +43,7 @@ export default function RegisterPage() {
 
     try {
       const response = await authApi.register({ email, username, password });
-      login(response.accessToken, response.user);
+      login(response.accessToken, response.refreshToken, response.user);
       router.push('/todos');
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');

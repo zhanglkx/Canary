@@ -10,6 +10,7 @@
  */
 import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcryptjs';
 import { UserService } from '../user/user.service';
 import { TokenService } from './services/token.service';
@@ -24,6 +25,7 @@ export class AuthService {
     private userService: UserService,
     private jwtService: JwtService,
     private tokenService: TokenService,
+    private configService: ConfigService,
   ) {}
 
   async validateUser(email: string, password: string): Promise<User | null> {
@@ -69,6 +71,34 @@ export class AuthService {
       return await this.userService.findOne(payload.sub);
     } catch (error) {
       throw new UnauthorizedException('Invalid token');
+    }
+  }
+
+  /**
+   * 从refreshToken中提取用户信息
+   * 用于刷新访问令牌时获取用户信息
+   */
+  async getUserFromRefreshToken(refreshToken: string): Promise<User> {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.configService.get('JWT_SECRET'),
+      });
+
+      if (payload.type !== 'refresh') {
+        throw new UnauthorizedException('Invalid refresh token type');
+      }
+
+      const user = await this.userService.findOne(payload.sub);
+      if (!user) {
+        throw new UnauthorizedException('User not found');
+      }
+
+      return user;
+    } catch (error) {
+      if (error instanceof UnauthorizedException) {
+        throw error;
+      }
+      throw new UnauthorizedException('Invalid refresh token');
     }
   }
 }
