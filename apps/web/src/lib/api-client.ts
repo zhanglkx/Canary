@@ -272,7 +272,7 @@ class ApiClient {
   /**
    * 统一错误处理
    */
-  private async handleError(error: AxiosError): Promise<never> {
+  private async handleError(error: AxiosError): Promise<any> {
     // 请求被取消 - 检查多种取消情况
     if (
       axios.isCancel(error) ||
