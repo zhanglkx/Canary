@@ -54,6 +54,9 @@ COPY --from=deps /app/tsconfig.base.json ./tsconfig.base.json
 COPY apps/web ./apps/web
 COPY libs/shared ./libs/shared
 
+# 确保 public 目录存在
+RUN mkdir -p /app/apps/web/public
+
 # 安装所有依赖（包括 devDependencies）用于构建，非交互式
 RUN CI=true pnpm install --frozen-lockfile --prefer-offline --ignore-scripts
 
@@ -87,12 +90,15 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/package.json ./package.json
 COPY --from=deps /app/pnpm-workspace.yaml ./pnpm-workspace.yaml
+# 复制构建产物和依赖
 COPY --from=builder /app/libs/shared/dist ./libs/shared/dist
 COPY --from=builder /app/libs/shared/package.json ./libs/shared/package.json
 COPY --from=builder /app/apps/web/.next ./apps/web/.next
-COPY --from=builder /app/apps/web/public ./apps/web/public
 COPY --from=builder /app/apps/web/package.json ./apps/web/package.json
 COPY --from=builder /app/apps/web/next.config.ts ./apps/web/next.config.ts
+
+# 复制 public 目录（现在已创建）
+COPY --from=builder /app/apps/web/public ./apps/web/public
 
 # 设置用户权限
 USER nextjs

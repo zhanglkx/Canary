@@ -12,6 +12,7 @@ RUN CI=true pnpm install --frozen-lockfile --prod --no-optional --ignore-scripts
 
 # 复制构建结果
 COPY apps/web/.next ./apps/web/.next
+COPY apps/web/public ./apps/web/public
 COPY libs/shared ./libs/shared
 
 WORKDIR /app/apps/web
