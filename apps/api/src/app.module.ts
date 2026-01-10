@@ -23,6 +23,7 @@ import { SearchModule } from './search/search.module'; // 搜索功能模块
 import { BatchModule } from './batch/batch.module'; // 批量操作模块
 import { EcommerceModule } from './ecommerce/ecommerce.module'; // 电商模块
 import { CommonModule } from './common/common.module'; // 通用模块
+import { JdSignModule } from './jd-sign/jd-sign.module'; // 京东签到模块
 import { AppController } from './app.controller';
 
 /**
@@ -62,9 +63,10 @@ import { AppController } from './app.controller';
         database: configService.get('DATABASE_NAME', 'learning_nest_next'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         // 允许通过环境变量 TYPEORM_SYNCHRONIZE 控制同步行为
-        synchronize: configService.get('TYPEORM_SYNCHRONIZE') === 'true' 
-          ? true 
-          : configService.get('NODE_ENV') !== 'production',
+        synchronize:
+          configService.get('TYPEORM_SYNCHRONIZE') === 'true'
+            ? true
+            : configService.get('NODE_ENV') !== 'production',
         logging: configService.get('NODE_ENV') === 'development',
         ssl: configService.get('DATABASE_SSL') === 'true' ? { rejectUnauthorized: false } : false,
       }),
@@ -83,6 +85,7 @@ import { AppController } from './app.controller';
     SearchModule, // 搜索功能
     BatchModule, // 批量操作功能
     EcommerceModule, // 电商功能
+    JdSignModule, // 京东签到功能
   ],
 })
 export class AppModule {}
