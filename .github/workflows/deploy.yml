@@ -2,188 +2,182 @@ name: Deploy to Production
 
 on:
   push:
-    branches:
-      - main
+    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deploy:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 60
+    
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
-
-      - name: Install pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 9.15.0
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Build API
-        run: |
-          cd apps/api
-          pnpm build
-
-      - name: Build Web
-        env:
-          NEXT_PUBLIC_API_URL: http://${{ secrets.SERVER_HOST }}/api
-        run: |
-          cd apps/web
-          pnpm build
-
-      - name: Create deployment package
-        run: |
-          # 创建部署目录结构
-          mkdir -p deploy
-
-          # 复制API构建结果
-          mkdir -p deploy/apps/api
-          cp -r apps/api/dist deploy/apps/api/
-          cp apps/api/package.json deploy/apps/api/
-
-          # 复制Web构建结果
-          mkdir -p deploy/apps/web
-          cp -r apps/web/.next deploy/apps/web/
-          cp apps/web/package.json deploy/apps/web/
-
-          # 复制shared库
-          mkdir -p deploy/libs/shared
-          cp -r libs/shared deploy/libs/
-
-          # 复制根目录文件
-          cp package.json pnpm-workspace.yaml pnpm-lock.yaml deploy/
-
-          # 复制Docker相关文件
-          cp -r apps/api/Dockerfile.local deploy/apps/api/
-          cp -r apps/web/Dockerfile.local deploy/apps/web/
-          cp docker-compose.prod.yml deploy/
-          cp nginx.simple.conf deploy/
-
-          # 打包
-          cd deploy
-          tar -czf ../deploy.tar.gz .
-
-      - name: Upload to server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: 'deploy.tar.gz'
-          target: '/tmp'
-
-      - name: Deploy on server
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: ${{ secrets.SERVER_USER }}
-          key: ${{ secrets.SSH_PRIVATE_KEY }}
-          port: 22
-          timeout: 60s
-          command_timeout: 30m
-          script: |
-            set -e
-
-            echo "🚀 Starting deployment process..."
-
-            # 进入项目目录
-            cd /opt/canary
-            echo "📁 Changed to project directory: $(pwd)"
-
-            # 停止当前服务
-            echo "🛑 Stopping current services..."
-            export $(cat .env.clean | xargs)
-            docker-compose -f docker-compose.prod.yml down || true
-            echo "✅ Services stopped"
-
-            # 备份当前版本
-            echo "💾 Backing up current version..."
-            if [ -d "backup" ]; then
-              rm -rf backup.old
-              mv backup backup.old
-            fi
-            mkdir -p backup
-            cp -r apps backup/ 2>/dev/null || true
-            echo "✅ Backup completed"
-
-            # 解压新版本
-            echo "📦 Extracting new version..."
-            rm -rf apps libs docker-compose.prod.yml nginx.simple.conf
-            tar -xzf /tmp/deploy.tar.gz
-            rm /tmp/deploy.tar.gz
-            echo "✅ Extraction completed"
-
-            # 重命名Dockerfile
-            echo "📝 Renaming Dockerfiles..."
-            mv apps/api/Dockerfile.local apps/api/Dockerfile.runtime
-            mv apps/web/Dockerfile.local apps/web/Dockerfile.runtime
-            echo "✅ Dockerfiles renamed"
-
-            # 构建并启动服务
-            export $(cat .env.clean | xargs)
-
-            # 构建API
-            echo "🔨 Building API Docker image..."
-            DOCKER_BUILDKIT=1 docker build --progress=plain -f apps/api/Dockerfile.runtime -t canary-api-prod:latest . || {
-              echo "❌ API build failed"
-              exit 1
-            }
-            echo "✅ API image built successfully"
-
-            # 构建Web
-            echo "🔨 Building Web Docker image..."
-            DOCKER_BUILDKIT=1 docker build --progress=plain -f apps/web/Dockerfile.runtime -t canary-web-prod:latest . || {
-              echo "❌ Web build failed"
-              exit 1
-            }
-            echo "✅ Web image built successfully"
-
-            # 启动所有服务
-            echo "🚀 Starting all services..."
-            docker-compose -f docker-compose.prod.yml up -d
-            echo "✅ Services started"
-
-            # 等待服务启动
-            echo "⏳ Waiting for services to be ready..."
-            sleep 15
-
-            # 检查服务状态
-            echo "📊 Checking service status..."
-            docker-compose -f docker-compose.prod.yml ps
-
-            # 清理旧镜像
-            echo "🧹 Cleaning up old images..."
-            docker image prune -f || true
-
-            echo "✅ Deployment completed successfully!"
-
-      - name: Notify deployment status
-        if: always()
-        run: |
-          if [ "${{ job.status }}" == "success" ]; then
-            echo "🎉 Deployment succeeded!"
-          else
-            echo "❌ Deployment failed!"
+    - name: Checkout code
+      uses: actions/checkout@v4
+      
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        
+    - name: Setup pnpm
+      uses: pnpm/action-setup@v4
+      with:
+        version: 9.15.0
+        
+    - name: Create deployment package
+      run: |
+        echo "📦 Creating deployment package..."
+        tar -czf deploy.tar.gz \
+          --exclude=node_modules \
+          --exclude=dist \
+          --exclude=.next \
+          --exclude=.git \
+          --exclude='*.log' \
+          --exclude='*.tar.gz' \
+          apps/ libs/ docker-compose.prod.yml nginx.simple.conf
+        echo "✅ Package created: $(ls -lh deploy.tar.gz | awk '{print $5}')"
+        
+    - name: Deploy to server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_KEY }}
+        port: ${{ secrets.DEPLOY_PORT || '22' }}
+        timeout: 60m
+        command_timeout: 60m
+        script_stop: true
+        script: |
+          set -e
+          echo "🚀 Starting deployment process..."
+          
+          # 进入项目目录
+          cd /opt/canary
+          echo "📁 Changed to project directory: $(pwd)"
+          
+          # 停止当前服务
+          echo "🛑 Stopping current services..."
+          export $(cat .env.clean | xargs) 2>/dev/null || true
+          docker-compose -f docker-compose.prod.yml down || true
+          echo "✅ Services stopped"
+          
+          # 备份当前版本
+          echo "💾 Backing up current version..."
+          if [ -d "backup" ]; then
+            rm -rf backup.old
+            mv backup backup.old
           fi
+          mkdir -p backup
+          cp -r apps backup/ 2>/dev/null || true
+          echo "✅ Backup completed"
+          
+          # 解压新版本
+          echo "📦 Extracting new version..."
+          rm -rf apps libs docker-compose.prod.yml nginx.simple.conf
+          tar -xzf /tmp/deploy.tar.gz
+          rm /tmp/deploy.tar.gz
+          echo "✅ Extraction completed"
+          
+          # 检查并准备Dockerfile
+          echo "📝 Preparing Dockerfiles..."
+          if [ -f "apps/api/Dockerfile.local" ]; then
+            mv apps/api/Dockerfile.local apps/api/Dockerfile.runtime
+            echo "✅ API Dockerfile.local renamed to Dockerfile.runtime"
+          elif [ ! -f "apps/api/Dockerfile.runtime" ]; then
+            echo "❌ No API Dockerfile found"
+            exit 1
+          else
+            echo "✅ API Dockerfile.runtime already exists"
+          fi
+          
+          if [ -f "apps/web/Dockerfile.local" ]; then
+            mv apps/web/Dockerfile.local apps/web/Dockerfile.runtime
+            echo "✅ Web Dockerfile.local renamed to Dockerfile.runtime"
+          elif [ ! -f "apps/web/Dockerfile.runtime" ]; then
+            echo "❌ No Web Dockerfile found"
+            exit 1
+          else
+            echo "✅ Web Dockerfile.runtime already exists"
+          fi
+          
+          # 加载环境变量
+          export $(cat .env.clean | xargs) 2>/dev/null || true
+          
+          # 设置 Docker 构建参数和缓存优化
+          export DOCKER_BUILDKIT=1
+          export BUILDKIT_PROGRESS=plain
+          
+          # 清理旧的 Docker 缓存（保留有用的缓存）
+          echo "🧹 Cleaning old Docker cache..."
+          docker builder prune --filter until=24h -f || true
+          
+          # 预拉取基础镜像以利用缓存
+          echo "📥 Pulling base images for cache..."
+          docker pull node:22.15.0-alpine || true
+          
+          # 构建API（使用缓存优化）
+          echo "🔨 Building API Docker image with cache optimization..."
+          timeout 1800 docker build \
+            --progress=plain \
+            --network=host \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --cache-from=canary-api-prod:latest \
+            --cache-from=node:22.15.0-alpine \
+            -f apps/api/Dockerfile.runtime \
+            -t canary-api-prod:latest . || {
+            echo "❌ API build failed or timed out"
+            docker system prune -f
+            exit 1
+          }
+          echo "✅ API image built successfully"
+          
+          # 构建Web（使用缓存优化）
+          echo "🔨 Building Web Docker image with cache optimization..."
+          timeout 1800 docker build \
+            --progress=plain \
+            --network=host \
+            --build-arg BUILDKIT_INLINE_CACHE=1 \
+            --cache-from=canary-web-prod:latest \
+            --cache-from=node:22.15.0-alpine \
+            -f apps/web/Dockerfile.runtime \
+            -t canary-web-prod:latest . || {
+            echo "❌ Web build failed or timed out"
+            docker system prune -f
+            exit 1
+          }
+          echo "✅ Web image built successfully"
+          
+          # 启动服务
+          echo "🚀 Starting services..."
+          docker-compose -f docker-compose.prod.yml up -d
+          echo "✅ Services started"
+          
+          # 等待服务启动
+          echo "⏳ Waiting for services to be ready..."
+          sleep 30
+          
+          # 检查服务状态
+          echo "🔍 Checking service status..."
+          docker-compose -f docker-compose.prod.yml ps
+          
+          echo "🎉 Deployment completed successfully!"
+          
+    - name: Upload deployment package
+      if: failure()
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.DEPLOY_HOST }}
+        username: ${{ secrets.DEPLOY_USER }}
+        key: ${{ secrets.DEPLOY_KEY }}
+        port: ${{ secrets.DEPLOY_PORT || '22' }}
+        source: "deploy.tar.gz"
+        target: "/tmp/"
+        
+    - name: Notify deployment result
+      if: always()
+      run: |
+        if [ "${{ job.status }}" == "success" ]; then
+          echo "🎉 Deployment succeeded!"
+        else
+          echo "❌ Deployment failed!"
+        fi
