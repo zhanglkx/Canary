@@ -16,9 +16,14 @@
  * 6. 请求重试机制
  */
 
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosError, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 
 // ============ 类型定义 ============
+
+// 扩展 InternalAxiosRequestConfig 类型，添加 _retry 属性
+interface ExtendedInternalAxiosRequestConfig extends InternalAxiosRequestConfig {
+  _retry?: boolean;
+}
 export interface ApiResponse<T = any> {
   code: number;
   message: string;
@@ -176,7 +181,11 @@ class ApiClient {
     error: AxiosError,
     refreshToken: string,
   ): Promise<any> {
-    const originalRequest = error.config!;
+    const originalRequest = error.config as ExtendedInternalAxiosRequestConfig | undefined;
+    
+    if (!originalRequest) {
+      return Promise.reject(error);
+    }
 
     // 如果正在刷新，将请求加入队列
     if (this.isRefreshing) {
@@ -336,9 +345,10 @@ class ApiClient {
         // Token过期或无效，尝试刷新token
         if (typeof window !== 'undefined') {
           const refreshToken = localStorage.getItem('refreshToken');
+          const requestConfig = error.config as ExtendedInternalAxiosRequestConfig | undefined;
           
           // 如果有refreshToken，尝试刷新
-          if (refreshToken && error.config && !error.config._retry) {
+          if (refreshToken && requestConfig && !requestConfig._retry) {
             return this.handleTokenRefresh(error, refreshToken);
           }
           
