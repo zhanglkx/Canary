@@ -57,30 +57,30 @@ jobs:
         run: |
           # 创建部署目录结构
           mkdir -p deploy
-          
+
           # 复制API构建结果
           mkdir -p deploy/apps/api
           cp -r apps/api/dist deploy/apps/api/
           cp apps/api/package.json deploy/apps/api/
-          
+
           # 复制Web构建结果
           mkdir -p deploy/apps/web
           cp -r apps/web/.next deploy/apps/web/
           cp apps/web/package.json deploy/apps/web/
-          
+
           # 复制shared库
           mkdir -p deploy/libs/shared
           cp -r libs/shared deploy/libs/
-          
+
           # 复制根目录文件
           cp package.json pnpm-workspace.yaml pnpm-lock.yaml deploy/
-          
+
           # 复制Docker相关文件
           cp -r apps/api/Dockerfile.local deploy/apps/api/
           cp -r apps/web/Dockerfile.local deploy/apps/web/
           cp docker-compose.prod.yml deploy/
           cp nginx.simple.conf deploy/
-          
+
           # 打包
           cd deploy
           tar -czf ../deploy.tar.gz .
@@ -91,8 +91,8 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
-          source: "deploy.tar.gz"
-          target: "/tmp"
+          source: 'deploy.tar.gz'
+          target: '/tmp'
 
       - name: Deploy on server
         uses: appleboy/ssh-action@v1.0.3
@@ -100,54 +100,83 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: 22
+          timeout: 60s
+          command_timeout: 30m
           script: |
             set -e
-            
+
+            echo "🚀 Starting deployment process..."
+
             # 进入项目目录
             cd /opt/canary
-            
+            echo "📁 Changed to project directory: $(pwd)"
+
             # 停止当前服务
+            echo "🛑 Stopping current services..."
             export $(cat .env.clean | xargs)
-            docker-compose -f docker-compose.prod.yml down
-            
+            docker-compose -f docker-compose.prod.yml down || true
+            echo "✅ Services stopped"
+
             # 备份当前版本
+            echo "💾 Backing up current version..."
             if [ -d "backup" ]; then
               rm -rf backup.old
               mv backup backup.old
             fi
             mkdir -p backup
             cp -r apps backup/ 2>/dev/null || true
-            
+            echo "✅ Backup completed"
+
             # 解压新版本
+            echo "📦 Extracting new version..."
             rm -rf apps libs docker-compose.prod.yml nginx.simple.conf
             tar -xzf /tmp/deploy.tar.gz
             rm /tmp/deploy.tar.gz
-            
+            echo "✅ Extraction completed"
+
             # 重命名Dockerfile
+            echo "📝 Renaming Dockerfiles..."
             mv apps/api/Dockerfile.local apps/api/Dockerfile.runtime
             mv apps/web/Dockerfile.local apps/web/Dockerfile.runtime
-            
+            echo "✅ Dockerfiles renamed"
+
             # 构建并启动服务
             export $(cat .env.clean | xargs)
-            
+
             # 构建API
-            docker build -f apps/api/Dockerfile.runtime -t canary-api-prod:latest .
-            
+            echo "🔨 Building API Docker image..."
+            DOCKER_BUILDKIT=1 docker build --progress=plain -f apps/api/Dockerfile.runtime -t canary-api-prod:latest . || {
+              echo "❌ API build failed"
+              exit 1
+            }
+            echo "✅ API image built successfully"
+
             # 构建Web
-            docker build -f apps/web/Dockerfile.runtime -t canary-web-prod:latest .
-            
+            echo "🔨 Building Web Docker image..."
+            DOCKER_BUILDKIT=1 docker build --progress=plain -f apps/web/Dockerfile.runtime -t canary-web-prod:latest . || {
+              echo "❌ Web build failed"
+              exit 1
+            }
+            echo "✅ Web image built successfully"
+
             # 启动所有服务
+            echo "🚀 Starting all services..."
             docker-compose -f docker-compose.prod.yml up -d
-            
+            echo "✅ Services started"
+
             # 等待服务启动
-            sleep 10
-            
+            echo "⏳ Waiting for services to be ready..."
+            sleep 15
+
             # 检查服务状态
+            echo "📊 Checking service status..."
             docker-compose -f docker-compose.prod.yml ps
-            
+
             # 清理旧镜像
-            docker image prune -f
-            
+            echo "🧹 Cleaning up old images..."
+            docker image prune -f || true
+
             echo "✅ Deployment completed successfully!"
 
       - name: Notify deployment status
