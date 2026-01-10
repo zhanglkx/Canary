@@ -113,6 +113,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_ACTOR: ${{ github.actor }}
+          # 环境变量从 GitHub Secrets 传入
+          DATABASE_PASSWORD: ${{ secrets.DATABASE_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
         with:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
@@ -120,7 +124,7 @@ jobs:
           port: 22
           timeout: 10m
           command_timeout: 10m
-          envs: GITHUB_TOKEN,GITHUB_ACTOR
+          envs: GITHUB_TOKEN,GITHUB_ACTOR,DATABASE_PASSWORD,JWT_SECRET,NEXT_PUBLIC_API_URL
           script: |
             set -e
             echo "🚀 开始部署..."
@@ -136,10 +140,39 @@ jobs:
             docker pull ghcr.io/${{ github.repository_owner }}/canary-api:latest
             docker pull ghcr.io/${{ github.repository_owner }}/canary-web:latest
             
+            # 自动生成 .env.production 文件
+            echo "📝 生成环境配置文件..."
+            cat > .env.production << EOF
+            # 自动生成 - $(date)
+            # GHCR 配置
+            GHCR_OWNER=${{ github.repository_owner }}
+            IMAGE_TAG=latest
+            
+            # 数据库配置
+            DATABASE_USERNAME=postgres
+            DATABASE_PASSWORD=${DATABASE_PASSWORD}
+            DATABASE_NAME=canary_production
+            
+            # JWT 配置
+            JWT_SECRET=${JWT_SECRET}
+            JWT_EXPIRATION=7d
+            
+            # 前端配置
+            NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://8.159.144.140:4000}
+            FRONTEND_URL=${NEXT_PUBLIC_API_URL:-http://8.159.144.140}
+            
+            # 支付配置（可选）
+            STRIPE_SECRET_KEY=
+            STRIPE_WEBHOOK_SECRET=
+            PAYPAL_CLIENT_ID=
+            PAYPAL_CLIENT_SECRET=
+            EOF
+            echo "✅ 环境配置文件已生成"
+            
             # 加载环境变量
             export $(cat .env.production | grep -v '^#' | xargs) 2>/dev/null || true
             
-            # 设置 GHCR 镜像变量（覆盖 .env.production 中的配置）
+            # 设置 GHCR 镜像变量
             export GHCR_OWNER=${{ github.repository_owner }}
             export IMAGE_TAG=latest
             
