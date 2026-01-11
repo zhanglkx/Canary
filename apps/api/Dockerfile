@@ -3,8 +3,12 @@ RUN corepack enable && corepack prepare pnpm@9.15.0 --activate
 WORKDIR /app
 
 FROM base AS dependencies
-# 配置 npm 镜像
-RUN echo "registry=https://registry.npmmirror.com" > /root/.npmrc
+# 配置 npm 镜像和网络设置
+RUN echo "registry=https://registry.npmmirror.com" > /root/.npmrc && \
+    echo "network-timeout=300000" >> /root/.npmrc && \
+    echo "fetch-retries=5" >> /root/.npmrc && \
+    echo "fetch-retry-mintimeout=20000" >> /root/.npmrc && \
+    echo "fetch-retry-maxtimeout=120000" >> /root/.npmrc
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/api/package.json ./apps/api/
 RUN mkdir -p ./libs/shared
@@ -20,7 +24,10 @@ COPY libs/shared ./libs/shared
 WORKDIR /app/apps/api
 # Install dependencies inside the build stage to ensure pnpm workspace layout is correct
 # 忽略 sqlite3 可选依赖，避免编译问题
-RUN corepack enable && corepack prepare pnpm@9.15.0 --activate && pnpm install --frozen-lockfile --no-optional
+RUN corepack enable && corepack prepare pnpm@9.15.0 --activate && \
+    pnpm config set registry https://registry.npmmirror.com && \
+    pnpm config set network-timeout 300000 && \
+    pnpm install --frozen-lockfile --no-optional
 RUN pnpm build
 
 FROM base AS production
