@@ -13,8 +13,8 @@ COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/api/package.json ./apps/api/
 RUN mkdir -p ./libs/shared
 COPY libs/shared/package.json ./libs/shared/
-# 忽略 sqlite3 可选依赖，避免编译问题
-RUN pnpm install --frozen-lockfile --no-optional
+# 完整安装所有依赖，包括可选依赖，确保 ajv 等模块正确安装
+RUN pnpm install --frozen-lockfile
 
 FROM base AS build
 # 添加构建参数强制刷新缓存
@@ -27,11 +27,11 @@ WORKDIR /app/apps/api
 # 使用构建参数确保代码层被重新构建
 RUN echo "Build cache bust: $CACHEBUST"
 # Install dependencies inside the build stage to ensure pnpm workspace layout is correct
-# 忽略 sqlite3 可选依赖，避免编译问题
+# 完整安装依赖，确保 @nestjs/cli 所需的 ajv 模块正确安装
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate && \
     pnpm config set registry https://registry.npmmirror.com && \
     pnpm config set network-timeout 300000 && \
-    pnpm install --frozen-lockfile --no-optional
+    pnpm install --frozen-lockfile
 RUN pnpm build
 
 FROM base AS production
