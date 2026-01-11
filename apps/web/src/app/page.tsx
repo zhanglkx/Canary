@@ -71,7 +71,7 @@ export default function HomePage() {
         <div className={styles.heroContent}>
           <h1 className={styles.title}>
             让效率
-            <span className={styles.gradient}>触手可及</span>
+            <span className={styles.gradient}>触手可及·让生活更美好</span>
           </h1>
           <p className={styles.description}>
             一个现代化的待办事项管理应用，帮助你组织任务、提升效率、实现目标。

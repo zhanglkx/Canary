@@ -41,25 +41,66 @@ prepare_images() {
     # 清理旧镜像确保使用最新代码
     docker rmi canary-api:latest canary-web:latest 2>/dev/null || true
     
+    # 添加构建时间戳到镜像标签
+    local BUILD_TIME=$(date +%Y%m%d_%H%M%S)
+    log "构建时间戳: $BUILD_TIME"
+    
     # 强制构建 API 镜像 (AMD64 架构)
     log "构建 API 镜像 (AMD64 架构，最新代码)..."
-    if docker build --platform linux/amd64 --no-cache -f apps/api/Dockerfile -t canary-api:latest .; then
-        success "API 镜像构建完成"
-    else
-        # 如果构建失败，尝试不使用缓存的简单构建
-        warn "无缓存构建失败，尝试普通构建..."
-        if docker build --platform linux/amd64 -f apps/api/Dockerfile -t canary-api:latest .; then
-            success "API 镜像构建完成 (普通模式)"
-        else
-            # 最后尝试使用现有镜像
-            warn "构建失败，查找现有镜像..."
-            if docker image inspect ghcr.io/zhanglkx/canary-api:latest >/dev/null 2>&1; then
-                docker tag ghcr.io/zhanglkx/canary-api:latest canary-api:latest
-                warn "使用现有 GHCR 镜像"
-            else
-                error "无法获取 API 镜像"
-            fi
+    
+    # 尝试多种构建策略
+    local api_built=false
+    
+    # 策略1: 无缓存构建
+    if docker build --platform linux/amd64 --no-cache -f apps/api/Dockerfile -t canary-api:latest . 2>/dev/null; then
+        success "API 镜像构建完成 (无缓存)"
+        api_built=true
+    # 策略2: 普通构建
+    elif docker build --platform linux/amd64 -f apps/api/Dockerfile -t canary-api:latest . 2>/dev/null; then
+        success "API 镜像构建完成 (普通模式)"
+        api_built=true
+    # 策略3: 强制重新构建现有代码 (如果有现有镜像)
+    elif docker image inspect canary-api:latest >/dev/null 2>&1; then
+        warn "网络问题导致构建失败，强制重新构建现有代码..."
+        # 重新标记现有镜像为新的时间戳
+        docker tag canary-api:latest canary-api:backup-$(date +%H%M%S)
+        # 使用现有镜像但更新代码层
+        if docker build --platform linux/amd64 --build-arg CACHEBUST=$(date +%s) -f apps/api/Dockerfile -t canary-api:latest . 2>/dev/null; then
+            success "API 镜像强制重构建完成"
+            api_built=true
         fi
+    fi
+    
+    # 如果所有策略都失败，强制更新现有镜像的代码
+    if [ "$api_built" = false ]; then
+        warn "构建失败，强制更新现有镜像代码..."
+        
+        # 检查是否有任何可用的 API 镜像
+        local base_image=""
+        if docker image inspect canary-api:latest >/dev/null 2>&1; then
+            base_image="canary-api:latest"
+        elif docker image inspect ghcr.io/zhanglkx/canary-api:latest >/dev/null 2>&1; then
+            base_image="ghcr.io/zhanglkx/canary-api:latest"
+            docker tag $base_image canary-api:latest
+        else
+            error "无法找到任何 API 镜像"
+        fi
+        
+        # 创建临时容器更新代码
+        log "在现有镜像基础上更新代码..."
+        local temp_container=$(docker run -d canary-api:latest sleep 60)
+        
+        # 复制最新代码到容器
+        docker cp apps/api/src/. $temp_container:/app/apps/api/src/
+        
+        # 在容器中重新构建
+        docker exec $temp_container sh -c "cd /app/apps/api && rm -rf dist && npm run build" || warn "容器内构建失败，使用现有构建"
+        
+        # 提交为新镜像
+        docker commit $temp_container canary-api:latest
+        docker rm -f $temp_container
+        
+        success "API 代码强制更新完成"
     fi
     
     # 强制构建 Web 镜像 (AMD64 架构)

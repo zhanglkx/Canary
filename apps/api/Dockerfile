@@ -17,11 +17,15 @@ COPY libs/shared/package.json ./libs/shared/
 RUN pnpm install --frozen-lockfile --no-optional
 
 FROM base AS build
+# 添加构建参数强制刷新缓存
+ARG CACHEBUST=1
 COPY tsconfig.base.json ./
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/api ./apps/api
 COPY libs/shared ./libs/shared
 WORKDIR /app/apps/api
+# 使用构建参数确保代码层被重新构建
+RUN echo "Build cache bust: $CACHEBUST"
 # Install dependencies inside the build stage to ensure pnpm workspace layout is correct
 # 忽略 sqlite3 可选依赖，避免编译问题
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate && \

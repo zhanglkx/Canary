@@ -18,6 +18,7 @@ RUN pnpm install --frozen-lockfile
 FROM base AS build
 # 重要：Next.js 构建时需要 NEXT_PUBLIC_* 环境变量
 ARG NEXT_PUBLIC_API_URL
+ARG CACHEBUST=1
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_TELEMETRY_DISABLED=1
 
@@ -26,6 +27,8 @@ COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
 COPY apps/web ./apps/web
 COPY libs/shared ./libs/shared
 WORKDIR /app/apps/web
+# 使用构建参数确保代码层被重新构建
+RUN echo "Build cache bust: $CACHEBUST"
 # Install dependencies inside the build stage to ensure pnpm workspace layout is correct
 RUN corepack enable && corepack prepare pnpm@9.15.0 --activate && \
     pnpm config set registry https://registry.npmmirror.com && \
