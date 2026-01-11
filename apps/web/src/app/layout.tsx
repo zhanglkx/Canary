@@ -16,7 +16,7 @@ function getBuildInfo() {
       ? JSON.parse(process.env.BUILD_INFO)
       : {
         buildId: 'development',
-        buildTime: new Date().toISOString(),
+        buildTime: getChinaTime(),
         gitCommit: 'dev',
         gitBranch: 'dev',
         gitTag: 'dev',
@@ -25,12 +25,19 @@ function getBuildInfo() {
   } catch (error) {
     return {
       buildId: 'unknown',
-      buildTime: new Date().toISOString(),
+      buildTime: getChinaTime(),
       gitCommit: 'unknown',
       gitBranch: 'unknown',
       gitTag: 'unknown',
     };
   }
+}
+
+// 获取中国时区时间
+function getChinaTime() {
+  const now = new Date();
+  const chinaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000));
+  return chinaTime.toISOString().replace('Z', '+08:00');
 }
 
 export default function RootLayout({
@@ -80,9 +87,24 @@ export default function RootLayout({
                   window.buildInfo = ${buildInfoJson};
                   window.buildId = '${buildInfo.buildId}';
                   if (typeof console !== 'undefined' && console.log) {
+                    // 将构建时间转换为中国时区的可读格式
+                    const buildTimeStr = '${buildInfo.buildTime}';
+                    const buildDate = new Date(buildTimeStr);
+                    const chinaTimeStr = buildDate.toLocaleString('zh-CN', {
+                      timeZone: 'Asia/Shanghai',
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: false
+                    });
+                    
                     console.log('%c🚀 Build Info', 'color: #4CAF50; font-weight: bold; font-size: 14px;');
                     console.log('Build ID:', window.buildId);
-                    console.log('Build Time:', '${buildInfo.buildTime}');
+                    console.log('Build Time (China):', chinaTimeStr + ' (UTC+8)');
+                    console.log('Build Time (ISO):', buildTimeStr);
                     console.log('Git Commit:', '${buildInfo.gitCommit}');
                     console.log('Git Branch:', '${buildInfo.gitBranch}');
                     console.log('Git Tag:', '${buildInfo.gitTag}');

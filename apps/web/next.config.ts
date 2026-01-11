@@ -3,7 +3,10 @@ import { execSync } from 'child_process';
 
 // 生成构建信息（包含 Git 信息）
 const generateBuildInfo = () => {
-  const buildTime = new Date().toISOString();
+  // 生成中国时区的构建时间
+  const now = new Date();
+  const chinaTime = new Date(now.getTime() + (8 * 60 * 60 * 1000)); // UTC+8
+  const buildTime = chinaTime.toISOString().replace('Z', '+08:00'); // 显示为中国时区格式
   const buildTimestamp = Date.now().toString();
 
   let gitCommit = 'unknown';
