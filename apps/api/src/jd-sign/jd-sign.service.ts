@@ -16,6 +16,7 @@ import { Repository } from 'typeorm';
 import axios, { AxiosInstance, AxiosRequestConfig } from 'axios';
 import { JdSignHistory, JdSignStatus } from './entities/jd-sign-history.entity';
 import { JdSignConfigDto } from './dto/jd-sign-config.dto';
+import { JdCookieService } from './jd-cookie.service';
 
 /**
  * 京东签到 API 响应接口
@@ -36,6 +37,7 @@ export class JdSignService {
     @InjectRepository(JdSignHistory)
     private readonly signHistoryRepository: Repository<JdSignHistory>,
     private readonly configService: ConfigService,
+    private readonly jdCookieService: JdCookieService,
   ) {
     // 创建 axios 实例，配置默认选项
     this.axiosInstance = axios.create({
@@ -45,14 +47,25 @@ export class JdSignService {
   }
 
   /**
-   * 从环境变量或配置中获取签到配置
+   * 从数据库或环境变量中获取签到配置
+   * 优先从数据库读取，如果数据库没有则从环境变量读取（向后兼容）
    */
-  private getSignConfig(): JdSignConfigDto {
-    // 直接获取完整 Cookie
-    const fullCookie = this.configService.get<string>('JD_FULL_COOKIE');
+  private async getSignConfig(): Promise<JdSignConfigDto> {
+    // 优先从数据库读取 Cookie
+    const cookieConfig = await this.jdCookieService.getActiveCookie();
 
-    if (!fullCookie) {
-      throw new Error('请配置 JD_FULL_COOKIE 环境变量');
+    let fullCookie: string;
+
+    if (cookieConfig) {
+      fullCookie = cookieConfig.cookie;
+      this.logger.debug(`使用数据库中的 Cookie 配置: ${cookieConfig.account}`);
+    } else {
+      // 向后兼容：从环境变量读取
+      fullCookie = this.configService.get<string>('JD_FULL_COOKIE');
+      if (!fullCookie) {
+        throw new Error('请配置 Cookie：可通过 API 接口设置，或配置 JD_FULL_COOKIE 环境变量');
+      }
+      this.logger.debug('使用环境变量中的 Cookie 配置');
     }
 
     // 从 Cookie 中提取关键参数用于验证
@@ -159,8 +172,8 @@ export class JdSignService {
     await this.signHistoryRepository.save(signHistory);
 
     try {
-      // 获取配置
-      const config = this.getSignConfig();
+      // 获取配置（异步）
+      const config = await this.getSignConfig();
       this.logger.debug(`使用配置: pt_pin=${config.ptPin}`);
 
       // 构建请求
@@ -195,6 +208,11 @@ export class JdSignService {
 
       if (isSuccess) {
         this.logger.log('✅ 京东签到成功');
+        // 更新 Cookie 的最后验证时间
+        const cookieConfig = await this.jdCookieService.getActiveCookie();
+        if (cookieConfig) {
+          await this.jdCookieService.updateLastVerifiedAt(cookieConfig.account);
+        }
       } else {
         this.logger.warn(`⚠️ 京东签到失败: ${signHistory.errorMessage}`);
       }
@@ -240,7 +258,7 @@ export class JdSignService {
       if (responseData.code === '0') {
         // 进一步检查 data 字段确认签到成功
         if (responseData.data) {
-          const data = responseData.data as any;
+          const data = responseData.data as Record<string, unknown>;
 
           // 检查是否有签到成功的标识
           if (data.status === '1' || data.status === 1) {
@@ -253,10 +271,11 @@ export class JdSignService {
           }
 
           // 检查标题是否包含成功信息
+          const dailyAward = data.dailyAward as Record<string, unknown> | undefined;
           if (
-            data.dailyAward &&
-            data.dailyAward.title &&
-            data.dailyAward.title.includes('签到成功')
+            dailyAward &&
+            typeof dailyAward.title === 'string' &&
+            dailyAward.title.includes('签到成功')
           ) {
             return true;
           }

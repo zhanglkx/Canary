@@ -12,7 +12,9 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ScheduleModule } from '@nestjs/schedule';
 import { JdSignHistory } from './entities/jd-sign-history.entity';
+import { JdCookieConfig } from './entities/jd-cookie-config.entity';
 import { JdSignService } from './jd-sign.service';
+import { JdCookieService } from './jd-cookie.service';
 import { JdSignScheduler } from './jd-sign.scheduler';
 import { JdSignController } from './jd-sign.controller';
 
@@ -21,10 +23,10 @@ import { JdSignController } from './jd-sign.controller';
     // 注册定时任务模块
     ScheduleModule.forRoot(),
     // 注册实体
-    TypeOrmModule.forFeature([JdSignHistory]),
+    TypeOrmModule.forFeature([JdSignHistory, JdCookieConfig]),
   ],
   controllers: [JdSignController],
-  providers: [JdSignService, JdSignScheduler],
-  exports: [JdSignService],
+  providers: [JdSignService, JdCookieService, JdSignScheduler],
+  exports: [JdSignService, JdCookieService],
 })
 export class JdSignModule {}

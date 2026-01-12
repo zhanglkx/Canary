@@ -8,9 +8,22 @@
  * - 查看签到统计
  */
 
-import { Controller, Get, Post, HttpCode, HttpStatus, Logger } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Delete,
+  Body,
+  Param,
+  HttpCode,
+  HttpStatus,
+  Logger,
+} from '@nestjs/common';
 import { JdSignService } from './jd-sign.service';
 import { JdSignScheduler } from './jd-sign.scheduler';
+import { JdCookieService } from './jd-cookie.service';
+import { UpsertCookieDto } from './dto/upsert-cookie.dto';
 
 @Controller('jd-sign')
 export class JdSignController {
@@ -19,6 +32,7 @@ export class JdSignController {
   constructor(
     private readonly jdSignService: JdSignService,
     private readonly jdSignScheduler: JdSignScheduler,
+    private readonly jdCookieService: JdCookieService,
   ) {}
 
   /**
@@ -68,5 +82,82 @@ export class JdSignController {
       success: true,
       data: statistics,
     };
+  }
+
+  /**
+   * 获取所有 Cookie 配置
+   * GET /api/jd-sign/cookies
+   */
+  @Get('cookies')
+  async getCookies() {
+    const cookies = await this.jdCookieService.getAllCookies();
+    // 隐藏敏感信息，只返回部分 Cookie
+    const safeCookies = cookies.map((cookie) => ({
+      id: cookie.id,
+      account: cookie.account,
+      status: cookie.status,
+      remark: cookie.remark,
+      lastVerifiedAt: cookie.lastVerifiedAt,
+      createdAt: cookie.createdAt,
+      updatedAt: cookie.updatedAt,
+      cookiePreview: cookie.cookie.substring(0, 50) + '...',
+    }));
+    return {
+      success: true,
+      data: safeCookies,
+    };
+  }
+
+  /**
+   * 创建或更新 Cookie 配置
+   * PUT /api/jd-sign/cookies
+   */
+  @Put('cookies')
+  @HttpCode(HttpStatus.OK)
+  async upsertCookie(@Body() body: UpsertCookieDto) {
+    try {
+      const cookie = await this.jdCookieService.upsertCookie(
+        body.account,
+        body.cookie,
+        body.remark,
+      );
+      return {
+        success: true,
+        message: 'Cookie 配置已保存',
+        data: {
+          id: cookie.id,
+          account: cookie.account,
+          status: cookie.status,
+        },
+      };
+    } catch (error) {
+      this.logger.error('保存 Cookie 配置失败', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : '保存失败',
+      };
+    }
+  }
+
+  /**
+   * 删除 Cookie 配置
+   * DELETE /api/jd-sign/cookies/:account
+   */
+  @Delete('cookies/:account')
+  @HttpCode(HttpStatus.OK)
+  async deleteCookie(@Param('account') account: string) {
+    try {
+      await this.jdCookieService.deleteCookie(account);
+      return {
+        success: true,
+        message: 'Cookie 配置已删除',
+      };
+    } catch (error) {
+      this.logger.error('删除 Cookie 配置失败', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : '删除失败',
+      };
+    }
   }
 }
